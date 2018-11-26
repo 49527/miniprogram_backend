@@ -18,7 +18,7 @@ class BasePhoneValidator(object):
     Basic flow: Sends a number to a cell phone and return the number.
     """
 
-    DIGITS_VALIDATE = 6
+    DIGITS_VALIDATE = 4
 
     def generate_and_send(self, pn):
         raise NotImplementedError
@@ -39,18 +39,13 @@ class ConsolePhoneValidator(BasePhoneValidator):
 
 
 class DummyPhoneValidator(BasePhoneValidator):
-    STATIC_VCODE = "123456"
+    STATIC_VCODE = "1234"
     """
     A Dummy validator that always send specified same validation code.
     """
 
     def generate_and_send(self, pn):
         return self.STATIC_VCODE
-
-
-class AliyunPhoneValidator(BasePhoneValidator):
-    # TODO: Implement this validator
-    pass
 
 
 phone_validator = import_string(settings.PHONE_VALIDATOR)()
