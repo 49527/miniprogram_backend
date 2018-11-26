@@ -19,7 +19,7 @@ User = get_user_model()
 
 def login(code, ipaddr):
     # get openid and session_key
-    url = 'https://api.weixin.qq.com/sns/jscode2session?appid={appid}&secret={appsecret}&js_code={code}' \
+    url = 'https://api.weixin.qq.com/sns/jscode2session?appid={AppID}&secret={AppSecret}&js_code={code}' \
           '&grant_type=authorization_code'.format(code=code, **settings.MINIPROGRAM)
 
     re = requests.get(url=url)
