@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'simple_history',
 
+    'base',
     'usersys',
 ]
 
