@@ -314,6 +314,6 @@ SIMPLE_HISTORY_HISTORY_CHANGE_REASON_USE_TEXT_FIELD = True
 # WCMiniProgram
 
 MINIPROGRAM = {
-    "AppID": 'wx76e4192d0d1f5a1f',
-    "AppSecret": '2acbdab22d3cfb5389da4429c09e02c5',
+    "AppID": 'wxfbbd60114365d79f',
+    "AppSecret": '77dacbf01a0bedbf663a932a2e0de4a7',
 }
