@@ -19,11 +19,11 @@ class Balance(models.Model):
 class TransactionDetail(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     transaction_type = models.IntegerField(_("收支类型"), choices=transaction_type.choice)
-    amount = models.FloatField(_("收支金额")),
+    amount = models.FloatField(_("收支金额"))
     oid = models.ForeignKey(
         OrderInfo,
         related_name="transaction",
-        verbose_name=_("响应订单"),
+        verbose_name=_("相应订单"),
         null=True
     )
     uid = models.ForeignKey(
