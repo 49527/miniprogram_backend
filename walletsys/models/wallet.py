@@ -8,12 +8,13 @@ from ordersys.models import OrderInfo
 
 
 class Balance(models.Model):
-    uid = models.ForeignKey(
+    uid = models.OneToOneField(
         UserBase,
-        related_name="Balance",
+        related_name="balance",
         verbose_name=_("用户id"),
     )
     balance = models.FloatField()
+
 
 class TransactionDetail(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
@@ -21,12 +22,12 @@ class TransactionDetail(models.Model):
     amount = models.FloatField(_("收支金额")),
     oid = models.ForeignKey(
         OrderInfo,
-        related_name="Transaction_Detail",
+        related_name="transaction",
         verbose_name=_("响应订单"),
         null=True
     )
     uid = models.ForeignKey(
         UserBase,
-        related_name="Transaction_Detail",
+        related_name="transaction",
         verbose_name=_("用户id"),
     )
