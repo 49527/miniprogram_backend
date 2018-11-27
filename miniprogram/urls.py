@@ -17,8 +17,10 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.conf.urls import include
 import usersys.urls
+import walletsys.urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^user/', include(usersys.urls.urlpatterns)),
+    url(r'^wallet/', include(walletsys.urls.urlpatterns)),
 ]
