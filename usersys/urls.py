@@ -1,5 +1,5 @@
 from django.conf.urls import url, include
-from usersys.views import login
+from usersys.views import login, obtain
 
 
 login_urls = [
@@ -13,7 +13,12 @@ validate_urls = [
 
 ]
 
+obtain_urls =[
+    url(r'self_info/$', obtain.ObtainSelfInfoView.as_view()),
+]
+
 urlpatterns = [
     url(r'^login/', include(login_urls)),
     url(r'^validate/', include(validate_urls)),
+    url(r'^obtain/', include(obtain_urls)),
 ]
