@@ -31,7 +31,7 @@ class ObtainOverviewView(WLAPIView, APIView):
         return self.generate_response(
             data={
                 "n_times": n_times,
-                "tital_amount": total_amount
+                "total_amount": total_amount
             },
             context=context
         )
