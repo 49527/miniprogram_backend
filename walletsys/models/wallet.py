@@ -24,7 +24,8 @@ class TransactionDetail(models.Model):
         OrderInfo,
         related_name="transaction",
         verbose_name=_("相应订单"),
-        null=True
+        null=True,
+        blank=True,
     )
     uid = models.ForeignKey(
         UserBase,
