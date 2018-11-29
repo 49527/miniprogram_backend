@@ -8,7 +8,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.base_user import BaseUserManager
 
 from base.util.misc_validators import validators
-
+from usersys.choices.model_choice import user_validate_status
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -53,3 +53,14 @@ class UserBase(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = _('userbase')
         verbose_name_plural = _('usersbase')
+
+
+class UserValidate(models.Model):
+    uid = models.OneToOneField(
+        UserBase,
+        related_name="user_validate",
+        verbose_name=_("用户id"),
+    )
+    idcard_number = models.CharField(_("身份证号"), max_length=30)
+    name = models.CharField(_("真实姓名"), max_length=30)
+    validate_status = models.IntegerField(_("验证状态"), choices=user_validate_status.choice)
