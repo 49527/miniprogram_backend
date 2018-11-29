@@ -54,6 +54,12 @@ class UserBase(AbstractBaseUser, PermissionsMixin):
         verbose_name = _('userbase')
         verbose_name_plural = _('usersbase')
 
+    def get_short_name(self):
+        return self.nickname
+
+    def get_full_name(self):
+        return self.nickname
+
 
 class UserValidate(models.Model):
     uid = models.OneToOneField(
