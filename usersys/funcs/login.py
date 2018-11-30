@@ -11,6 +11,7 @@ from base.util.phone_validator import phone_validator
 from base.util.misc_validators import validators
 from base.util.temp_session import create_session, update_session_dict, \
     destroy_session, get_session_dict, get_session, update_session
+from usersys.choices.model_choice import user_role_choice
 
 from .session import RegistrationSessionKeys, ValidateStatus
 
@@ -30,7 +31,8 @@ def login(code, ipaddr):
     try:
         user = UserBase.object.get(openid=re_data['openid'])
     except UserBase.DoesNotExist:
-        user = UserBase.object.create(openid=re_data['openid'], nickname=re_data['openid'])
+        user = UserBase.object.create(openid=re_data['openid'], nickname=re_data['openid'],
+                                      role=user_role_choice.CLIENT)
 
     sid = sid_create(user, ipaddr, re_data['session_key'], settings.SID_DURATION)
 
