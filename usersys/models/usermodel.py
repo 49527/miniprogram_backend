@@ -10,6 +10,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from base.util.misc_validators import validators
 from usersys.choices.model_choice import user_validate_status, user_role_choice
 
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 

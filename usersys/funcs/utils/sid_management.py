@@ -42,18 +42,45 @@ def sid_create(user, ipaddr, session_key, duration):
     return sid.sid
 
 
+def sid_reuse(user, ipaddr, session_key):
+    """
+    return the latest reusable user_sid.
+    :param user: user object
+    :param ipaddr: ip address
+    :param session_key: session key
+    :return: None if not reusable, else the usersid string.
+    """
+    try:
+        sid_reusable = UserSid.objects.filter(
+            uid=user,
+            last_ipaddr=ipaddr,
+            is_login=True,
+            session_key=session_key,
+            expire_datetime__gte=now(),
+        ).latest("last_login")
+        return sid_reusable
+    except UserSid.DoesNotExist:
+        return None
+
+
 def sid_access(sid):
     """
     if user access the sid, please call this function
     :param sid:
     """
     # TODO: hook this function into sid model, maybe
-    try:
-        sidobj = UserSid.objects.get(sid=sid)
-        sidobj.last_login = now()
-        sidobj.save()
-    except UserSid.DoesNotExist:
-        pass
+    if isinstance(sid, (str, unicode)):
+        try:
+            sidobj = UserSid.objects.get(sid=sid)
+            sidobj.last_login = now()
+            sidobj.save()
+        except UserSid.DoesNotExist:
+            pass
+    elif isinstance(sid, UserSid):
+        sid.last_login = now()
+        sid.save()
+    else:
+        raise TypeError
 
 
 def sid_destroy(sid):

@@ -35,4 +35,3 @@ class BusinessProductTypeBind(models.Model):
     )
     price = models.FloatField()
     modified_time = models.DateTimeField(auto_now=True)
-

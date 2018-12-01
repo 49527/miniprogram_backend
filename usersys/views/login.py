@@ -6,15 +6,16 @@ from usersys.serializers.login_api import (
     LoginSerializer, SubmitPnSerializer, PNvalidateSerializer,
     LogoutSerializer
 )
+from usersys.choices.model_choice import user_role_choice
 
 
-class LoginView(WLAPIView, APIView):
+class ClientLoginView(WLAPIView, APIView):
     def post(self, request):
         data, context = self.get_request_obj(request)
         seri = LoginSerializer(data=data)
         self.validate_serializer(seri)
 
-        sid, state = login(ipaddr=get_client_ip(request), **seri.data)
+        sid, state = login(ipaddr=get_client_ip(request), role=user_role_choice.CLIENT, **seri.data)
         return self.generate_response(
             data={
                 "user_sid": sid,
@@ -24,7 +25,7 @@ class LoginView(WLAPIView, APIView):
         )
 
 
-class SubmitPnView(WLAPIView, APIView):
+class ClientSubmitPnView(WLAPIView, APIView):
     def post(self, request):
         data, context = self.get_request_obj(request)
         seri = SubmitPnSerializer(data=data)
