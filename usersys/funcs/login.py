@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
 from base.exceptions import *
 from usersys.funcs.utils.sid_management import sid_create, sid_destroy, sid_reuse, sid_access
-from usersys.models import UserBase, UserSid
+from usersys.models import UserBase, UserSid, WechatUserContext
 from usersys.choices.state_choice import state_choice
+from usersys.choices.model_choice import user_role_choice
 from django.conf import settings
 import requests
 
@@ -15,7 +16,7 @@ from .session import RegistrationSessionKeys, ValidateStatus
 User = get_user_model()
 
 
-def login(code, ipaddr, role):
+def wechat_login(code, ipaddr):
     # get openid and session_key
     url = 'https://api.weixin.qq.com/sns/jscode2session?appid={AppID}&secret={AppSecret}&js_code={code}' \
           '&grant_type=authorization_code'.format(code=code, **settings.MINIPROGRAM)
@@ -25,24 +26,41 @@ def login(code, ipaddr, role):
     if 'errcode' in re_data:
         raise WLException(401, re_data['errmsg'])
 
+    openid = re_data['openid']
+    session_key = re_data["session_key"]
+
     try:
-        user = UserBase.object.get(openid=re_data['openid'])
+        user = WechatUserContext.objects.get(openid=openid).uid
+        if user.is_active is False:
+            raise WLException(code=404, message="This user is not active.")
+
     except UserBase.DoesNotExist:
-        user = UserBase.object.create(
-            openid=re_data['openid'],
-            nickname=re_data['openid'],
-            role=role
+        user = UserBase.objects.create(
+            internal_name=openid,
+            role=user_role_choice.CLIENT,
+            is_active=True,
         )
-    sid_obj = sid_reuse(user, ipaddr, re_data['session_key'])
+        WechatUserContext.objects.create(
+            uid=user,
+            nickname=openid,
+            openid=openid,
+        )
+
+    state = state_choice.PN_NOT_BIND if user.pn is None else state_choice.PN_BIND
+    sid_obj = sid_reuse(user, ipaddr, session_key)
     if sid_obj is not None:
         sid_access(sid_obj)
         sid = sid_obj.sid
     else:
-        sid = sid_create(user, ipaddr, re_data['session_key'], settings.SID_DURATION)
-
-    state = state_choice.PN_NOT_BIND if user.pn is None else state_choice.PN_BIND
+        sid = login(user, ipaddr, session_key)
 
     return sid, state
+
+
+def login(user, ipaddr, session_key):
+
+    sid = sid_create(user, ipaddr, session_key, settings.SID_DURATION)
+    return sid
 
 
 @default_exception(Error500)

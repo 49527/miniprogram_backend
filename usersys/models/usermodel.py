@@ -38,18 +38,16 @@ class UserManager(BaseUserManager):
 
 
 class UserBase(AbstractBaseUser, PermissionsMixin):
-    openid = models.CharField(_('微信用户唯一标识'), max_length=50, unique=True)
+    internal_name = models.CharField(_("内部登录名称"), max_length=64, unique=True)
     pn = models.CharField(_('电话号码'), max_length=25, null=True, validators=[
         validators.get_validator("phone number")
     ])
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
-    nickname = models.CharField(max_length=128)
-    nickname_modified = models.BooleanField(default=False)
     role = models.IntegerField(_("用户角色"), choices=user_role_choice.choice)
 
-    object = UserManager()
-    USERNAME_FIELD = 'openid'
+    objects = UserManager()
+    USERNAME_FIELD = 'internal_name'
     REQUIRED_FIELDS = []
 
     class Meta:
@@ -63,6 +61,20 @@ class UserBase(AbstractBaseUser, PermissionsMixin):
         return self.nickname
 
 
+class WechatUserContext(models.Model):
+    uid = models.OneToOneField(
+        UserBase,
+        related_name="user_wechat_context",
+        verbose_name=_("用户id"),
+    )
+    openid = models.CharField(_('微信用户唯一标识'), max_length=50, unique=True)
+    nickname = models.CharField(max_length=128)
+    nickname_modified = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return self.openid
+
+
 class UserValidate(models.Model):
     uid = models.OneToOneField(
         UserBase,
@@ -73,6 +85,9 @@ class UserValidate(models.Model):
     name = models.CharField(_("真实姓名"), max_length=30)
     validate_status = models.IntegerField(_("验证状态"), choices=user_validate_status.choice)
 
+    def __unicode__(self):
+        return self.idcard_number
+
 
 class RecyclingStaffInfo(models.Model):
     uid = models.OneToOneField(
@@ -82,3 +97,6 @@ class RecyclingStaffInfo(models.Model):
     )
     rs_name = models.CharField(_("回收员姓名"), max_length=30)
     number_plate = models.CharField(max_length=20)
+
+    def __unicode__(self):
+        return self.rs_name

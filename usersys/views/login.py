@@ -1,12 +1,11 @@
 from rest_framework.views import APIView
 from base.views import WLAPIView
 from base.util.get_ip import get_client_ip
-from usersys.funcs.login import login, get_sid_by_pn, validate_sid, logout
+from usersys.funcs.login import wechat_login, get_sid_by_pn, validate_sid, logout
 from usersys.serializers.login_api import (
     LoginSerializer, SubmitPnSerializer, PNvalidateSerializer,
     LogoutSerializer
 )
-from usersys.choices.model_choice import user_role_choice
 
 
 class ClientLoginView(WLAPIView, APIView):
@@ -15,7 +14,7 @@ class ClientLoginView(WLAPIView, APIView):
         seri = LoginSerializer(data=data)
         self.validate_serializer(seri)
 
-        sid, state = login(ipaddr=get_client_ip(request), role=user_role_choice.CLIENT, **seri.data)
+        sid, state = wechat_login(ipaddr=get_client_ip(request), **seri.data)
         return self.generate_response(
             data={
                 "user_sid": sid,
