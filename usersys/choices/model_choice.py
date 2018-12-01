@@ -19,5 +19,6 @@ class _UserRoleChoice(FieldChoice):
         (1, _("B端业务员"), "RECYCLING_STAFF"),
     )
 
+
 user_validate_status = _ValidateStatusChoice()
 user_role_choice = _UserRoleChoice()
