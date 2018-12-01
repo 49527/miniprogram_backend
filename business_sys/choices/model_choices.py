@@ -16,5 +16,6 @@ class _BusinessStaffBindStatusChoice(FieldChoice):
         (0, _("默认状态"), "DEFAULT")
     )
 
+
 recycle_bin_type = _RecycleBinTypeChoice()
 business_staff_status = _BusinessStaffBindStatusChoice()
