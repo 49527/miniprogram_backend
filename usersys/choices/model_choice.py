@@ -1,4 +1,5 @@
 # coding=UTF-8
+from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
 from base.util.field_choice import FieldChoice
 
@@ -12,4 +13,11 @@ class _ValidateStatusChoice(FieldChoice):
     )
 
 
+class _UserRoleChoice(FieldChoice):
+    CHOICE_DISPLAY = (
+        (0, _("C端客户"), "CLIENT"),
+        (1, _("B端业务员"), "RECYCLING_STAFF"),
+    )
+
 user_validate_status = _ValidateStatusChoice()
+user_role_choice = _UserRoleChoice()

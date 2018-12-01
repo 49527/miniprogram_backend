@@ -8,7 +8,8 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.base_user import BaseUserManager
 
 from base.util.misc_validators import validators
-from usersys.choices.model_choice import user_validate_status
+from usersys.choices.model_choice import user_validate_status, user_role_choice
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -45,6 +46,7 @@ class UserBase(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     nickname = models.CharField(max_length=128)
     nickname_modified = models.BooleanField(default=False)
+    role = models.IntegerField(_("用户角色"), choices=user_role_choice.choice)
 
     object = UserManager()
     USERNAME_FIELD = 'openid'
@@ -70,3 +72,13 @@ class UserValidate(models.Model):
     idcard_number = models.CharField(_("身份证号"), max_length=30)
     name = models.CharField(_("真实姓名"), max_length=30)
     validate_status = models.IntegerField(_("验证状态"), choices=user_validate_status.choice)
+
+
+class RecyclingStaffInfo(models.Model):
+    uid = models.OneToOneField(
+        UserBase,
+        related_name="recycling_staff_info",
+        verbose_name=_("用户id"),
+    )
+    rs_name = models.CharField(_("回收员姓名"), max_length=30)
+    number_plate = models.CharField(max_length=20)

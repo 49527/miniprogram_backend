@@ -3,8 +3,8 @@ from usersys.views import login, obtain
 
 
 login_urls = [
-    url(r'^login/$', login.LoginView.as_view()),
-    url(r'^submit_pn/$', login.SubmitPnView.as_view()),
+    url(r'^login/$', login.ClientLoginView.as_view()),
+    url(r'^submit_pn/$', login.ClientSubmitPnView.as_view()),
     url(r'^validate/$', login.PNvalidateView.as_view()),
     url(r'^logout/$', login.LogoutView.as_view()),
 ]

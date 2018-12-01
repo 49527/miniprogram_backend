@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'usersys',
     'ordersys',
     'walletsys',
+    'business_sys',
+    'category_sys',
 ]
 
 MIDDLEWARE = [

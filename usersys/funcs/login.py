@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from base.exceptions import *
-from usersys.funcs.utils.sid_management import sid_create, sid_destroy
+from usersys.funcs.utils.sid_management import sid_create, sid_destroy, sid_reuse, sid_access
 from usersys.models import UserBase, UserSid
 from usersys.choices.state_choice import state_choice
 from django.conf import settings
@@ -11,13 +11,11 @@ from base.util.phone_validator import phone_validator
 from base.util.misc_validators import validators
 from base.util.temp_session import create_session, update_session_dict, \
     destroy_session, get_session_dict, get_session, update_session
-
 from .session import RegistrationSessionKeys, ValidateStatus
-
 User = get_user_model()
 
 
-def login(code, ipaddr):
+def login(code, ipaddr, role):
     # get openid and session_key
     url = 'https://api.weixin.qq.com/sns/jscode2session?appid={AppID}&secret={AppSecret}&js_code={code}' \
           '&grant_type=authorization_code'.format(code=code, **settings.MINIPROGRAM)
@@ -30,9 +28,17 @@ def login(code, ipaddr):
     try:
         user = UserBase.object.get(openid=re_data['openid'])
     except UserBase.DoesNotExist:
-        user = UserBase.object.create(openid=re_data['openid'], nickname=re_data['openid'])
-
-    sid = sid_create(user, ipaddr, re_data['session_key'], settings.SID_DURATION)
+        user = UserBase.object.create(
+            openid=re_data['openid'],
+            nickname=re_data['openid'],
+            role=role
+        )
+    sid_obj = sid_reuse(user, ipaddr, re_data['session_key'])
+    if sid_obj is not None:
+        sid_access(sid_obj)
+        sid = sid_obj.sid
+    else:
+        sid = sid_create(user, ipaddr, re_data['session_key'], settings.SID_DURATION)
 
     state = state_choice.PN_NOT_BIND if user.pn is None else state_choice.PN_BIND
 
