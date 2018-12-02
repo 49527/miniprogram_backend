@@ -8,7 +8,7 @@ from category_sys.choices.model_choices import top_type_choice, type_unit_choice
 class ProductTopType(models.Model):
     t_top_name = models.CharField(max_length=20)
     in_use = models.BooleanField(default=True)
-    Operator = models.IntegerField(_("所属端类型"), choices=top_type_choice.choice)
+    operator = models.IntegerField(_("所属端类型"), choices=top_type_choice.choice)
     create_time = models.DateTimeField(auto_now_add=True)
 
 

@@ -1,8 +1,12 @@
 from rest_framework.views import APIView
 from base.views import WLAPIView
-from ordersys.serializers.obtain_api import ObtainOrderListSerializer, ObtainOverviewSerializer
-from ordersys.funcs.obtain import obtain_order_list, obtain_overview
-from ordersys.serializers.order import OrderDisplaySerializer
+from ordersys.serializers.obtain_api import ObtainOrderListSerializer, ObtainOverviewSerializer,\
+ObtainDeliveryInfoSerializer, ObtainUncompletedorderSerilaizer, ObtainTopypeCListSerializer,\
+ObtainCancelReasonSerializer
+from ordersys.funcs.obtain import obtain_order_list, obtain_overview, obtain_delivery_info, obtain_uncompleted,\
+obtain_c_toptype_list, obtain_cancel_reason
+from ordersys.serializers.order import OrderDisplaySerializer, CancelReasonDisplaySerializer
+from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 
 
 class ObtainOrderListView(WLAPIView, APIView):
@@ -33,6 +37,73 @@ class ObtainOverviewView(WLAPIView, APIView):
             data={
                 "n_times": n_times,
                 "total_amount": total_amount
+            },
+            context=context
+        )
+
+
+class ObtainDeliveryInfoView(WLAPIView, APIView):
+    def get(self, request):
+        data, context = self.get_request_obj(request)
+        seri = ObtainDeliveryInfoSerializer(data=data)
+        self.validate_serializer(seri)
+
+        delivery_info, address_exist = obtain_delivery_info(**seri.data)
+        seri_info = UserDeliveryInfoDisplay(delivery_info)
+        return self.generate_response(
+            data={
+                "delivery_info": seri_info.data,
+                "address_exist": address_exist
+            },
+            context=context
+        )
+
+class ObtainUncompletedOrderView(WLAPIView, APIView):
+    def get(self, request):
+        data, context = self.get_request_obj(request)
+        seri = ObtainUncompletedorderSerilaizer(data=data)
+        self.validate_serializer(seri)
+
+        uncompleted, count = obtain_uncompleted(**seri.data)
+
+        seri_info = OrderDisplaySerializer(uncompleted)
+
+        return self.generate_response(
+            data={
+                "uncompleted": seri_info.data,
+                "count": count
+            },
+            context=context
+        )
+
+class ObtainTopTypeCListView(WLAPIView, APIView):
+    def post(self, request):
+        data, context = self.get_request_obj(request)
+        seri = ObtainTopypeCListSerializer(data=data)
+        self.validate_serializer(seri)
+
+        toptypes = obtain_c_toptype_list(**seri.data)
+
+        return self.generate_response(
+            data={
+                "c_types": toptypes
+            },
+            context=context
+        )
+
+
+class ObtainCancelReasonView(WLAPIView, APIView):
+    def get(self, request):
+        data, context = self.get_request_obj(request)
+        seri = ObtainCancelReasonSerializer(data=data)
+        self.validate_serializer(seri)
+
+        reasons = obtain_cancel_reason(**seri.data)
+        seri_reasons = CancelReasonDisplaySerializer(reasons, many=True)
+
+        return self.generate_response(
+            data={
+                "reasons": seri_reasons.data
             },
             context=context
         )

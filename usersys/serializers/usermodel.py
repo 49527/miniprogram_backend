@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from usersys.models import UserValidate, UserBase
+from usersys.models import UserValidate, UserBase, UserDeliveryInfo
 
 
 class UserInfoDisplay(serializers.ModelSerializer):
@@ -10,4 +10,13 @@ class UserInfoDisplay(serializers.ModelSerializer):
         model = UserBase
         fields = (
             "id", "pn", "name", "idcard_number"
+        )
+
+
+class UserDeliveryInfoDisplay(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserDeliveryInfo
+        fields = (
+            "address", "contact", "house_number", "contact_pn"
         )
