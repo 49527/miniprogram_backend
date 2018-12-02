@@ -14,27 +14,27 @@ from usersys.choices.model_choice import user_validate_status, user_role_choice
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(self, openid, password, **extra_fields):
-        if openid is None:
+    def _create_user(self, internal_name, password, **extra_fields):
+        if internal_name is None:
             raise ValueError('The openid must be set')
 
-        user = self.model(openid=openid, **extra_fields)
+        user = self.model(internal_name=internal_name, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, openid, password=None, **extra_fields):
+    def create_user(self, internal_name, password=None, **extra_fields):
         extra_fields.setdefault('is_superuser', False)
-        return self._create_user(openid, password, **extra_fields)
+        return self._create_user(internal_name, password, **extra_fields)
 
-    def create_superuser(self, openid, password, **extra_fields):
+    def create_superuser(self, internal_name, password, **extra_fields):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault("is_staff", True)
 
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self._create_user(openid, password, **extra_fields)
+        return self._create_user(internal_name, password, **extra_fields)
 
 
 class UserBase(AbstractBaseUser, PermissionsMixin):
