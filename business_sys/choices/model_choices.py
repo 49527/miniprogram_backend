@@ -13,7 +13,7 @@ class _RecycleBinTypeChoice(FieldChoice):
 
 class _BusinessStaffBindStatusChoice(FieldChoice):
     CHOICE_DISPLAY = (
-        (0, _("默认状态"), "DEFAULT")
+        (0, _("默认状态"), "DEFAULT"),
     )
 
 

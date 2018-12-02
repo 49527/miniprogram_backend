@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
-from business_sys.modles import RecycleBin
+from business_sys.models import RecycleBin
 from business_sys.choices.model_choices import business_staff_status
 from usersys.models import UserBase
 from category_sys.models import ProductSubType
@@ -19,7 +19,10 @@ class BusinessStaffBind(models.Model):
         verbose_name=_("回收员"),
         related_name="business"
     )
-    business_staff_status = models.IntegerField(choices=business_staff_status.choice, default=0)
+    business_staff_status = models.IntegerField(
+        choices=business_staff_status.choice,
+        default=business_staff_status.DEFAULT
+    )
 
 
 class BusinessProductTypeBind(models.Model):
