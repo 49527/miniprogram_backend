@@ -1,3 +1,6 @@
+import requests
+import logging
+import time
 from django.contrib.auth import get_user_model
 from base.exceptions import *
 from usersys.funcs.utils.sid_management import sid_create, sid_destroy, sid_reuse, sid_access
@@ -5,15 +8,13 @@ from usersys.models import UserBase, UserSid, WechatUserContext
 from usersys.choices.state_choice import state_choice
 from usersys.choices.model_choice import user_role_choice
 from django.conf import settings
-import requests
-
-import time
 from base.util.phone_validator import phone_validator
 from base.util.misc_validators import validators
 from base.util.temp_session import create_session, update_session_dict, \
     destroy_session, get_session_dict, get_session, update_session
 from .session import RegistrationSessionKeys, ValidateStatus
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 def wechat_login(code, ipaddr):
@@ -34,12 +35,18 @@ def wechat_login(code, ipaddr):
         if user.is_active is False:
             raise WLException(code=404, message="This user is not active.")
 
-    except UserBase.DoesNotExist:
-        user = UserBase.objects.create(
+    except WechatUserContext.DoesNotExist:
+        user, created = UserBase.objects.get_or_create(
             internal_name=openid,
-            role=user_role_choice.CLIENT,
-            is_active=True,
+            defaults={
+                "role": user_role_choice.CLIENT,
+                "is_active": True,
+            }
         )
+
+        if created:
+            logger.warning("wx login: openid=%s duplicated.")
+
         WechatUserContext.objects.create(
             uid=user,
             nickname=openid,

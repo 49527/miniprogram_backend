@@ -19,10 +19,12 @@ from django.conf.urls import include
 import usersys.urls
 import walletsys.urls
 import ordersys.urls
+import appearancesys.urls
 
 urlpatterns = [
     url(r'^bg/', admin.site.urls),
     url(r'^user/', include(usersys.urls.urlpatterns)),
     url(r'^wallet/', include(walletsys.urls.urlpatterns)),
-    url('^order/', include(ordersys.urls.urlpatterns)),
+    url(r'^order/', include(ordersys.urls.urlpatterns)),
+    url(r'^appearance/', include(appearancesys.urls.url_patterns)),
 ]
