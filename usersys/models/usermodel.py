@@ -102,16 +102,3 @@ class UserDeliveryInfo(models.Model):
         validators.get_validator("phone number")
     ])
     in_use = models.BooleanField(default=True)
-
-
-class RecyclingStaffInfo(models.Model):
-    uid = models.OneToOneField(
-        UserBase,
-        related_name="recycling_staff_info",
-        verbose_name=_("用户id"),
-    )
-    rs_name = models.CharField(_("回收员姓名"), max_length=30)
-    number_plate = models.CharField(max_length=20)
-
-    def __unicode__(self):
-        return self.rs_name
