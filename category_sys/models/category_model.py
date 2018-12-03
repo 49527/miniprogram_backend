@@ -11,6 +11,9 @@ class ProductTopType(models.Model):
     operator = models.IntegerField(_("所属端类型"), choices=top_type_choice.choice)
     create_time = models.DateTimeField(auto_now_add=True)
 
+    def __unicode__(self):
+        return self.t_top_name
+
 
 class ProductSubType(models.Model):
     t_sub_name = models.CharField(max_length=20)
@@ -27,3 +30,6 @@ class ProductSubType(models.Model):
         verbose_name=_("B端顶级品类"),
         related_name="b_subtype"
     )
+
+    def __unicode__(self):
+        return self.t_sub_name

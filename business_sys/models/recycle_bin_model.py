@@ -5,6 +5,7 @@ from django.db import models
 
 from business_sys.choices.model_choices import recycle_bin_type
 
+
 class RecycleBin(models.Model):
     GPS_L = models.FloatField(_("经度"))
     GPS_A = models.FloatField(_("纬度"))
@@ -13,3 +14,6 @@ class RecycleBin(models.Model):
     loc_desc = models.TextField(_("地点描述"))
     create_time = models.DateTimeField(auto_now_add=True)
     pn = models.CharField(_("联系电话"), max_length=20)
+
+    def __unicode__(self):
+        return self.rb_name
