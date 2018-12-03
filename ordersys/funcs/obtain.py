@@ -4,7 +4,6 @@ from usersys.models import UserBase, UserDeliveryInfo
 from base.util.pages import get_page_info
 from django.db import models
 from ordersys.choices.model_choices import order_state_choice
-from ordersys.choices.state_choices import is_delivery_exist
 from ordersys.models import OrderCancelReason
 from business_sys.models import RecycleBin
 from category_sys.models import ProductTopType
@@ -35,13 +34,12 @@ def obtain_overview(user):
 @user_from_sid(Error404)
 def obtain_delivery_info(user):
     # type: (UserBase) -> (UserDeliveryInfo, int)
-    user_delivery = user.user_delivery_info
-    print user_delivery is UserDeliveryInfo.DoesNotExist
+    user_delivery = user.user_delivery_info.filter(in_use=True)
     if user_delivery.count() == 0:
-        exist = is_delivery_exist.NOT_EXIST
+        exist = False
     else:
-        exist = is_delivery_exist.EXIST
-    return user_delivery.last(), exist
+        exist = True
+    return user_delivery.order_by('id').last(), exist
 
 
 @user_from_sid(Error404)

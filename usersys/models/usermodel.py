@@ -98,9 +98,10 @@ class UserDeliveryInfo(models.Model):
     address = models.TextField(_("收货地址"))
     contact = models.CharField(_("联系人"), max_length=30, null=True, blank=True)
     house_number = models.CharField(_("门牌号"), max_length=20, null=True, blank=True)
-    contact_pn = models.CharField(_('联系电话'), max_length=25, null=True, blank=True, validators=[
+    contact_pn = models.CharField(_('联系电话'), max_length=25, validators=[
         validators.get_validator("phone number")
     ])
+    in_use = models.BooleanField(default=True)
 
 
 class RecyclingStaffInfo(models.Model):
