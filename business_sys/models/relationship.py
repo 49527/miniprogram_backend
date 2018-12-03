@@ -8,21 +8,26 @@ from usersys.models import UserBase
 from category_sys.models import ProductSubType
 
 
-class BusinessStaffBind(models.Model):
-    recycle_bin = models.ForeignKey(
-        RecycleBin,
-        verbose_name=_("回收站"),
-        related_name="staff"
-    )
-    recycling_staff = models.ForeignKey(
+class RecyclingStaffInfo(models.Model):
+    uid = models.OneToOneField(
         UserBase,
-        verbose_name=_("回收员"),
-        related_name="business"
+        related_name="recycling_staff_info",
+        verbose_name=_("用户id"),
     )
-    business_staff_status = models.IntegerField(
+    rs_name = models.CharField(_("回收员姓名"), max_length=30)
+    number_plate = models.CharField(max_length=20)
+    staff_status = models.IntegerField(
         choices=business_staff_status.choice,
         default=business_staff_status.DEFAULT
     )
+    recycle_bin = models.ForeignKey(
+        RecycleBin,
+        related_name="recycling_staff",
+        verbose_name=_("回收站")
+    )
+
+    def __unicode__(self):
+        return self.rs_name
 
 
 class BusinessProductTypeBind(models.Model):

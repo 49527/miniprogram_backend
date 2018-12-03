@@ -1,2 +1,2 @@
 from sid import UserSid
-from usermodel import UserBase, UserValidate, WechatUserContext, RecyclingStaffInfo, UserDeliveryInfo
+from usermodel import UserBase, UserValidate, WechatUserContext, UserDeliveryInfo
