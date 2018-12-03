@@ -1,10 +1,11 @@
 from rest_framework.views import APIView
 from base.views import WLAPIView
 from base.util.get_ip import get_client_ip
-from usersys.funcs.login import wechat_login, get_sid_by_pn, validate_sid, logout
+from usersys.funcs.login import wechat_login, get_sid_by_pn, validate_sid, logout, recyclingstafflogin, send_sms
 from usersys.serializers.login_api import (
     LoginSerializer, SubmitPnSerializer, PNvalidateSerializer,
-    LogoutSerializer
+    LogoutSerializer, RecyclingStaffLoginSerializer, SendSerializer,
+    ForgetPwdSerializer
 )
 
 
@@ -69,3 +70,39 @@ class LogoutView(WLAPIView, APIView):
             data={},
             context=context
         )
+
+
+class RecyclingStaffLoginView(WLAPIView, APIView):
+    def post(self, request):
+        data, context = self.get_request_obj(request)
+        seri = RecyclingStaffLoginSerializer(data=data)
+        self.validate_serializer(seri)
+        user_sid = recyclingstafflogin(seri.data['pn'], seri.data['pwd'], ipaddr=get_client_ip(request))
+        return self.generate_response(
+            data={
+                'pn': seri.data.get('pn'),
+                'user_sid': user_sid,
+            },
+            context=context
+        )
+
+
+class SendSMSView(WLAPIView, APIView):
+    def post(self, request):
+        data, context = self.get_request_obj(request)
+        seri = SendSerializer(data=data)
+        self.validate_serializer(seri)
+        user_sid, code = send_sms(seri.data['pn'])
+        return self.generate_response(
+            data={
+                'pn': seri.data.get('pn'),
+                'code': code,
+                'user_sid': user_sid,
+            },
+            context=context
+        )
+
+
+class ForgetPwdView(WLAPIView, APIView):
+    def post(self, request):
+        pass

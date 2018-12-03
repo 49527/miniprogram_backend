@@ -44,7 +44,7 @@ class UserBase(AbstractBaseUser, PermissionsMixin):
     ])
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
-    role = models.IntegerField(_("用户角色"), choices=user_role_choice.choice)
+    role = models.IntegerField(_("用户角色"), choices=user_role_choice.choice,default=0)
 
     objects = UserManager()
     USERNAME_FIELD = 'internal_name'

@@ -2,9 +2,10 @@ import requests
 import logging
 import time
 from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate
 from base.exceptions import *
 from usersys.funcs.utils.sid_management import sid_create, sid_destroy, sid_reuse, sid_access
-from usersys.models import UserBase, UserSid, WechatUserContext
+from usersys.models import UserBase, UserSid, WechatUserContext, RecyclingStaffInfo
 from usersys.choices.state_choice import state_choice
 from usersys.choices.model_choice import user_role_choice
 from django.conf import settings
@@ -15,6 +16,9 @@ from base.util.temp_session import create_session, update_session_dict, \
 from .session import RegistrationSessionKeys, ValidateStatus
 User = get_user_model()
 logger = logging.getLogger(__name__)
+import uuid
+from django.core.cache import cache
+
 
 
 def wechat_login(code, ipaddr):
@@ -178,3 +182,25 @@ def logout(user_sid):
         sid_destroy(user_sid)
     except KeyError:
         raise WLException(404, "user_id do not exist")
+
+
+def recyclingstafflogin(pn, password, ipaddr, session_key=None):
+    if session_key is None:
+        session_key = uuid.uuid4()
+    user = authenticate(username=pn, password=password)
+    if user is None:
+        raise WLException(404, "Account or password error")
+    sid_obj = sid_reuse(user, ipaddr, session_key)
+    if sid_obj is not None:
+        sid_access(sid_obj)
+        sid = sid_obj.sid
+    else:
+        sid = login(user, ipaddr, session_key)
+    return sid
+
+
+def send_sms(pn):
+    pass
+    # cache
+    vcode = phone_validator.generate_and_send(pn)
+    return vcode

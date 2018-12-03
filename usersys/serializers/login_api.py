@@ -20,3 +20,18 @@ class PNvalidateSerializer(serializers.Serializer):
 
 class LogoutSerializer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
+
+
+class RecyclingStaffLoginSerializer(serializers.Serializer):
+    pn = serializers.CharField(max_length=20, validators=[validators.get_validator("phone number")])
+    pwd = serializers.CharField(max_length=50)
+
+
+class SendSerializer(serializers.Serializer):
+    pn = serializers.CharField(max_length=20, validators=[validators.get_validator("phone number")])
+
+
+class ForgetPwdSerializer(serializers.Serializer):
+    old_pwd = serializers.CharField(max_length=50)
+    new_pwd = serializers.CharField(max_length=50)
+    code = serializers.CharField(max_length=6)
