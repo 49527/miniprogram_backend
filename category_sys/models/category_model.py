@@ -20,8 +20,10 @@ class ProductSubType(models.Model):
     toptype_c = models.ForeignKey(
         ProductTopType,
         verbose_name=_("C端顶级品类"),
+        related_name="c_subtype"
     )
     toptype_b = models.ForeignKey(
         ProductTopType,
         verbose_name=_("B端顶级品类"),
+        related_name="b_subtype"
     )
