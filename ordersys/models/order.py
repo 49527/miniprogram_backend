@@ -35,7 +35,6 @@ class OrderInfo(models.Model):
     )
 
 
-
 class OrderProductTypeBind(models.Model):
     p_type = models.ForeignKey(
         ProductTopType,
