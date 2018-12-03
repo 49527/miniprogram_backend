@@ -6,16 +6,13 @@ from ordersys.choices.model_choices import order_state_choice
 from usersys.models import UserBase
 from category_sys.models import ProductTopType
 from base.util.misc_validators import validators
+from usersys.models import UserDeliveryInfo
 
 
 class OrderInfo(models.Model):
     create_time = models.DateTimeField(_('订单创建时间'), auto_now_add=True)
-    location = models.TextField(null=True, blank=True)
     amount = models.FloatField(_("订单金额"), default=0.0)
     o_state = models.IntegerField(_("订单状态"), choices=order_state_choice.choice)
-    contact_pn_c = models.CharField(_("客户联系方式"), max_length=20, validators=[
-        validators.get_validator("phone number")
-    ])
     uid_c = models.ForeignKey(
         UserBase,
         related_name="order_c",
@@ -30,6 +27,13 @@ class OrderInfo(models.Model):
         null=True,
         blank=True
     )
+    c_delivery_info = models.ForeignKey(
+        UserDeliveryInfo,
+        verbose_name=_("客户收货信息"),
+        null=True,
+        blank=True
+    )
+
 
 
 class OrderProductTypeBind(models.Model):

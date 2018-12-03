@@ -60,7 +60,11 @@ def obtain_delivery_info(user):
 def obtain_uncompleted(user):
     # type: (UserBase) -> (UserDeliveryInfo, int)
     uncompleted = get_uncompleted_order(user)
-    return uncompleted.order_by('id').last(), uncompleted.count()
+    if uncompleted.count() == 0:
+        exist = False
+    else:
+        exist = True
+    return uncompleted.order_by('id').last(), exist
 
 
 def obtain_c_toptype_list():

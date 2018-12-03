@@ -63,14 +63,14 @@ class ObtainUncompletedOrderView(WLAPIView, APIView):
         seri = ObtainUncompletedorderSerilaizer(data=data)
         self.validate_serializer(seri)
 
-        uncompleted, count = obtain_uncompleted(**seri.data)
+        uncompleted, exist = obtain_uncompleted(**seri.data)
 
         seri_info = OrderDisplaySerializer(uncompleted)
 
         return self.generate_response(
             data={
                 "uncompleted": seri_info.data,
-                "count": count
+                "exist": exist
             },
             context=context
         )

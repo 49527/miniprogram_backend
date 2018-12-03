@@ -11,7 +11,7 @@ from ordersys.funcs.utils import get_uncompleted_order
 
 @user_from_sid(Error404)
 def submit_delivery_info(user, **data):
-    UserDeliveryInfo.objects.create(uid=user,**data)
+    return UserDeliveryInfo.objects.create(uid=user,**data)
 
 
 @user_from_sid(Error404)
@@ -31,11 +31,18 @@ def cancel_order(user, **data):
 
 
 @user_from_sid(Error404)
-def one_click_order(user, contact_pn, type_quantity):
+def one_click_order(user, **data):
     if not get_uncompleted_order(user).count() == 0:
-        raise WLException(403, "there exist a order uncompleted")
-    order = OrderInfo.objects.create(uid_c=user, contact_pn_c=contact_pn, o_state=order_state_choice.CREATED)
-    for dic in type_quantity:
+        raise WLException(403, _("已经存在一个未完成订单"))
+    delivery_info = data["deli_id"]
+    if not delivery_info.uid == user:
+        raise WLException(402, _("用户收货地址不存在"))
+    order = OrderInfo.objects.create(
+        uid_c=user,
+        c_delivery_info=delivery_info,
+        o_state=order_state_choice.CREATED
+    )
+    for dic in data["type_quantity"]:
         OrderProductTypeBind.objects.create(oid=order, **dic)
 
     return order

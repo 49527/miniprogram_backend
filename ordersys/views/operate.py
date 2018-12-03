@@ -4,6 +4,7 @@ from ordersys.serializers.operate_api import SubmitDeliveryInfoSerializer, Cance
     OneClickOrderSerializer
 from ordersys.funcs.operate import submit_delivery_info, cancel_order, one_click_order
 from ordersys.serializers.order import OrderDisplaySerializer
+from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 
 
 class SubmitDeliveryInfoView(WLAPIView, APIView):
@@ -12,10 +13,13 @@ class SubmitDeliveryInfoView(WLAPIView, APIView):
         seri = SubmitDeliveryInfoSerializer(data=data)
         self.validate_serializer(seri)
 
-        submit_delivery_info(**seri.data)
+        addr = submit_delivery_info(**seri.data)
+        seri_addr = UserDeliveryInfoDisplay(addr)
 
         return self.generate_response(
-            data={},
+            data={
+                "addr": seri_addr.data
+            },
             context=context
         )
 

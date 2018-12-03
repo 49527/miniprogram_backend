@@ -36,4 +36,6 @@ class TypeQuantitySerializer(serializers.Serializer):
 class OneClickOrderSerializer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
     type_quantity = TypeQuantitySerializer(many=True)
-    contact_pn = serializers.CharField(max_length=20)
+    deli_id = serializers.PrimaryKeyRelatedField(
+        queryset=UserDeliveryInfo.objects.all()
+    )
