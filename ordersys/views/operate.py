@@ -3,6 +3,7 @@ from base.views import WLAPIView
 from ordersys.serializers.operate_api import SubmitDeliveryInfoSerializer, CancelOrderSerializer,\
     OneClickOrderSerializer
 from ordersys.funcs.operate import submit_delivery_info, cancel_order, one_click_order
+from ordersys.serializers.order import OrderDisplaySerializer
 
 
 class SubmitDeliveryInfoView(WLAPIView, APIView):
@@ -39,9 +40,12 @@ class OneClickOrderView(WLAPIView, APIView):
         seri = OneClickOrderSerializer(data=data)
         self.validate_serializer(seri)
 
-        one_click_order(**seri.validated_data)
+        order = one_click_order(**seri.validated_data)
 
+        seri_order = OrderDisplaySerializer(order)
         return self.generate_response(
-            data={},
+            data={
+                "order_info": seri_order.data
+            },
             context=context
         )

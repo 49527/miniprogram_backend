@@ -8,6 +8,8 @@ from ordersys.models import OrderCancelReason
 from business_sys.models import RecycleBin
 from category_sys.models import ProductTopType
 from category_sys.choices.model_choices import top_type_choice
+from ordersys.funcs.utils import get_uncompleted_order
+
 
 @user_from_sid(Error404)
 def obtain_order_list(user, page, count_per_page):
@@ -45,14 +47,11 @@ def obtain_delivery_info(user):
 @user_from_sid(Error404)
 def obtain_uncompleted(user):
     # type: (UserBase) -> (UserDeliveryInfo, int)
-    uncompleted = user.order_c.filter(
-        models.Q(o_state=order_state_choice.CREATED) | models.Q(o_state=order_state_choice.ACCEPTED)
-    )
+    uncompleted = get_uncompleted_order(user)
     return uncompleted.order_by('id').last(), uncompleted.count()
 
 
-@user_from_sid(Error404)
-def obtain_c_toptype_list(user):
+def obtain_c_toptype_list():
     type_list = []
     qs = RecycleBin.objects.all()
     for c_type in ProductTopType.objects.filter(operator=top_type_choice.CONSUMER):
@@ -69,6 +68,5 @@ def obtain_c_toptype_list(user):
     return type_list
 
 
-@user_from_sid(Error404)
-def obtain_cancel_reason(user):
+def obtain_cancel_reason():
     return OrderCancelReason.objects.filter(in_use=True)

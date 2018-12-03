@@ -17,10 +17,3 @@ class ObtainDeliveryInfoSerializer(serializers.Serializer):
 class ObtainUncompletedorderSerilaizer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
 
-
-class ObtainTopypeCListSerializer(serializers.Serializer):
-    user_sid = serializers.CharField(max_length=128)
-
-
-class ObtainCancelReasonSerializer(serializers.Serializer):
-    user_sid = serializers.CharField(max_length=128)

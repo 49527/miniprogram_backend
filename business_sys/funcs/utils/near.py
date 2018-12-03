@@ -1,9 +1,10 @@
 from business_sys.models import RecycleBin
 from business_sys.choices.model_choices import recycle_bin_type
+from django.conf import settings
 
 
 def find_near_recycle_bin(lon, lat):
-    l = 0.05 # about 5.6 kilometer
+    l = settings.BOUND
     max_lon = lon + l
     min_lon = lon - l
     max_lat = lat + l

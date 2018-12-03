@@ -1,8 +1,7 @@
 from rest_framework.views import APIView
 from base.views import WLAPIView
 from ordersys.serializers.obtain_api import ObtainOrderListSerializer, ObtainOverviewSerializer,\
-ObtainDeliveryInfoSerializer, ObtainUncompletedorderSerilaizer, ObtainTopypeCListSerializer,\
-ObtainCancelReasonSerializer
+ObtainDeliveryInfoSerializer, ObtainUncompletedorderSerilaizer
 from ordersys.funcs.obtain import obtain_order_list, obtain_overview, obtain_delivery_info, obtain_uncompleted,\
 obtain_c_toptype_list, obtain_cancel_reason
 from ordersys.serializers.order import OrderDisplaySerializer, CancelReasonDisplaySerializer
@@ -77,12 +76,10 @@ class ObtainUncompletedOrderView(WLAPIView, APIView):
         )
 
 class ObtainTopTypeCListView(WLAPIView, APIView):
-    def post(self, request):
+    def get(self, request):
         data, context = self.get_request_obj(request)
-        seri = ObtainTopypeCListSerializer(data=data)
-        self.validate_serializer(seri)
 
-        toptypes = obtain_c_toptype_list(**seri.data)
+        toptypes = obtain_c_toptype_list()
 
         return self.generate_response(
             data={
@@ -95,10 +92,8 @@ class ObtainTopTypeCListView(WLAPIView, APIView):
 class ObtainCancelReasonView(WLAPIView, APIView):
     def get(self, request):
         data, context = self.get_request_obj(request)
-        seri = ObtainCancelReasonSerializer(data=data)
-        self.validate_serializer(seri)
 
-        reasons = obtain_cancel_reason(**seri.data)
+        reasons = obtain_cancel_reason()
         seri_reasons = CancelReasonDisplaySerializer(reasons, many=True)
 
         return self.generate_response(

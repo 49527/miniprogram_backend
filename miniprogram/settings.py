@@ -30,7 +30,7 @@ DEBUG = True
 USE_MYSQL = False
 
 # TODO: Add host name
-ALLOWED_HOSTS = ['localhost', 'backend.sandbox.bbrecycle.cn']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -322,3 +322,5 @@ MINIPROGRAM = {
     "AppID": 'wxfbbd60114365d79f',
     "AppSecret": '77dacbf01a0bedbf663a932a2e0de4a7',
 }
+
+BOUND = 0.5 # about 5.6 kilometer

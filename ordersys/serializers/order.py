@@ -13,4 +13,6 @@ class CancelReasonDisplaySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderCancelReason
-        fields = '__all__'
+        fields = (
+            "id", "reason",
+        )
