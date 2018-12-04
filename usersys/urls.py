@@ -15,6 +15,7 @@ validate_urls = [
 
 obtain_urls =[
     url(r'self_info/$', obtain.ObtainSelfInfoView.as_view()),
+    url(r'qr_info/$', obtain.QRInfoView.as_view()),
 ]
 
 urlpatterns = [
