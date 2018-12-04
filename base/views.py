@@ -6,7 +6,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.exceptions import MethodNotAllowed
 from django.http.response import HttpResponseNotAllowed
 from django.conf import settings
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse, FileResponse
 from base.exceptions import WLException
 from base.util.serializer_helper import errors_summery
 
@@ -98,3 +98,24 @@ class WLAPIView(object):
                 },
                 "version": self.API_VERSION,
             })
+
+
+class WLBinaryView(WLAPIView):
+
+    ERROR_HTTP_STATUS = True
+
+    def get(self, request):
+        data, context = self.get_request_obj(request)
+
+        io_stream, content_type = self.get_io_stream(data, context)
+
+        return FileResponse(io_stream, content_type=content_type)
+
+    def get_io_stream(self, data, context):
+        """
+
+        :param data:
+        :param context:
+        :return: BinaryIO, content_type
+        """
+        raise NotImplementedError
