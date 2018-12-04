@@ -20,7 +20,6 @@ import usersys.urls
 import walletsys.urls
 import ordersys.urls
 import appearancesys.urls
-import business_sys.urls
 import category_sys.urls
 
 
@@ -30,6 +29,5 @@ urlpatterns = [
     url(r'^wallet/', include(walletsys.urls.urlpatterns)),
     url(r'^order/', include(ordersys.urls.urlpatterns)),
     url(r'^appearance/', include(appearancesys.urls.url_patterns)),
-    url(r'business/', include(business_sys.urls.urlpatterns)),
-    url(r'^category/', include(category_sys.urls)),
+    url(r'^category/', include(category_sys.urls.urlpatterns)),
 ]
