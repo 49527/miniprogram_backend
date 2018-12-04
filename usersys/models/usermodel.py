@@ -94,14 +94,19 @@ class UserValidate(models.Model):
         return self.idcard_number
 
 
-class RecyclingStaffInfo(models.Model):
-    uid = models.OneToOneField(
+class UserDeliveryInfo(models.Model):
+    uid = models.ForeignKey(
         UserBase,
-        related_name="recycling_staff_info",
+        related_name="user_delivery_info",
         verbose_name=_("用户id"),
     )
-    rs_name = models.CharField(_("回收员姓名"), max_length=30)
-    number_plate = models.CharField(max_length=20)
+    address = models.TextField(_("收货地址"))
+    contact = models.CharField(_("联系人"), max_length=30, null=True, blank=True)
+    house_number = models.CharField(_("门牌号"), max_length=20, null=True, blank=True)
+    contact_pn = models.CharField(_('联系电话'), max_length=25, validators=[
+        validators.get_validator("phone number")
+    ])
+    in_use = models.BooleanField(default=True)
 
     def __unicode__(self):
-        return self.rs_name
+        return u"{} {} {} {}".format(self.address, self.house_number, self.contact, self.contact_pn)
