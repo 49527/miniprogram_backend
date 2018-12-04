@@ -12,7 +12,7 @@ def obtain_top_type_photo(top_type):
         raise WLException(404, _("无此ICON"))
 
     try:
-        if top_type is not None:
+        if top_type.icon.name is not None:
             return open(top_type.icon.path, 'r')
         else:
             return default_image()
