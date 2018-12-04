@@ -5,6 +5,7 @@ from django.db import models
 
 from business_sys.choices.model_choices import recycle_bin_type
 
+
 class RecycleBin(models.Model):
     GPS_L = models.FloatField(_("经度"))
     GPS_A = models.FloatField(_("纬度"))

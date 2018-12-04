@@ -22,8 +22,8 @@ def find_near_recycle_bin(lng, lat):
 
 
 def get_one_to_many_distance(lng, lat, lon_lat_list):
-    NUM = settings.NUM_OF_NEAR_BIN
-    num = NUM if len(lon_lat_list) > NUM else len(lon_lat_list)
+
+    num = min(settings.NUM_OF_NEAR_BIN, len(lon_lat_list))
 
     if len(lon_lat_list) == 0:
         return []
@@ -32,8 +32,8 @@ def get_one_to_many_distance(lng, lat, lon_lat_list):
                          [str(item["GPS_A"]) + ',' + str(item["GPS_L"]) for item in lon_lat_list])
 
     url = "https://apis.map.qq.com/ws/distance/v1/" \
-            "?mode=walking&from={lat},{lng}&to={lat_lon}&key={Key}".format(
-        lng=lng, lat=lat, lat_lon=lat_lon, Key=settings.MAP_KEY
+          "?mode=walking&from={lat},{lng}&to={lat_lon}&key={key}".format(
+        lng=lng, lat=lat, lat_lon=lat_lon, key=settings.MAP_KEY
     )
     re = requests.get(url)
     elements = re.json()["result"]["elements"]
@@ -45,8 +45,8 @@ def get_one_to_many_distance(lng, lat, lon_lat_list):
 def get_one_to_one_distance(lng, lat, GPS_L, GPS_A):
     lat_lon = str(GPS_A) + ',' + str(GPS_L)
     url = "https://apis.map.qq.com/ws/distance/v1/" \
-            "?mode=walking&from={lat},{lng}&to={lat_lon}&key={Key}".format(
-        lng=lng, lat=lat, lat_lon=lat_lon, Key=settings.MAP_KEY
+          "?mode=walking&from={lat},{lng}&to={lat_lon}&key={key}".format(
+        lng=lng, lat=lat, lat_lon=lat_lon, key=settings.MAP_KEY
     )
     re = requests.get(url)
     return re.json()["result"]["elements"][0]["distance"]

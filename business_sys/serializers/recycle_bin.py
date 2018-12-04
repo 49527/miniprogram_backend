@@ -22,12 +22,12 @@ class RecycleBinDisplaySerializer(serializers.ModelSerializer):
             dic = {
                 "type_id": c_type.id,
                 "c_type": c_type.t_top_name,
-                "min_price": recycle_bin.product_subtype.filter(p_type__toptype_c=c_type,
-                                       p_type__in_use=True).aggregate(
-                    Min("price"))["price__min"],
-                "max_price": recycle_bin.product_subtype.filter(p_type__toptype_c=c_type,
-                                       p_type__in_use=True).aggregate(
-                    Max("price"))["price__max"]
+                "min_price": recycle_bin.product_subtype.filter(
+                    p_type__toptype_c=c_type,
+                    p_type__in_use=True).aggregate(Min("price"))["price__min"],
+                "max_price": recycle_bin.product_subtype.filter(
+                    p_type__toptype_c=c_type,
+                    p_type__in_use=True).aggregate(Max("price"))["price__max"]
             }
             type_list.append(dic)
         data["type_list"] = type_list
