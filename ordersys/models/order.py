@@ -34,6 +34,8 @@ class OrderInfo(models.Model):
         blank=True
     )
 
+    def __unicode__(self):
+        return u"{}:{} vs {}".format(self.id, self.uid_c, self.uid_b)
 
 
 class OrderProductTypeBind(models.Model):
@@ -48,6 +50,9 @@ class OrderProductTypeBind(models.Model):
         related_name="product_type"
     )
     quantity = models.FloatField()
+
+    def __unicode__(self):
+        return u"[{}] - {}, count:{}".format(self.oid, self.p_type, self.quantity)
 
 
 class OrderCancelReason(models.Model):
@@ -72,3 +77,6 @@ class OrderReasonBind(models.Model):
         verbose_name="取消原因"
     )
     desc = models.TextField(_("具体描述"), null=True, blank=True)
+
+    def __unicode__(self):
+        return u"[{}] - {}, desc: {}".format(self.order, self.reason, self.desc)

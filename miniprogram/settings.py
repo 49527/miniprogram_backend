@@ -237,6 +237,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 UPLOAD_APPEARANCE_BANNER = 'upload/base/banner/%Y/%m/%d/'
 UPLOAD_VALIDATE_PHOTO = 'upload/user/validate/%Y/%m/%d/'
+UPLOAD_CATEGORY_ICON = 'upload/category/icon/'
 
 
 # File Storage

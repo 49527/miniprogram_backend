@@ -1,6 +1,7 @@
 # coding=UTF-8
 from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 from django.db import models
 from category_sys.choices.model_choices import top_type_choice, type_unit_choice
 
@@ -10,6 +11,10 @@ class ProductTopType(models.Model):
     in_use = models.BooleanField(default=True)
     operator = models.IntegerField(_("所属端类型"), choices=top_type_choice.choice)
     create_time = models.DateTimeField(auto_now_add=True)
+    icon = models.ImageField(upload_to=settings.UPLOAD_CATEGORY_ICON, null=True, blank=True)
+
+    def __unicode__(self):
+        return self.t_top_name
 
 
 class ProductSubType(models.Model):
@@ -27,3 +32,6 @@ class ProductSubType(models.Model):
         verbose_name=_("B端顶级品类"),
         related_name="b_subtype"
     )
+
+    def __unicode__(self):
+        return self.t_sub_name

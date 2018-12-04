@@ -43,3 +43,6 @@ class BusinessProductTypeBind(models.Model):
     )
     price = models.FloatField()
     modified_time = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return u"{} - {}: RMB: {}".format(self.recycle_bin, self.p_type, self.price)

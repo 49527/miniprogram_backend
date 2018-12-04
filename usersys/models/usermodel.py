@@ -102,3 +102,6 @@ class UserDeliveryInfo(models.Model):
         validators.get_validator("phone number")
     ])
     in_use = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return u"{} {} {} {}".format(self.address, self.house_number, self.contact, self.contact_pn)
