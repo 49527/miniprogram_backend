@@ -8,12 +8,4 @@ class _StateChoice(FieldChoice):
     )
 
 
-class _ValidateStateChoice(FieldChoice):
-    CHOICE_DISPLAY = (
-        (0, "", "NOT_VALIDATED"),
-        (1, "", "VALIDATED"),
-    )
-
-
 state_choice = _StateChoice()
-is_validate_choice = _ValidateStateChoice()

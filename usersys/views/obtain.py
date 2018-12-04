@@ -11,12 +11,14 @@ class ObtainSelfInfoView(WLAPIView, APIView):
         seri = ObtainSelfInfoSerializer(data=data)
         self.validate_serializer(seri)
 
-        user_info, is_validate = obtain_self_info(**seri.data)
+        user_info, is_validate, n_times, total_amount = obtain_self_info(**seri.data)
         seri_u_info = UserInfoDisplay(user_info)
         return self.generate_response(
             data={
                 "user_info": seri_u_info.data,
-                "is_validate": is_validate
+                "is_validate": is_validate,
+                "n_times": n_times,
+                "total_amount": total_amount
             },
             context=context
         )
