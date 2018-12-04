@@ -9,7 +9,7 @@ login_urls = [
     url(r'^logout/$', login.LogoutView.as_view()),
     url(r'^login_b/$', login.RecyclingStaffLoginView.as_view()),
     url(r'^send_sms/$', login.SendSMSView.as_view()),
-    url(r'^forget_psw/$', login.ForgetPwdView.as_view()),
+    url(r'^forget_pwd/$', login.ForgetPwdView.as_view()),
 
 ]
 

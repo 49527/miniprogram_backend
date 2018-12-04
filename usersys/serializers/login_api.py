@@ -32,6 +32,7 @@ class SendSerializer(serializers.Serializer):
 
 
 class ForgetPwdSerializer(serializers.Serializer):
-    old_pwd = serializers.CharField(max_length=50)
-    new_pwd = serializers.CharField(max_length=50)
-    code = serializers.CharField(max_length=6)
+    pn = serializers.CharField(max_length=20, validators=[validators.get_validator("phone number")])
+    new_pwd1 = serializers.CharField(max_length=50)
+    new_pwd2 = serializers.CharField(max_length=50)
+    vcode = serializers.CharField(max_length=6)

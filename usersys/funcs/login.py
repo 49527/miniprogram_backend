@@ -1,3 +1,4 @@
+# coding=utf-8
 import requests
 import logging
 import time
@@ -9,15 +10,16 @@ from usersys.models import UserBase, UserSid, WechatUserContext, RecyclingStaffI
 from usersys.choices.state_choice import state_choice
 from usersys.choices.model_choice import user_role_choice
 from django.conf import settings
-from base.util.phone_validator import phone_validator
+from base.util.phone_validator import phone_validator, AliyunPhoneValidator
 from base.util.misc_validators import validators
 from base.util.temp_session import create_session, update_session_dict, \
     destroy_session, get_session_dict, get_session, update_session
 from .session import RegistrationSessionKeys, ValidateStatus
-User = get_user_model()
-logger = logging.getLogger(__name__)
 import uuid
 from django.core.cache import cache
+User = get_user_model()
+logger = logging.getLogger(__name__)
+
 
 
 
@@ -184,12 +186,12 @@ def logout(user_sid):
         raise WLException(404, "user_id do not exist")
 
 
-def recyclingstafflogin(pn, password, ipaddr, session_key=None):
+def recycling_staff_login(pn, password, ipaddr, session_key=None):
     if session_key is None:
         session_key = uuid.uuid4()
     user = authenticate(username=pn, password=password)
     if user is None:
-        raise WLException(404, "Account or password error")
+        raise WLException(400, "帐号或密码错误")
     sid_obj = sid_reuse(user, ipaddr, session_key)
     if sid_obj is not None:
         sid_access(sid_obj)
@@ -200,7 +202,21 @@ def recyclingstafflogin(pn, password, ipaddr, session_key=None):
 
 
 def send_sms(pn):
-    pass
-    # cache
-    vcode = phone_validator.generate_and_send(pn)
+    t = int(time.time())
+    t1 = cache.get(pn)
+    if t1:
+        raise WLException(400, u"请求太频繁")
+    vcode = AliyunPhoneValidator().generate_and_send(pn)
+    cache.set(pn, t, 60)
     return vcode
+
+
+def forget_pwd(pn, new_pwd1, new_pwd2, vcode):
+    if new_pwd1 != new_pwd2:
+        raise WLException(400, u"新老密码不同!")
+    if vcode != cache.get(pn):
+        raise WLException(401, u"验证码错误")
+    user = UserBase.objects.filter(internal_name=pn).first()
+    user.set_password(new_pwd1)
+    user.save()
+    return user
