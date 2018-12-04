@@ -317,4 +317,7 @@ MINIPROGRAM = {
     "AppSecret": '77dacbf01a0bedbf663a932a2e0de4a7',
 }
 
-BOUND = 0.5 # about 5.6 kilometer
+BOUND = 0.05 # about 5.6 kilometer
+
+MAP_KEY = "OVYBZ-3K43X-WC74H-ZD6LX-WEQ2F-X4BTW"
+NUM_OF_NEAR_BIN = 3
