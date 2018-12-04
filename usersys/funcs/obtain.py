@@ -3,6 +3,8 @@ from base.exceptions import Error404
 from usersys.choices.state_choice import is_validate_choice
 from usersys.choices.model_choice import user_validate_status
 from usersys.models import UserBase, UserValidate
+from django.core.cache import caches
+import uuid
 
 
 @user_from_sid(Error404)
@@ -15,3 +17,11 @@ def obtain_self_info(user):
     except UserValidate.DoesNotExist:
         state = is_validate_choice.NOT_VALIDATED
     return user, state
+
+
+@user_from_sid(Error404)
+def obtain_qr_info(user):
+    # type: (UserBase) -> str
+    qr_info = str(uuid.uuid1())
+    caches["sessions"].set(qr_info, user.id, 300)
+    return qr_info
