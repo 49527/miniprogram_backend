@@ -4,12 +4,12 @@ from business_sys.models import RecycleBin
 
 def obtain_nearby_recycle_bin(lng, lat):
     r_b_qs = find_near_recycle_bin(lng, lat)
-    lon_lat_qs = r_b_qs.values('GPS_L', 'GPS_A')
+    lon_lat_qs = r_b_qs.values('GPS_L', 'GPS_A', 'id')
     closest = get_one_to_many_distance(lng, lat, lon_lat_qs)
     query_list = []
     while not len(closest) == 0:
         position = closest.pop(0)
-        qs = r_b_qs.get(GPS_L=position["lng"], GPS_A=position["lat"])
+        qs = r_b_qs.get(id=position["id"])
         query_list.append({"recycle_bin": qs, "distance": position["distance"]})
     return query_list
 

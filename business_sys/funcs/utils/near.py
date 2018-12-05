@@ -24,6 +24,7 @@ def find_near_recycle_bin(lng, lat):
 def get_one_to_many_distance(lng, lat, lon_lat_list):
 
     num = min(settings.NUM_OF_NEAR_BIN, len(lon_lat_list))
+    id_list = [l["id"] for l in lon_lat_list]
 
     if len(lon_lat_list) == 0:
         return []
@@ -37,7 +38,15 @@ def get_one_to_many_distance(lng, lat, lon_lat_list):
     )
     re = requests.get(url)
     elements = re.json()["result"]["elements"]
-    position = [dict({"distance": e["distance"]}, **e["to"]) for e in elements]
+    position = [
+        dict(
+            {
+                "distance": e["distance"],
+                "id": rid,
+            },
+            **e["to"]
+        ) for e, rid in zip(elements, id_list)
+    ]
     position = sorted(position, key=itemgetter("distance"))
     return position[0: num]
 
