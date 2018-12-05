@@ -37,7 +37,7 @@ class ObtainRecycleBinDetailView(WLAPIView, APIView):
             data={
                 "recycle_bin": seri_rb.data,
                 "distance": distance,
-                "positon_desc": position_desc
+                "position_desc": position_desc
             },
             context=context
         )
