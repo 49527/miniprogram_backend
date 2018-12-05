@@ -53,8 +53,7 @@ class CancelOrder4BSerializer(serializers.Serializer):
 
 
 class TypeQuantity4BSerializer(serializers.Serializer):
-    p_type = serializers.PrimaryKeyRelatedField(
-        queryset=ProductSubType.objects.filter())
+    p_type = serializers.CharField(max_length=128)
     quantity = serializers.FloatField(min_value=0)
 
 

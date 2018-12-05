@@ -82,18 +82,21 @@ def cancel_order_b(user, oid, reason):
 
 @user_from_sid(Error404)
 def bookkeepingorder(user, oid, **data):
-    try:
-        p_id = data.get("type_quantity").get("p_type")
+
+    type_quantity = data.get("type_quantity")
+    for i in type_quantity:
+        p_id = i.get("p_type")
         order = OrderInfo.objects.filter(id=oid).first()
         p_type = ProductSubType.objects.filter(id=p_id).first()
         bpt = BusinessProductTypeBind.objects.filter(p_type=p_type).first()
+        if bpt is None:
+            raise WLException(401, "品类不存在，清添加后操作")
+        if OrderProductType.objects.filter(p_type=p_type, oid=order).first():
+            continue
         OrderProductType.objects.create(
             p_type=p_type,
             oid=order,
-            quantity=data.get("type_quantity").get("quantity"),
+            quantity=i.get("quantity"),
             price=bpt.price
         )
-        return True
-    except Exception as e:
-        print(e.message)
-        raise WLException(400, "记账失败")
+    return True

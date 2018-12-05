@@ -10,13 +10,8 @@ class ProductSubTypeSerializers(serializers.ModelSerializer):
 
 
 class ProductTopTypeSerializers(serializers.ModelSerializer):
-    # product_sub_type = ProductSubTypeSerializers(many=True).data
-
-    def to_representation(self, instance):
-        ret = super(ProductTopTypeSerializers, self).to_representation(instance)
-        ret["product_sub_type"] = ProductSubTypeSerializers(many=True).data
-        return ret
+    product_sub_type = ProductSubTypeSerializers(many=True)
 
     class Meta:
         model = ProductTopType
-        fields = ("id", "t_top_name")
+        fields = ("id", "t_top_name", "product_sub_type")

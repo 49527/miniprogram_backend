@@ -21,9 +21,11 @@ import walletsys.urls
 import ordersys.urls
 import appearancesys.urls
 import category_sys.urls
+import business_sys.urls
 
 urlpatterns = [
     url(r'^bg/', admin.site.urls),
+    url(r'^business/', include(business_sys.urls.urlpatterns)),
     url(r'^user/', include(usersys.urls.urlpatterns)),
     url(r'^wallet/', include(walletsys.urls.urlpatterns)),
     url(r'^order/', include(ordersys.urls.urlpatterns)),
