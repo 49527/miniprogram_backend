@@ -36,6 +36,11 @@ class UserManager(BaseUserManager):
 
         return self._create_user(internal_name, password, **extra_fields)
 
+    def set_password(self, internal_name, password):
+        user = self.get(internal_name=internal_name)
+        user.set_password(password)
+        return user
+
 
 class UserBase(AbstractBaseUser, PermissionsMixin):
     internal_name = models.CharField(_("内部登录名称"), max_length=64, unique=True)
@@ -44,7 +49,7 @@ class UserBase(AbstractBaseUser, PermissionsMixin):
     ])
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
-    role = models.IntegerField(_("用户角色"), choices=user_role_choice.choice)
+    role = models.IntegerField(_("用户角色"), choices=user_role_choice.choice,default=0)
 
     objects = UserManager()
     USERNAME_FIELD = 'internal_name'

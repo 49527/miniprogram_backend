@@ -1,10 +1,13 @@
+# coding=utf-8
 from rest_framework.views import APIView
 from base.views import WLAPIView
 from base.util.get_ip import get_client_ip
-from usersys.funcs.login import wechat_login, get_sid_by_pn, validate_sid, logout
+from usersys.funcs.login import wechat_login, get_sid_by_pn, validate_sid, logout, recycling_staff_login, send_sms, \
+    forget_pwd
 from usersys.serializers.login_api import (
     LoginSerializer, SubmitPnSerializer, PNvalidateSerializer,
-    LogoutSerializer
+    LogoutSerializer, RecyclingStaffLoginSerializer, SendSerializer,
+    ForgetPwdSerializer
 )
 
 
@@ -67,5 +70,48 @@ class LogoutView(WLAPIView, APIView):
         logout(**seri.data)
         return self.generate_response(
             data={},
+            context=context
+        )
+
+
+class RecyclingStaffLoginView(WLAPIView, APIView):
+    def post(self, request):
+        data, context = self.get_request_obj(request)
+        seri = RecyclingStaffLoginSerializer(data=data)
+        self.validate_serializer(seri)
+        user_sid = recycling_staff_login(seri.data['pn'], seri.data['pwd'], ipaddr=get_client_ip(request))
+        return self.generate_response(
+            data={
+                'pn': seri.data.get('pn'),
+                'user_sid': user_sid,
+            },
+            context=context
+        )
+
+
+class SendSMSView(WLAPIView, APIView):
+    def post(self, request):
+        data, context = self.get_request_obj(request)
+        seri = SendSerializer(data=data)
+        self.validate_serializer(seri)
+        send_sms(**seri.data)
+        return self.generate_response(
+            data={
+                'pn': seri.data.get('pn'),
+            },
+            context=context
+        )
+
+
+class ForgetPwdView(WLAPIView, APIView):
+    def post(self, request):
+        data, context = self.get_request_obj(request)
+        seri = ForgetPwdSerializer(data=data)
+        self.validate_serializer(seri)
+        forget_pwd(**seri.data)
+        return self.generate_response(
+            data={
+                'msg': u'密码已重置',
+            },
             context=context
         )

@@ -1,7 +1,9 @@
+# coding=utf-8
 import requests
 import logging
 import time
 from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate
 from base.exceptions import *
 from usersys.funcs.utils.sid_management import sid_create, sid_destroy, sid_reuse, sid_access
 from usersys.models import UserBase, UserSid, WechatUserContext
@@ -13,6 +15,8 @@ from base.util.misc_validators import validators
 from base.util.temp_session import create_session, update_session_dict, \
     destroy_session, get_session_dict, get_session, update_session
 from .session import RegistrationSessionKeys, ValidateStatus
+import uuid
+from django.core.cache import caches
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
@@ -178,3 +182,40 @@ def logout(user_sid):
         sid_destroy(user_sid)
     except KeyError:
         raise WLException(404, "user_id do not exist")
+
+
+def recycling_staff_login(pn, password, ipaddr, session_key=None):
+    if session_key is None:
+        session_key = uuid.uuid4()
+    user = authenticate(username=pn, password=password)
+    if user is None:
+        raise WLException(400, "帐号或密码错误")
+    sid_obj = sid_reuse(user, ipaddr, session_key)
+    if sid_obj is not None:
+        sid_access(sid_obj)
+        sid = sid_obj.sid
+    else:
+        sid = login(user, ipaddr, session_key)
+    return sid
+
+
+def send_sms(pn):
+    t = caches["session"].get(pn)
+    if t:
+        raise WLException(400, u"请求太频繁")
+    vcode = phone_validator().generate_and_send(pn)
+    caches["session"].set(pn, vcode, 60)
+
+
+def forget_pwd(pn, new_pwd1, new_pwd2, vcode):
+    if new_pwd1 != new_pwd2:
+        raise WLException(400, u"新老密码不同!")
+    if vcode != caches["session"].get(pn):
+        raise WLException(401, u"验证码错误")
+    try:
+        user = UserBase.objects.get(internal_name=pn)
+    except UserBase.DoesNotExist:
+        raise WLException(404, u"用户不存在")
+    user.set_password(new_pwd1)
+    user.save()
+    return user
