@@ -13,6 +13,10 @@ class ProductTopType(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     icon = models.ImageField(upload_to=settings.UPLOAD_CATEGORY_ICON, null=True, blank=True)
 
+    @property
+    def product_sub_type(self):
+        return ProductSubType.objects.filter(toptype_b=self)
+
     def __unicode__(self):
         return self.t_top_name
 

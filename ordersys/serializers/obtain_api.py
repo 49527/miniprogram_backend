@@ -17,3 +17,12 @@ class ObtainDeliveryInfoSerializer(serializers.Serializer):
 class ObtainUncompletedorderSerilaizer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
 
+
+class RecycleOrderListSerilaizer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    page = serializers.IntegerField(default=0)
+
+
+class RecycleOrderDetailsSerilaizer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    oid = serializers.CharField(max_length=128)

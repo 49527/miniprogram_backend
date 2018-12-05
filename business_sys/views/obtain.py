@@ -3,6 +3,8 @@ from base.views import WLAPIView
 from business_sys.serializers.obtain_api import ObtainNearbyRecycleBinSerializer, ObtainRecycleBinSerializer
 from business_sys.funcs.obtain import obtain_nearby_recycle_bin, obtain_recycle_bin_detail
 from business_sys.serializers.recycle_bin import NearbyDisplaySerializer, RecycleBinDisplaySerializer
+from category_sys.serializers import ProductTopTypeSerializers
+from business_sys.funcs import get_category_list
 
 
 class ObtainNearbyRecycleBinView(WLAPIView, APIView):
@@ -38,6 +40,19 @@ class ObtainRecycleBinDetailView(WLAPIView, APIView):
                 "recycle_bin": seri_rb.data,
                 "distance": distance,
                 "position_desc": position_desc
+            },
+            context=context
+        )
+
+
+class CategoryPriceListView(WLAPIView, APIView):
+    def get(self, request):
+        data, context = self.get_request_obj(request)
+        categorys = get_category_list()
+        seri_order = ProductTopTypeSerializers(categorys, many=True)
+        return self.generate_response(
+            data={
+                "categorys": seri_order.data,
             },
             context=context
         )

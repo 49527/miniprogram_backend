@@ -39,3 +39,25 @@ class OneClickOrderSerializer(serializers.Serializer):
     deli_id = serializers.PrimaryKeyRelatedField(
         queryset=UserDeliveryInfo.objects.all()
     )
+
+
+class CompeteOrderSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    oid = serializers.CharField(max_length=128)
+
+
+class CancelOrder4BSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    oid = serializers.CharField(max_length=128)
+    reason = serializers.CharField(max_length=128)
+
+
+class TypeQuantity4BSerializer(serializers.Serializer):
+    p_type = serializers.CharField(max_length=128)
+    quantity = serializers.FloatField(min_value=0)
+
+
+class BookkeepingOrderSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    oid = serializers.CharField(max_length=128)
+    type_quantity = TypeQuantity4BSerializer(many=True)

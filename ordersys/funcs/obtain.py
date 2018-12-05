@@ -1,3 +1,4 @@
+# coding=utf-8
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
 from usersys.choices.model_choice import user_role_choice
@@ -5,7 +6,7 @@ from usersys.models import UserBase, UserDeliveryInfo
 from base.util.pages import get_page_info
 from django.db import models
 from ordersys.choices.model_choices import order_state_choice
-from ordersys.models import OrderCancelReason
+from ordersys.models import OrderCancelReason, OrderInfo, OrderProductType
 from business_sys.models import RecycleBin
 from category_sys.models import ProductTopType
 from category_sys.choices.model_choices import top_type_choice
@@ -88,3 +89,28 @@ def obtain_c_toptype_list():
 
 def obtain_cancel_reason():
     return OrderCancelReason.objects.filter(in_use=True)
+
+
+# @user_from_sid(Error404)
+def obtain_order_list_by_o_state(page, count_per_page):
+    # type: (int, int) -> (QuerySet, int)
+    qs = OrderInfo.objects.filter(o_state=order_state_choice.CREATED)
+    start, end, n_pages = get_page_info(
+        qs, count_per_page, page,
+        index_error_excepiton=WLException(400, "Page out of range")
+    )
+
+    return qs.order_by("-id")[start:end], n_pages
+
+
+@user_from_sid(Error404)
+def obtain_order_details(user, oid):
+    # type: (UserBase, int) -> OrderProductType
+    try:
+        order = OrderInfo.objects.get(id=oid)
+    except OrderInfo.DoesNotExist:
+        raise WLException(404, u"订单不存在")
+    if order.uid_b != user:
+        raise WLException(404, u"订单不存在")
+    order_product = OrderProductType.objects.filter(oid=order)
+    return order_product

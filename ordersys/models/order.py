@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from ordersys.choices.model_choices import order_state_choice
 from usersys.models import UserBase
-from category_sys.models import ProductTopType
+from category_sys.models import ProductTopType, ProductSubType
 from base.util.misc_validators import validators
 from usersys.models import UserDeliveryInfo
 
@@ -55,6 +55,24 @@ class OrderProductTypeBind(models.Model):
         return u"[{}] - {}, count:{}".format(self.oid, self.p_type, self.quantity)
 
 
+class OrderProductType(models.Model):
+    p_type = models.ForeignKey(
+        ProductSubType,
+        verbose_name=_("B端客户对应商品"),
+        related_name="product_type"
+    )
+    oid = models.ForeignKey(
+        OrderInfo,
+        verbose_name=_("订单id"),
+        related_name="order"
+    )
+    quantity = models.FloatField()
+    price = models.FloatField()
+
+    def __unicode__(self):
+        return u"[{}] - {}, count:{}".format(self.oid, self.p_type, self.quantity)
+
+
 class OrderCancelReason(models.Model):
     in_use = models.BooleanField(default=True)
     reason = models.CharField(max_length=256)
@@ -80,3 +98,16 @@ class OrderReasonBind(models.Model):
 
     def __unicode__(self):
         return u"[{}] - {}, desc: {}".format(self.order, self.reason, self.desc)
+
+
+class OrderCancel(models.Model):
+    in_use = models.BooleanField(default=True)
+    reason = models.CharField(max_length=256)
+    order = models.ForeignKey(
+        OrderInfo,
+        related_name="order_b",
+        verbose_name="对应订单"
+    )
+
+    def __unicode__(self):
+        return self.reason
