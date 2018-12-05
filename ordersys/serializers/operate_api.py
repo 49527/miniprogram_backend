@@ -1,9 +1,9 @@
 from rest_framework import serializers
 from usersys.models import UserDeliveryInfo
 from ordersys.models import OrderReasonBind
-from category_sys.models import ProductTopType
+from category_sys.models import ProductTopType, ProductSubType
 from category_sys.choices.model_choices import top_type_choice
-
+from business_sys.models import BusinessProductTypeBind
 
 class SubmitDeliveryInfoSerializer(serializers.ModelSerializer):
     user_sid = serializers.CharField(max_length=128)
@@ -39,3 +39,26 @@ class OneClickOrderSerializer(serializers.Serializer):
     deli_id = serializers.PrimaryKeyRelatedField(
         queryset=UserDeliveryInfo.objects.all()
     )
+
+
+class CompeteOrderSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    oid = serializers.CharField(max_length=128)
+
+
+class CancelOrder4BSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    oid = serializers.CharField(max_length=128)
+    reason = serializers.CharField(max_length=128)
+
+
+class TypeQuantity4BSerializer(serializers.Serializer):
+    p_type = serializers.PrimaryKeyRelatedField(
+        queryset=ProductSubType.objects.filter())
+    quantity = serializers.FloatField(min_value=0)
+
+
+class BookkeepingOrderSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    oid = serializers.CharField(max_length=128)
+    type_quantity = TypeQuantity4BSerializer(many=True)

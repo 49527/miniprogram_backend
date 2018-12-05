@@ -4,10 +4,11 @@ from django.utils.translation import ugettext_lazy as _
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
 from usersys.models import UserDeliveryInfo
-from ordersys.models import OrderReasonBind, OrderProductTypeBind, OrderInfo
+from ordersys.models import OrderReasonBind, OrderProductTypeBind, OrderInfo, OrderCancel, OrderProductType
 from ordersys.choices.model_choices import order_state_choice
 from ordersys.funcs.utils import get_uncompleted_order
-
+from category_sys.models import ProductSubType
+from business_sys.models import BusinessProductTypeBind
 
 @user_from_sid(Error404)
 def submit_delivery_info(user, **data):
@@ -46,3 +47,53 @@ def one_click_order(user, **data):
         OrderProductTypeBind.objects.create(oid=order, **dic)
 
     return order
+
+
+@user_from_sid(Error404)
+def compete_order(user, oid):
+    order = OrderInfo.objects.filter(id=oid).first()
+    if order.uid_b is not None:
+        raise WLException(400, "订单已被抢")
+    if order.uid_b is user:
+        raise WLException(401, "不可重复抢单")
+    if order.o_state == order_state_choice.CREATED:
+        order.uid_b = user
+        order.o_state = order_state_choice.ACCEPTED
+        order.save()
+    return order
+
+
+@user_from_sid(Error404)
+def cancel_order_b(user, oid, reason):
+    order = OrderInfo.objects.filter(id=oid).first()
+    if order.o_state == order_state_choice.CANCELED or order.o_state == order_state_choice.COMPLETED:
+        raise WLException(400, "此订单已完成或者已被取消，不能执行此操作")
+    if order.uid_b != user:
+        raise WLException(401, "这个订单不属于该用户,不能执行此操作")
+
+    order.uid_b = None
+    order.o_state = order_state_choice.CREATED
+    order.save()
+    OrderCancel.objects.create(
+        reason=reason,
+        order=order
+    )
+
+
+@user_from_sid(Error404)
+def bookkeepingorder(user, oid, **data):
+    try:
+        p_id = data.get("type_quantity").get("p_type")
+        order = OrderInfo.objects.filter(id=oid).first()
+        p_type = ProductSubType.objects.filter(id=p_id).first()
+        bpt = BusinessProductTypeBind.objects.filter(p_type=p_type).first()
+        OrderProductType.objects.create(
+            p_type=p_type,
+            oid=order,
+            quantity=data.get("type_quantity").get("quantity"),
+            price=bpt.price
+        )
+        return True
+    except Exception as e:
+        print(e.message)
+        raise WLException(400, "记账失败")
