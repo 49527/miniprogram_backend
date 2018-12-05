@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 from base.exceptions import *
 from usersys.funcs.utils.sid_management import sid_create, sid_destroy, sid_reuse, sid_access
-from usersys.models import UserBase, UserSid, WechatUserContext, RecyclingStaffInfo
+from usersys.models import UserBase, UserSid, WechatUserContext
 from usersys.choices.state_choice import state_choice
 from usersys.choices.model_choice import user_role_choice
 from django.conf import settings
@@ -16,11 +16,9 @@ from base.util.temp_session import create_session, update_session_dict, \
     destroy_session, get_session_dict, get_session, update_session
 from .session import RegistrationSessionKeys, ValidateStatus
 import uuid
-from django.core.cache import cache
+from django.core.cache import caches
 User = get_user_model()
 logger = logging.getLogger(__name__)
-
-
 
 
 def wechat_login(code, ipaddr):
@@ -202,19 +200,22 @@ def recycling_staff_login(pn, password, ipaddr, session_key=None):
 
 
 def send_sms(pn):
-    t = cache.get(pn)
+    t = caches["session"].get(pn)
     if t:
         raise WLException(400, u"请求太频繁")
-    vcode = AliyunPhoneValidator().generate_and_send(pn)
-    cache.set(pn, vcode, 60)
+    vcode = phone_validator().generate_and_send(pn)
+    caches["session"].set(pn, vcode, 60)
 
 
 def forget_pwd(pn, new_pwd1, new_pwd2, vcode):
     if new_pwd1 != new_pwd2:
         raise WLException(400, u"新老密码不同!")
-    if vcode != cache.get(pn):
+    if vcode != caches["session"].get(pn):
         raise WLException(401, u"验证码错误")
-    user = UserBase.objects.filter(internal_name=pn).first()
+    try:
+        user = UserBase.objects.get(internal_name=pn)
+    except UserBase.DoesNotExist:
+        raise WLException(404, u"用户不存在")
     user.set_password(new_pwd1)
     user.save()
     return user

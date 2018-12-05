@@ -94,7 +94,7 @@ class SendSMSView(WLAPIView, APIView):
         data, context = self.get_request_obj(request)
         seri = SendSerializer(data=data)
         self.validate_serializer(seri)
-        send_sms(seri.data.get('pn'))
+        send_sms(**seri.data)
         return self.generate_response(
             data={
                 'pn': seri.data.get('pn'),
@@ -108,7 +108,7 @@ class ForgetPwdView(WLAPIView, APIView):
         data, context = self.get_request_obj(request)
         seri = ForgetPwdSerializer(data=data)
         self.validate_serializer(seri)
-        forget_pwd(**data)
+        forget_pwd(**seri.data)
         return self.generate_response(
             data={
                 'msg': u'密码已重置',
