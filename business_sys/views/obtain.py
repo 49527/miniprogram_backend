@@ -40,6 +40,9 @@ class ObtainRecycleBinDetailView(WLAPIView, APIView):
                 "recycle_bin": seri_rb.data,
                 "distance": distance,
                 "position_desc": position_desc
+            },
+            context=context
+        )
 
 
 class CategoryPriceListView(WLAPIView, APIView):
