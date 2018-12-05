@@ -11,6 +11,10 @@ class ProductTopType(models.Model):
     operator = models.IntegerField(_("所属端类型"), choices=top_type_choice.choice)
     create_time = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def product_sub_type(self):
+        return ProductSubType.objects.filter(toptype_b=self)
+
     def __unicode__(self):
         return self.t_top_name
 

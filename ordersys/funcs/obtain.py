@@ -1,3 +1,4 @@
+# coding=utf-8
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
 from usersys.choices.model_choice import user_role_choice
@@ -93,7 +94,6 @@ def obtain_cancel_reason():
 # @user_from_sid(Error404)
 def obtain_order_list_by_o_state(page, count_per_page):
     # type: (UserBase, int, int) -> (QuerySet, int)
-    # qs = get_user_order_queryset(user)
     qs = OrderInfo.objects.filter(o_state=order_state_choice.CREATED)
     start, end, n_pages = get_page_info(
         qs, count_per_page, page,
@@ -105,6 +105,9 @@ def obtain_order_list_by_o_state(page, count_per_page):
 
 @user_from_sid(Error404)
 def obtain_order_details(user, oid):
-    order = OrderInfo.objects.filter(id=oid).first()
+    try:
+        order = OrderInfo.objects.get(id=oid)
+    except OrderInfo.DoesNotExist:
+        raise WLException(401, "订单不存在")
     order_product = OrderProductType.objects.filter(oid=order)
     return order_product

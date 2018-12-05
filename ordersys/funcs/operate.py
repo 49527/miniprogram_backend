@@ -9,6 +9,7 @@ from ordersys.choices.model_choices import order_state_choice
 from ordersys.funcs.utils import get_uncompleted_order
 from category_sys.models import ProductSubType
 from business_sys.models import BusinessProductTypeBind
+from usersys.choices.model_choice import user_role_choice
 
 @user_from_sid(Error404)
 def submit_delivery_info(user, **data):
@@ -51,11 +52,21 @@ def one_click_order(user, **data):
 
 @user_from_sid(Error404)
 def compete_order(user, oid):
-    order = OrderInfo.objects.filter(id=oid).first()
+    try:
+        order = OrderInfo.objects.get(id=oid)
+    except OrderInfo.DoesNotExist:
+        raise WLException(407, "订单不存在")
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, "无权限操作")
     if order.uid_b is not None:
         raise WLException(400, "订单已被抢")
-    if order.uid_b is user:
-        raise WLException(401, "不可重复抢单")
+    o_state = order.o_state
+    if o_state == order_state_choice.ACCEPTED:
+        raise WLException(402, "已接单")
+    if o_state == order_state_choice.CANCELED:
+        raise WLException(403, "被取消")
+    if o_state == order_state_choice.COMPLETED:
+        raise WLException(405, "已完成")
     if order.o_state == order_state_choice.CREATED:
         order.uid_b = user
         order.o_state = order_state_choice.ACCEPTED
@@ -65,14 +76,18 @@ def compete_order(user, oid):
 
 @user_from_sid(Error404)
 def cancel_order_b(user, oid, reason):
-    order = OrderInfo.objects.filter(id=oid).first()
-    if order.o_state == order_state_choice.CANCELED or order.o_state == order_state_choice.COMPLETED:
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, "无权限操作")
+    try:
+        order = OrderInfo.objects.get(id=oid)
+    except OrderInfo.DoesNotExist:
+        raise WLException(407, "订单不存在")
+    if order.o_state in (order_state_choice.CANCELED, order_state_choice.COMPLETED):
         raise WLException(400, "此订单已完成或者已被取消，不能执行此操作")
     if order.uid_b != user:
-        raise WLException(401, "这个订单不属于该用户,不能执行此操作")
+        raise WLException(402, "这个订单不属于该用户,不能执行此操作")
 
-    order.uid_b = None
-    order.o_state = order_state_choice.CREATED
+    order.o_state = order_state_choice.CANCELED
     order.save()
     OrderCancel.objects.create(
         reason=reason,
@@ -81,13 +96,18 @@ def cancel_order_b(user, oid, reason):
 
 
 @user_from_sid(Error404)
-def bookkeepingorder(user, oid, **data):
-
-    type_quantity = data.get("type_quantity")
+def bookkeeping_order(user, oid, type_quantity):
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, "无权限操作")
     for i in type_quantity:
         p_id = i.get("p_type")
-        order = OrderInfo.objects.filter(id=oid).first()
+        try:
+            order = OrderInfo.objects.get(id=oid)
+        except OrderInfo.DoesNotExist:
+            raise WLException(407, "订单不存在")
         p_type = ProductSubType.objects.filter(id=p_id).first()
+        if p_type is None:
+            raise WLException(401, "品类不存在，清添加后操作")
         bpt = BusinessProductTypeBind.objects.filter(p_type=p_type).first()
         if bpt is None:
             raise WLException(401, "品类不存在，清添加后操作")

@@ -3,7 +3,7 @@ from base.views import WLAPIView
 from ordersys.serializers.operate_api import SubmitDeliveryInfoSerializer, CancelOrderSerializer,\
     OneClickOrderSerializer, CompeteOrderSerializer, CancelOrder4BSerializer, BookkeepingOrderSerializer
 from ordersys.funcs.operate import submit_delivery_info, cancel_order, one_click_order, compete_order, cancel_order_b, \
-    bookkeepingorder
+    bookkeeping_order
 from ordersys.serializers.order import OrderDisplaySerializer
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 
@@ -63,7 +63,6 @@ class RecycleOrderCompeteView(WLAPIView, APIView):
         self.validate_serializer(seri)
 
         order = compete_order(**seri.validated_data)
-
         seri_order = OrderDisplaySerializer(order)
         return self.generate_response(
             data={
@@ -93,9 +92,8 @@ class BookkeepingOrderView(WLAPIView, APIView):
         seri = BookkeepingOrderSerializer(data=data)
         self.validate_serializer(seri)
 
-        state = bookkeepingorder(**seri.validated_data)
-
+        bookkeeping_order(**seri.validated_data)
         return self.generate_response(
-            data={"state": state},
+            data={},
             context=context
         )
