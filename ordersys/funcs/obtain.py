@@ -91,10 +91,10 @@ def obtain_cancel_reason():
 
 
 # @user_from_sid(Error404)
-def obtain_order_list_by_o_state(o_state, page, count_per_page):
+def obtain_order_list_by_o_state(page, count_per_page):
     # type: (UserBase, int, int) -> (QuerySet, int)
     # qs = get_user_order_queryset(user)
-    qs = OrderInfo.objects.filter(o_state=o_state)
+    qs = OrderInfo.objects.filter(o_state=order_state_choice.CREATED)
     start, end, n_pages = get_page_info(
         qs, count_per_page, page,
         index_error_excepiton=WLException(400, "Page out of range")

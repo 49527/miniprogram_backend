@@ -20,7 +20,6 @@ class ObtainUncompletedorderSerilaizer(serializers.Serializer):
 
 class RecycleOrderListSerilaizer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
-    o_state = serializers.CharField(max_length=1)
     page = serializers.IntegerField(default=0)
 
 
