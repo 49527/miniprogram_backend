@@ -94,11 +94,10 @@ class SendSMSView(WLAPIView, APIView):
         data, context = self.get_request_obj(request)
         seri = SendSerializer(data=data)
         self.validate_serializer(seri)
-        vcode = send_sms(seri.data.get('pn'))
+        send_sms(seri.data.get('pn'))
         return self.generate_response(
             data={
                 'pn': seri.data.get('pn'),
-                'vcode': vcode,
             },
             context=context
         )

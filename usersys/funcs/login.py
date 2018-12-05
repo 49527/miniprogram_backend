@@ -202,13 +202,11 @@ def recycling_staff_login(pn, password, ipaddr, session_key=None):
 
 
 def send_sms(pn):
-    t = int(time.time())
-    t1 = cache.get(pn)
-    if t1:
+    t = cache.get(pn)
+    if t:
         raise WLException(400, u"请求太频繁")
     vcode = AliyunPhoneValidator().generate_and_send(pn)
-    cache.set(pn, t, 60)
-    return vcode
+    cache.set(pn, vcode, 60)
 
 
 def forget_pwd(pn, new_pwd1, new_pwd2, vcode):
