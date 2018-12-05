@@ -59,3 +59,15 @@ def get_one_to_one_distance(lng, lat, GPS_L, GPS_A):
     )
     re = requests.get(url)
     return re.json()["result"]["elements"][0]["distance"]
+
+
+def get_position_desc(lng, lat):
+    url = "https://apis.map.qq.com/ws/geocoder/v1/?location={lat},{lng}&key={key}".format(
+        lat=lat, lng=lng, key=settings.MAP_KEY
+    )
+    re = requests.get(url).json()["result"]
+    position_desc = {
+        "address": re["address"],
+        "formatted_addresses": re["formatted_addresses"]
+    }
+    return position_desc

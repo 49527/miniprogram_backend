@@ -29,14 +29,15 @@ class ObtainRecycleBinDetailView(WLAPIView, APIView):
         seri = ObtainRecycleBinSerializer(data=data)
         self.validate_serializer(seri)
 
-        rb, distance = obtain_recycle_bin_detail(**seri.data)
+        rb, distance, position_desc = obtain_recycle_bin_detail(**seri.data)
 
         seri_rb = RecycleBinDisplaySerializer(rb)
 
         return self.generate_response(
             data={
                 "recycle_bin": seri_rb.data,
-                "distance": distance
+                "distance": distance,
+                "positon_desc": position_desc
             },
             context=context
         )
