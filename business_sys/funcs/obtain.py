@@ -1,4 +1,5 @@
-from business_sys.funcs.utils.near import find_near_recycle_bin, get_one_to_many_distance, get_one_to_one_distance
+from business_sys.funcs.utils.positon import find_near_recycle_bin, get_one_to_many_distance, get_one_to_one_distance,\
+    get_position_desc
 from business_sys.models import RecycleBin
 
 
@@ -23,4 +24,5 @@ def obtain_recycle_bin_detail(lng, lat, rb_id):
         GPS_A=rb.GPS_A,
         GPS_L=rb.GPS_L
     )
-    return rb, distance
+    position_desc = get_position_desc(lng=lng, lat=lat)
+    return rb, distance, position_desc
