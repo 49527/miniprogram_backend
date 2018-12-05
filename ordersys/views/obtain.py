@@ -57,6 +57,7 @@ class ObtainDeliveryInfoView(WLAPIView, APIView):
             context=context
         )
 
+
 class ObtainUncompletedOrderView(WLAPIView, APIView):
     def get(self, request):
         data, context = self.get_request_obj(request)
@@ -74,6 +75,7 @@ class ObtainUncompletedOrderView(WLAPIView, APIView):
             },
             context=context
         )
+
 
 class ObtainTopTypeCListView(WLAPIView, APIView):
     def get(self, request):

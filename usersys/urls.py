@@ -7,6 +7,10 @@ login_urls = [
     url(r'^submit_pn/$', login.ClientSubmitPnView.as_view()),
     url(r'^validate/$', login.PNvalidateView.as_view()),
     url(r'^logout/$', login.LogoutView.as_view()),
+    url(r'^login_b/$', login.RecyclingStaffLoginView.as_view()),
+    url(r'^send_sms/$', login.SendSMSView.as_view()),
+    url(r'^forget_pwd/$', login.ForgetPwdView.as_view()),
+
 ]
 
 validate_urls = [
@@ -15,6 +19,7 @@ validate_urls = [
 
 obtain_urls =[
     url(r'self_info/$', obtain.ObtainSelfInfoView.as_view()),
+    url(r'qr_info/$', obtain.QRInfoView.as_view()),
 ]
 
 urlpatterns = [

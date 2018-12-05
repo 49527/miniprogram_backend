@@ -6,3 +6,4 @@ from usersys.models import UserBase, UserSid, UserValidate, WechatUserContext, U
 
 # Register your models here.
 admin.site.register([UserBase, UserSid, UserValidate, WechatUserContext, UserDeliveryInfo])
+
