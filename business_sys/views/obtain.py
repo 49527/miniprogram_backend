@@ -15,4 +15,3 @@ class CategoryPriceListView(WLAPIView, APIView):
             },
             context=context
         )
-

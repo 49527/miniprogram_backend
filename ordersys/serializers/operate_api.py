@@ -1,9 +1,9 @@
 from rest_framework import serializers
 from usersys.models import UserDeliveryInfo
 from ordersys.models import OrderReasonBind
-from category_sys.models import ProductTopType, ProductSubType
+from category_sys.models import ProductTopType
 from category_sys.choices.model_choices import top_type_choice
-from business_sys.models import BusinessProductTypeBind
+
 
 class SubmitDeliveryInfoSerializer(serializers.ModelSerializer):
     user_sid = serializers.CharField(max_length=128)

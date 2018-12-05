@@ -93,7 +93,7 @@ def obtain_cancel_reason():
 
 # @user_from_sid(Error404)
 def obtain_order_list_by_o_state(page, count_per_page):
-    # type: (UserBase, int, int) -> (QuerySet, int)
+    # type: (int, int) -> (QuerySet, int)
     qs = OrderInfo.objects.filter(o_state=order_state_choice.CREATED)
     start, end, n_pages = get_page_info(
         qs, count_per_page, page,
@@ -105,9 +105,12 @@ def obtain_order_list_by_o_state(page, count_per_page):
 
 @user_from_sid(Error404)
 def obtain_order_details(user, oid):
+    # type: (UserBase, int) -> OrderProductType
     try:
         order = OrderInfo.objects.get(id=oid)
     except OrderInfo.DoesNotExist:
-        raise WLException(401, "订单不存在")
+        raise WLException(404, u"订单不存在")
+    if order.uid_b != user:
+        raise WLException(404, u"订单不存在")
     order_product = OrderProductType.objects.filter(oid=order)
     return order_product
