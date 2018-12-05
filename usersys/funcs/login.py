@@ -10,7 +10,7 @@ from usersys.models import UserBase, UserSid, WechatUserContext
 from usersys.choices.state_choice import state_choice
 from usersys.choices.model_choice import user_role_choice
 from django.conf import settings
-from base.util.phone_validator import phone_validator, AliyunPhoneValidator
+from base.util.phone_validator import phone_validator
 from base.util.misc_validators import validators
 from base.util.temp_session import create_session, update_session_dict, \
     destroy_session, get_session_dict, get_session, update_session
