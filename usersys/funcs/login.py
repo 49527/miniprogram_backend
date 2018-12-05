@@ -187,7 +187,7 @@ def logout(user_sid):
 def recycling_staff_login(pn, password, ipaddr, session_key=None):
     if session_key is None:
         session_key = uuid.uuid4()
-    user = authenticate(username=pn, password=password)
+    user = authenticate(username=pn, password=password, role=user_role_choice.RECYCLING_STAFF)
     if user is None:
         raise WLException(400, "帐号或密码错误")
     sid_obj = sid_reuse(user, ipaddr, session_key)
