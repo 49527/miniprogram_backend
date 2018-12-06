@@ -91,6 +91,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'miniprogram.wsgi.application'
 
 
+# DRF
+
+REST_FRAMEWORK = {
+    'DATETIME_FORMAT': '%s',
+}
+
+
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
