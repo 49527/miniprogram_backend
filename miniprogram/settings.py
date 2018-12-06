@@ -318,6 +318,8 @@ MINIPROGRAM = {
     "AppSecret": '77dacbf01a0bedbf663a932a2e0de4a7',
 }
 
+TIME_FOR_SET_ORDER = 600
+
 BOUND = 0.05 # about 5.6 kilometer
 
 MAP_KEY = "5MEBZ-IR536-DYYS6-EPZHQ-FUSWE-KRFRF"
