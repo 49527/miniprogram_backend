@@ -200,17 +200,17 @@ def recycling_staff_login(pn, password, ipaddr, session_key=None):
 
 
 def send_sms(pn):
-    t = caches["session"].get(pn)
+    t = caches["sessions"].get(pn)
     if t:
         raise WLException(400, u"请求太频繁")
     vcode = phone_validator().generate_and_send(pn)
-    caches["session"].set(pn, vcode, 60)
+    caches["sessions"].set(pn, vcode, 60)
 
 
 def forget_pwd(pn, new_pwd1, new_pwd2, vcode):
     if new_pwd1 != new_pwd2:
         raise WLException(400, u"新老密码不同!")
-    if vcode != caches["session"].get(pn):
+    if vcode != caches["sessions"].get(pn):
         raise WLException(401, u"验证码错误")
     try:
         user = UserBase.objects.get(internal_name=pn)
