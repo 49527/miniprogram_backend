@@ -1,7 +1,12 @@
 from django.conf.urls import url, include
 from category_sys.views import CategoryListView
+from category_sys.views.icon import ObtainCategoryIconView
 
+icon_urls = [
+    url(r'^obtain/$', ObtainCategoryIconView.as_view())
+]
 
 urlpatterns = [
     url(r'^obtain/category_list/', CategoryListView.as_view()),
-]
+    url(r'^icon/', include(icon_urls)),
+    ]

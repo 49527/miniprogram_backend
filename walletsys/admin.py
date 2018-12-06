@@ -5,4 +5,15 @@ from django.contrib import admin
 from walletsys.models import Balance, TransactionDetail
 
 # Register your models here.
-admin.site.register([Balance, TransactionDetail])
+
+
+class BalanceAdmin(admin.ModelAdmin):
+    list_display = ['id', 'uid', 'balance']
+
+
+class TransactionDetailAdmin(admin.ModelAdmin):
+    list_display = ['id', 'transaction_type', 'amount', 'oid', 'uid']
+
+
+admin.site.register(Balance, BalanceAdmin)
+admin.site.register(TransactionDetail, TransactionDetailAdmin)

@@ -31,4 +31,5 @@ urlpatterns = [
     url(r'^order/', include(ordersys.urls.urlpatterns)),
     url(r'^appearance/', include(appearancesys.urls.url_patterns)),
     url(r'^category/', include(category_sys.urls.urlpatterns)),
+
 ]

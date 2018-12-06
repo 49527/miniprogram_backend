@@ -40,7 +40,7 @@ def obtain_order_list(user, page, count_per_page):
 def obtain_overview(user):
     # type: (UserBase) -> (int, float)
     orders = get_user_order_queryset(user)
-    n_times = orders.count()
+    n_times = orders.filter(o_state=order_state_choice.COMPLETED).count()
     total_amount = orders.filter(o_state=order_state_choice.COMPLETED).aggregate(models.Sum('amount'))["amount__sum"]
     total_amount = 0 if total_amount is None else total_amount
     return n_times, total_amount

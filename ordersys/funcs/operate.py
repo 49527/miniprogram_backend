@@ -58,15 +58,15 @@ def compete_order(user, oid):
         raise WLException(407, "订单不存在")
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, "无权限操作")
-    if order.uid_b is not None:
-        raise WLException(400, "订单已被抢")
     o_state = order.o_state
     if o_state == order_state_choice.ACCEPTED:
-        raise WLException(402, "已接单")
+        raise WLException(402, "订单已接单")
     if o_state == order_state_choice.CANCELED:
-        raise WLException(403, "被取消")
+        raise WLException(403, "订单被取消")
     if o_state == order_state_choice.COMPLETED:
-        raise WLException(405, "已完成")
+        raise WLException(405, "订单已完成")
+    if order.uid_b is not None:
+        raise WLException(400, "订单已被抢")
     if order.o_state == order_state_choice.CREATED:
         order.uid_b = user
         order.o_state = order_state_choice.ACCEPTED

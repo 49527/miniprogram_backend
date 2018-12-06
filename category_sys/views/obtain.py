@@ -15,4 +15,3 @@ class CategoryListView(WLAPIView, APIView):
             },
             context=context
         )
-
