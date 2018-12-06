@@ -5,6 +5,18 @@ from ordersys.models import OrderInfo, OrderCancelReason, OrderProductType
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 from base.util.timestamp_filed import TimestampField
 from category_sys.serializers import ProductSubTypeSerializers
+from usersys.models import UserBase
+
+
+class RecyclingStaffDisplay(serializers.ModelSerializer):
+    rs_pn = serializers.ReadOnlyField(source="pn")
+    rs_name = serializers.ReadOnlyField(source="recycling_staff_info.rs_name")
+
+    class Meta:
+        model = UserBase
+        fields = (
+            "rs_name", "rs_pn"
+        )
 
 
 class OrderDisplaySerializer(serializers.ModelSerializer):
@@ -12,11 +24,12 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
     location = serializers.ReadOnlyField(source="c_delivery_info.address")
     create_time = TimestampField()
     time_remain = serializers.SerializerMethodField()
+    recycling_staff = RecyclingStaffDisplay(source="uid_b")
 
     class Meta:
         model = OrderInfo
         fields = (
-            "location",
+            "location", "recycling_staff",
             "id", "create_time", "o_state", "c_delivery_info",
             "time_remain",
             "amount",
