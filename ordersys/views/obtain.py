@@ -4,7 +4,8 @@ from ordersys.serializers.obtain_api import ObtainOrderListSerializer, ObtainOve
     ObtainDeliveryInfoSerializer, ObtainUncompletedorderSerilaizer, RecycleOrderListSerilaizer, RecycleOrderDetailsSerilaizer
 from ordersys.funcs.obtain import obtain_order_list, obtain_overview, obtain_delivery_info, obtain_uncompleted,\
     obtain_c_toptype_list, obtain_cancel_reason, obtain_order_list_by_o_state, obtain_order_details
-from ordersys.serializers.order import OrderDisplaySerializer, CancelReasonDisplaySerializer, OrderDetailsSerializer
+from ordersys.serializers.order import OrderDisplaySerializer, CancelReasonDisplaySerializer, OrderDetailsSerializer,\
+    TimeSerializer
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 
 
@@ -83,10 +84,12 @@ class ObtainTopTypeCListView(WLAPIView, APIView):
 
         toptypes, modified_time = obtain_c_toptype_list()
 
+        seri_time = TimeSerializer({"time": modified_time})
+
         return self.generate_response(
             data={
                 "c_types": toptypes,
-                "modified_time": modified_time
+                "modified_time": seri_time.data
             },
             context=context
         )
