@@ -7,6 +7,10 @@ from base.util.timestamp_filed import TimestampField
 from category_sys.serializers import ProductSubTypeSerializers
 
 
+class TimeSerializer(serializers.Serializer):
+    time = TimestampField()
+
+
 class OrderDisplaySerializer(serializers.ModelSerializer):
     c_delivery_info = UserDeliveryInfoDisplay()
     location = serializers.ReadOnlyField(source="c_delivery_info.address")
