@@ -81,11 +81,12 @@ class ObtainTopTypeCListView(WLAPIView, APIView):
     def get(self, request):
         data, context = self.get_request_obj(request)
 
-        toptypes = obtain_c_toptype_list()
+        toptypes, modified_time = obtain_c_toptype_list()
 
         return self.generate_response(
             data={
-                "c_types": toptypes
+                "c_types": toptypes,
+                "modified_time": modified_time
             },
             context=context
         )

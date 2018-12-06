@@ -83,8 +83,10 @@ def obtain_c_toptype_list():
                 models.Max("product_subtype__price"))["product_subtype__price__max"]
         }
         type_list.append(dic)
+    modified_time = qs.filter(product_subtype__p_type__in_use=True).aggregate(
+        models.Max("product_subtype__modified_time"))["product_subtype__modified_time__max"]
 
-    return type_list
+    return type_list, modified_time
 
 
 def obtain_cancel_reason():
