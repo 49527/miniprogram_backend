@@ -45,7 +45,7 @@ def update_price(user, type_price):
         raise WLException(401, _("您无权修改价格"))
     recycle_bin = rsi.recycle_bin
     for i in type_price:
-        bpt = BusinessProductTypeBind.objects.filter(id=i.get('bpt_id')).first()
+        bpt = BusinessProductTypeBind.objects.filter(p_type__id=i.get('pst_id')).first()
         if bpt is None:
             raise WLException(400, _("该记录不存在，操作失败"))
         if bpt.recycle_bin != recycle_bin:

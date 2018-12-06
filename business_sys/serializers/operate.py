@@ -4,7 +4,7 @@ from business_sys.models import BusinessProductTypeBind
 
 
 class TypePriceSerializer(serializers.Serializer):
-    bpt_id = serializers.CharField(max_length=128)
+    pst_id = serializers.CharField(max_length=128)
     price = serializers.FloatField(min_value=0)
 
 
@@ -14,7 +14,6 @@ class BusinessProductTypeUpdateSerializers(serializers.Serializer):
 
 
 class ProductSubTypeSerializers(serializers.ModelSerializer):
-    price = serializers.ReadOnlyField(source="business.price")
 
     class Meta:
         model = ProductSubType

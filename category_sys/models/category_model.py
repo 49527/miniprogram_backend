@@ -37,5 +37,11 @@ class ProductSubType(models.Model):
         related_name="b_subtype"
     )
 
+    @property
+    def price(self):
+        from business_sys.models import BusinessProductTypeBind
+        p_type = BusinessProductTypeBind.objects.filter(p_type=self).first()
+        return p_type.price if p_type is not None else 0
+
     def __unicode__(self):
         return self.t_sub_name

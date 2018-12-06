@@ -97,20 +97,23 @@ def cancel_order_b(user, oid, reason):
 
 @user_from_sid(Error404)
 def bookkeeping_order(user, oid, type_quantity):
+    price = 0.0
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, "无权限操作")
+    try:
+        order = OrderInfo.objects.get(id=oid)
+    except OrderInfo.DoesNotExist:
+        raise WLException(407, "订单不存在")
+    if order.o_state != order_state_choice.ACCEPTED:
+        raise WLException(405, "该订单未被接单，不能执行此操作")
     for i in type_quantity:
         p_id = i.get("p_type")
-        try:
-            order = OrderInfo.objects.get(id=oid)
-        except OrderInfo.DoesNotExist:
-            raise WLException(407, "订单不存在")
         p_type = ProductSubType.objects.filter(id=p_id).first()
         if p_type is None:
-            raise WLException(401, "品类不存在，清添加后操作")
+            raise WLException(402, "品类不存在，清添加后操作")
         bpt = BusinessProductTypeBind.objects.filter(p_type=p_type).first()
         if bpt is None:
-            raise WLException(401, "品类不存在，清添加后操作")
+            raise WLException(403, "回收站对应的商品不存在，清添加后操作")
         if OrderProductType.objects.filter(p_type=p_type, oid=order).first():
             continue
         OrderProductType.objects.create(
@@ -119,4 +122,9 @@ def bookkeeping_order(user, oid, type_quantity):
             quantity=i.get("quantity"),
             price=bpt.price
         )
+        price_ = bpt.price * i.get("quantity")
+        price += price_
+    order.amount = price
+    order.o_state = order_state_choice.COMPLETED
+    order.save()
     return True
