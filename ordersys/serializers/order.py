@@ -19,6 +19,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
             "location",
             "id", "create_time", "o_state", "c_delivery_info",
             "time_remain",
+            "amount",
         )
 
     def get_time_remain(self, obj):
