@@ -1,10 +1,10 @@
 from rest_framework.views import APIView
 from base.views import WLAPIView
-from category_sys.serializers import ProductTopTypeSerializers
-from business_sys.funcs import get_category_list
 from business_sys.serializers.obtain_api import ObtainNearbyRecycleBinSerializer, ObtainRecycleBinSerializer
 from business_sys.funcs.obtain import obtain_nearby_recycle_bin, obtain_recycle_bin_detail
 from business_sys.serializers.recycle_bin import NearbyDisplaySerializer, RecycleBinDisplaySerializer
+from category_sys.serializers import ProductTopTypeSerializers
+from business_sys.funcs import get_category_list
 
 
 class CategoryPriceListView(WLAPIView, APIView):

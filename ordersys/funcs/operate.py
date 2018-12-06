@@ -11,23 +11,23 @@ from category_sys.models import ProductSubType
 from business_sys.models import BusinessProductTypeBind
 from usersys.choices.model_choice import user_role_choice
 
+
 @user_from_sid(Error404)
 def submit_delivery_info(user, **data):
-    return UserDeliveryInfo.objects.create(uid=user,**data)
+    return UserDeliveryInfo.objects.create(uid=user, **data)
 
 
 @user_from_sid(Error404)
-def cancel_order(user, **data):
-    order = data["order"]
+def cancel_order(user, order, reason=None, desc=None, **kwargs):
 
     if not order.uid_c == user:
         raise WLException(403, _("这个订单不属于该用户"))
     if order.o_state == order_state_choice.CANCELED or order.o_state == order_state_choice.COMPLETED:
         raise WLException(403, _("此订单已完成或者已被取消，不能执行此操作"))
-    if data.get("reason", None) is None and data.get("desc", None) is None:
+    if reason is None and desc is None:
         raise WLException(402, _("reason或者desc中至少有一个字段不能为空"))
 
-    OrderReasonBind.objects.create(**data)
+    OrderReasonBind.objects.create(order=order, reason=reason, desc=desc, **kwargs)
     order.o_state = order_state_choice.CANCELED
     order.save()
 
