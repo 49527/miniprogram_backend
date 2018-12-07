@@ -6,11 +6,13 @@ from usersys.models import UserBase, UserDeliveryInfo
 from base.util.pages import get_page_info
 from django.db import models
 from ordersys.choices.model_choices import order_state_choice
-from ordersys.models import OrderCancelReason, OrderInfo, OrderProductType
+from ordersys.models import OrderCancelReason, OrderInfo, OrderProductType, OrderReasonBind
 from business_sys.models import RecycleBin
 from category_sys.models import ProductTopType
 from category_sys.choices.model_choices import top_type_choice
 from ordersys.funcs.utils import get_uncompleted_order
+from django.utils.timezone import now
+from django.conf import settings
 
 
 def get_user_order_queryset(user):
@@ -62,10 +64,18 @@ def obtain_uncompleted(user):
     # type: (UserBase) -> (UserDeliveryInfo, int)
     uncompleted = get_uncompleted_order(user)
     if uncompleted.count() == 0:
+        order = None
         exist = False
     else:
         exist = True
-    return uncompleted.order_by('id').last(), exist
+        order = uncompleted.order_by('id').last()
+        if (now() - order.create_time).total_seconds() > settings.TIME_FOR_SET_ORDER \
+                and order.o_state == order_state_choice.CREATED:
+            order.o_state = order_state_choice.CANCELED
+            order.save()
+            OrderReasonBind.objects.create(desc=u'订单超时', order=order)
+
+    return order, exist
 
 
 def obtain_c_toptype_list():
@@ -83,8 +93,10 @@ def obtain_c_toptype_list():
                 models.Max("product_subtype__price"))["product_subtype__price__max"]
         }
         type_list.append(dic)
+    modified_time = qs.filter(product_subtype__p_type__in_use=True).aggregate(
+        models.Max("product_subtype__modified_time"))["product_subtype__modified_time__max"]
 
-    return type_list
+    return type_list, modified_time
 
 
 def obtain_cancel_reason():

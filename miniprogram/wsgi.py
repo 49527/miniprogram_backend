@@ -7,10 +7,16 @@ For more information on this file, see
 https://docs.djangoproject.com/en/1.11/howto/deployment/wsgi/
 """
 
-import os
 
+import os
+import sys  # 4
+from os.path import dirname, abspath
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "miniprogram.settings")
+PROJECT_DIR = dirname(dirname(abspath(__file__)))  # 3
+
+sys.path.insert(0, PROJECT_DIR)  # 5
+
+os.environ["DJANGO_SETTINGS_MODULE"] = "miniprogram.settings"  # 7
 
 application = get_wsgi_application()
