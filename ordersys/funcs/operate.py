@@ -22,7 +22,7 @@ def cancel_order(user, order, reason=None, desc=None, **kwargs):
 
     if not order.uid_c == user:
         raise WLException(403, _("这个订单不属于该用户"))
-    if order.o_state == order_state_choice.CANCELED or order.o_state == order_state_choice.COMPLETED:
+    if order.o_state in (order_state_choice.CANCELED, order_state_choice.COMPLETED):
         raise WLException(403, _("此订单已完成或者已被取消，不能执行此操作"))
     if reason is None and desc is None:
         raise WLException(402, _("reason或者desc中至少有一个字段不能为空"))
