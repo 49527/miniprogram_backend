@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
-from usersys.models import UserDeliveryInfo
+from usersys.models import UserDeliveryInfo, UserBase
 from ordersys.models import OrderReasonBind, OrderProductTypeBind, OrderInfo, OrderCancel, OrderProductType
 from ordersys.choices.model_choices import order_state_choice
 from ordersys.funcs.utils import get_uncompleted_order
@@ -130,3 +130,59 @@ def bookkeeping_order(user, oid, type_quantity):
     order.o_state = order_state_choice.COMPLETED
     order.save()
     return True
+
+
+@user_from_sid(Error404)
+def bookkeeping(user, type_quantity):
+    price = 0.0
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, "无权限操作")
+    order = OrderInfo()
+    order.uid_b=user
+    order.o_state = order_state_choice.ACCEPTED
+    order.save()
+    for i in type_quantity:
+        p_id = i.get("p_type")
+        p_type = ProductSubType.objects.filter(id=p_id).first()
+        if p_type is None:
+            raise WLException(402, "品类不存在，清添加后操作")
+        bpt = BusinessProductTypeBind.objects.filter(p_type=p_type).first()
+        if bpt is None:
+            raise WLException(403, "回收站对应的商品不存在，清添加后操作")
+        if OrderProductType.objects.filter(p_type=p_type, oid=order).first():
+            continue
+        OrderProductType.objects.create(
+            p_type=p_type,
+            oid=order,
+            quantity=i.get("quantity"),
+            price=bpt.price
+        )
+        price_ = bpt.price * i.get("quantity")
+        price += price_
+    order.amount = price
+    order.save()
+    return order.id
+
+
+@user_from_sid(Error404)
+def bookkeeping_order_scan(user, oid, qr_info):
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, "无权限操作")
+    try:
+        order = OrderInfo.objects.get(id=oid)
+    except OrderInfo.DoesNotExist:
+        raise WLException(407, "订单不存在")
+    if order.o_state != order_state_choice.ACCEPTED:
+        raise WLException(405, "该订单未被接单，不能执行此操作")
+    user_id = caches["sessions"].get(qr_info)
+    if user_id is None or user_id == '':
+        raise WLException(402, "用户不存在，请重新获取二维码")
+    try:
+        user_c = UserBase.objects.get(id=user_id)
+        c_delivery_info = UserDeliveryInfo.objects.filter(uid=user_c).first()
+    except UserBase.DoesNotExist:
+        raise WLException(403, "用户不存在或收获地址为空")
+    order.uid_c = user_c
+    order.c_delivery_info = c_delivery_info
+    order.o_state = order_state_choice.COMPLETED
+    order.save()
