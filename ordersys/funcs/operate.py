@@ -28,7 +28,7 @@ def cancel_order(user, order, reason=None, desc=None, **kwargs):
         raise WLException(402, _("reason或者desc中至少有一个字段不能为空"))
 
     cancel_reason = OrderReasonBind.objects.create(order=order, reason=reason, **kwargs)
-    cancel_reason.desc = cancel_reason.reason.reason if desc is None else cancel_reason.reason.reason
+    cancel_reason.desc = cancel_reason.reason.reason if desc is None else desc
     cancel_reason.save()
     order.o_state = order_state_choice.CANCELED
     order.save()
