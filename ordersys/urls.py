@@ -1,5 +1,5 @@
 from django.conf.urls import url, include
-from ordersys.views import obtain, operate
+from ordersys.views import obtain, operate, detail
 
 
 obtain_urls = [
@@ -24,7 +24,23 @@ operate_urls = [
 ]
 
 
+detail_urls = [
+    url(r'^detail/$', detail.OrderDetailView.as_view()),
+    url(r'^summary/$', detail.CompletedOrderSummaryView.as_view()),
+]
+
+
+c_urls = [
+    url(r'^detail/', include(detail_urls)),
+]
+
+
+b_urls = [
+]
+
 urlpatterns = [
     url(r'^obtain/', include(obtain_urls)),
     url(r"^operate/", include(operate_urls)),
+    url(r'^c/', include(c_urls)),
+    url(r'^b/', include(b_urls)),
 ]
