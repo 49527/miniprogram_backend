@@ -54,6 +54,23 @@ def update_price(user, type_price):
         bpt.save()
 
 
-def get_category_list():
-    category = ProductTopType.objects.filter(operator=top_type_choice.BUSINESS)
-    return category
+def get_category_list(rb_id):
+    rb = RecycleBin.objects.get(id=rb_id)
+    top_b = ProductTopType.objects.filter(operator=top_type_choice.BUSINESS)
+    queryset = BusinessProductTypeBind.objects.filter(recycle_bin=rb, p_type__toptype_b__in=top_b)
+    return queryset, top_b
+
+
+def get_categorys(top_type_list, sub_type_list):
+    categorys = []
+    for i in top_type_list:
+        t_top_type = {}
+        product_sub_type = []
+        for j in sub_type_list:
+            if i.get('id') == j.get('p_top_id'):
+                product_sub_type.append(j)
+                t_top_type["t_top_name"] = i.get('t_top_name')
+            t_top_type["product_sub_type"] = product_sub_type
+            t_top_type["id"] = i.get('id')
+        categorys.append(t_top_type)
+    return categorys

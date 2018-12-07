@@ -1,10 +1,12 @@
 from rest_framework.views import APIView
 from base.views import WLAPIView
 from ordersys.serializers.obtain_api import ObtainOrderListSerializer, ObtainOverviewSerializer,\
-    ObtainDeliveryInfoSerializer, ObtainUncompletedorderSerilaizer, RecycleOrderListSerilaizer, RecycleOrderDetailsSerilaizer
+    ObtainDeliveryInfoSerializer, ObtainUncompletedorderSerilaizer, RecycleOrderListSerilaizer, \
+    RecycleOrderDetailsSerilaizer
 from ordersys.funcs.obtain import obtain_order_list, obtain_overview, obtain_delivery_info, obtain_uncompleted,\
     obtain_c_toptype_list, obtain_cancel_reason, obtain_order_list_by_o_state, obtain_order_details
-from ordersys.serializers.order import OrderDisplaySerializer, CancelReasonDisplaySerializer, OrderDetailsSerializer
+from ordersys.serializers.order import OrderDisplaySerializer, CancelReasonDisplaySerializer, OrderDetailsSerializer, \
+    OrderInfoSerializer
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 
 
@@ -128,11 +130,13 @@ class RecycleOrderDetailsView(WLAPIView, APIView):
         data, context = self.get_request_obj(request)
         seri = RecycleOrderDetailsSerilaizer(data=data)
         self.validate_serializer(seri)
-        orders = obtain_order_details(**seri.data)
-        seri_order = OrderDetailsSerializer(orders, many=True)
+        order_product, order = obtain_order_details(**seri.data)
+        seri_order = OrderDetailsSerializer(order_product, many=True)
+        order_ = OrderInfoSerializer(order)
         return self.generate_response(
             data={
-                "orders": seri_order.data,
+                "order_product": seri_order.data,
+                "order": order_.data
             },
             context=context
         )

@@ -3,18 +3,23 @@ from base.views import WLAPIView
 from business_sys.serializers.obtain_api import ObtainNearbyRecycleBinSerializer, ObtainRecycleBinSerializer
 from business_sys.funcs.obtain import obtain_nearby_recycle_bin, obtain_recycle_bin_detail
 from business_sys.serializers.recycle_bin import NearbyDisplaySerializer, RecycleBinDisplaySerializer
-from business_sys.funcs import get_category_list
-from business_sys.serializers import ProductTopTypeSerializers
+from business_sys.funcs import get_category_list, get_categorys
+from business_sys.serializers import BusinessSerializer, BusinessPriceSerializer, ProductTopTypeSerializer
 
 
 class CategoryPriceListView(WLAPIView, APIView):
     def get(self, request):
         data, context = self.get_request_obj(request)
-        categorys = get_category_list()
-        seri_order = ProductTopTypeSerializers(categorys, many=True)
+        seri = BusinessSerializer(data=data)
+        self.validate_serializer(seri)
+
+        categorys, top_type_qs = get_category_list(**seri.data)
+        seri_order = BusinessPriceSerializer(categorys, many=True)
+        top_types = ProductTopTypeSerializer(top_type_qs, many=True)
+        categorys = get_categorys(top_types.data, seri_order.data)
         return self.generate_response(
             data={
-                "categorys": seri_order.data,
+                "categorys": categorys,
             },
             context=context
         )

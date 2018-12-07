@@ -203,7 +203,7 @@ def send_sms(pn):
     t = caches["sessions"].get(pn)
     if t:
         raise WLException(400, u"请求太频繁")
-    vcode = phone_validator().generate_and_send(pn)
+    vcode = phone_validator.generate_and_send(pn)
     caches["sessions"].set(pn, vcode, 60)
 
 

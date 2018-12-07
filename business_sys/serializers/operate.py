@@ -13,18 +13,36 @@ class BusinessProductTypeUpdateSerializers(serializers.Serializer):
     type_price = TypePriceSerializer(many=True)
 
 
-class ProductSubTypeSerializers(serializers.ModelSerializer):
+class BusinessSerializer(serializers.Serializer):
+    rb_id = serializers.CharField(max_length=128)
+
+
+class BusinessPriceSerializer(serializers.ModelSerializer):
+
+    id = serializers.ReadOnlyField(source='p_type.id')
+    t_sub_name = serializers.ReadOnlyField(source='p_type.t_sub_name')
+    p_top_name = serializers.ReadOnlyField(source='p_type.toptype_b.t_top_name')
+    p_top_id = serializers.ReadOnlyField(source='p_type.toptype_b.id')
+    unit = serializers.ReadOnlyField(source="p_type.unit")
+
+    def to_representation(self, instance):
+        ret = super(BusinessPriceSerializer, self).to_representation(instance)
+        return ret
 
     class Meta:
-        model = ProductSubType
+        model = BusinessProductTypeBind
         fields = (
-            "id", "t_sub_name", "unit", "price"
+            'id',
+            't_sub_name',
+            'p_top_name',
+            "p_top_id",
+            'unit',
+            'price',
         )
 
 
-class ProductTopTypeSerializers(serializers.ModelSerializer):
-    product_sub_type = ProductSubTypeSerializers(many=True)
+class ProductTopTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductTopType
-        fields = ("id", "t_top_name", "product_sub_type")
+        fields = ("id", "t_top_name")

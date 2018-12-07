@@ -50,3 +50,11 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
             "p_type",
             "price"
         )
+
+
+class OrderInfoSerializer(serializers.ModelSerializer):
+    client = serializers.ReadOnlyField(source="uid_c.pn")
+
+    class Meta:
+        model = OrderInfo
+        fields = ("id", "amount", "client")
