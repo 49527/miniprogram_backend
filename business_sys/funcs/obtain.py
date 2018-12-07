@@ -56,8 +56,8 @@ def update_price(user, type_price):
 
 def get_category_list(rb_id):
     rb = RecycleBin.objects.get(id=rb_id)
-    top_b = ProductTopType.objects.filter(operator=top_type_choice.BUSINESS)
-    queryset = BusinessProductTypeBind.objects.filter(recycle_bin=rb, p_type__toptype_b__in=top_b)
+    top_b = ProductTopType.objects.filter(operator=top_type_choice.BUSINESS, in_use=True)
+    queryset = BusinessProductTypeBind.objects.filter(recycle_bin=rb, p_type__toptype_b__in=top_b, p_type__in_use=True)
     return queryset, top_b
 
 

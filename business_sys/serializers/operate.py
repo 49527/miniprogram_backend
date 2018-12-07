@@ -18,8 +18,7 @@ class BusinessSerializer(serializers.Serializer):
 
 
 class BusinessPriceSerializer(serializers.ModelSerializer):
-
-    id = serializers.ReadOnlyField(source='p_type.id')
+    t_sub_id = serializers.ReadOnlyField(source='p_type.id')
     t_sub_name = serializers.ReadOnlyField(source='p_type.t_sub_name')
     p_top_name = serializers.ReadOnlyField(source='p_type.toptype_b.t_top_name')
     p_top_id = serializers.ReadOnlyField(source='p_type.toptype_b.id')
@@ -32,12 +31,13 @@ class BusinessPriceSerializer(serializers.ModelSerializer):
     class Meta:
         model = BusinessProductTypeBind
         fields = (
-            'id',
+            't_sub_id',
             't_sub_name',
             'p_top_name',
             "p_top_id",
             'unit',
             'price',
+            'modified_time'
         )
 
 
