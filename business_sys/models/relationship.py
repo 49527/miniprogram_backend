@@ -15,7 +15,7 @@ class RecyclingStaffInfo(models.Model):
         verbose_name=_("用户id"),
     )
     rs_name = models.CharField(_("回收员姓名"), max_length=30)
-    number_plate = models.CharField(max_length=20)
+    number_plate = models.CharField(_("车牌号"), max_length=20)
     staff_status = models.IntegerField(
         choices=business_staff_status.choice,
         default=business_staff_status.DEFAULT
