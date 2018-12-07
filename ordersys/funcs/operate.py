@@ -1,6 +1,7 @@
 # coding=UTF-8
 from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
+from django.core.cache import caches
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
 from usersys.models import UserDeliveryInfo, UserBase
@@ -174,15 +175,14 @@ def bookkeeping_order_scan(user, oid, qr_info):
         raise WLException(407, "订单不存在")
     if order.o_state != order_state_choice.ACCEPTED:
         raise WLException(405, "该订单未被接单，不能执行此操作")
-    user_id = caches["sessions"].get(qr_info)
-    if user_id is None or user_id == '':
-        raise WLException(402, "用户不存在，请重新获取二维码")
     try:
+        user_id = caches["sessions"].get(qr_info)
         user_c = UserBase.objects.get(id=user_id)
-        c_delivery_info = UserDeliveryInfo.objects.filter(uid=user_c).first()
     except UserBase.DoesNotExist:
-        raise WLException(403, "用户不存在或收获地址为空")
+        raise WLException(402, "用户不存在，请重新获取二维码")
+    c_delivery_info = UserDeliveryInfo.objects.filter(uid=user_c).first()
     order.uid_c = user_c
-    order.c_delivery_info = c_delivery_info
+    if c_delivery_info is not None:
+        order.c_delivery_info = c_delivery_info
     order.o_state = order_state_choice.COMPLETED
     order.save()
