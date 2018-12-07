@@ -1,4 +1,6 @@
 # coding=utf-8
+import datetime
+from datetime import timedelta
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
 from usersys.choices.model_choice import user_role_choice
@@ -126,3 +128,55 @@ def obtain_order_details(user, oid):
         raise WLException(404, u"订单不存在")
     order_product = OrderProductType.objects.filter(oid=order)
     return order_product, order
+
+
+@user_from_sid(Error404)
+def obtain_order_list_b(user, start_date, end_date, page, count_per_page):
+    # type: (UserBase, int, int) -> (QuerySet, int)
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, u"无权操作")
+    qs = OrderInfo.objects.filter(create_time__gte=start_date, create_time__lte=end_date)
+    start, end, n_pages = get_page_info(
+        qs, count_per_page, page,
+        index_error_excepiton=WLException(400, "Page out of range")
+    )
+
+    return qs.order_by("-id")[start:end], n_pages
+
+
+def get_datetime():
+    now = datetime.datetime.now()
+    week_s = now - timedelta(days=now.weekday())
+    week_e = now + timedelta(days=6 - now.weekday())
+    month_s = datetime.datetime(now.year, now.month, 1)
+    if now.month == 12:
+        month_e = datetime.datetime(now.year, now.month, 31)
+    else:
+        month_e = datetime.datetime(now.year, now.month + 1, 1) - timedelta(days=1)
+    return now, week_s, week_e, month_s, month_e
+
+
+@user_from_sid(Error404)
+def obtain_order_count(user):
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, u"无权操作")
+    now, week_s, week_e, month_s, month_e = get_datetime()
+    qs = OrderProductType.objects.filter(oid__o_state=order_state_choice.COMPLETED, oid__uid_b=user)
+    month_quantity = qs.filter(oid__create_time__gte=month_s, oid__create_time__lte=month_e).\
+                    aggregate(models.Sum('quantity'))["quantity__sum"]
+    month_price = qs.filter(oid__create_time__gte=month_s, oid__create_time__lte=month_e).\
+                    aggregate(models.Sum('price'))["price__sum"]
+    week_quantity = qs.filter(oid__create_time__gte=week_s, oid__create_time__lte=week_e).\
+                    aggregate(models.Sum('quantity'))["quantity__sum"]
+    week_price = qs.filter(oid__create_time__gte=week_s, oid__create_time__lte=week_e).\
+                    aggregate(models.Sum('price'))["price__sum"]
+    day_quantity = qs.filter(oid__create_time__gte=now, oid__create_time__lte=now).\
+                    aggregate(models.Sum('quantity'))["quantity__sum"]
+    day_price = qs.filter(oid__create_time__gte=now, oid__create_time__lte=now).\
+                    aggregate(models.Sum('price'))["price__sum"]
+
+    data = {"month": {"quantity": month_quantity, "price": month_price},
+            "week": {"quantity": week_quantity, "price": week_price},
+            "day": {"quantity": day_quantity, "price": day_price}
+            }
+    return data

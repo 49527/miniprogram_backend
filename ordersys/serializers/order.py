@@ -4,8 +4,8 @@ from django.utils.timezone import now
 from ordersys.models import OrderInfo, OrderCancelReason, OrderProductType
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 from base.util.timestamp_filed import TimestampField
-from category_sys.serializers import ProductSubTypeSerializers
 from usersys.models import UserBase
+from category_sys.models import ProductSubType
 
 
 class RecyclingStaffDisplay(serializers.ModelSerializer):
@@ -53,6 +53,14 @@ class CancelReasonDisplaySerializer(serializers.ModelSerializer):
         fields = (
             "id", "reason",
         )
+
+
+class ProductSubTypeSerializers(serializers.ModelSerializer):
+    t_top_name = serializers.ReadOnlyField(source="toptype_b.t_top_name")
+
+    class Meta:
+        model = ProductSubType
+        fields = ("id", "t_sub_name", "t_top_name")
 
 
 class OrderDetailsSerializer(serializers.ModelSerializer):
