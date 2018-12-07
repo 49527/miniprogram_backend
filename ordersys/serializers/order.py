@@ -67,6 +67,11 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
 
     p_type = ProductSubTypeSerializers()
 
+    def to_representation(self, instance):
+        ret = super(OrderDetailsSerializer, self).to_representation(instance)
+        ret['amount'] = ret['quantity'] * ret['price']
+        return ret
+
     class Meta:
         model = OrderProductType
         fields = (
