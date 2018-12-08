@@ -37,13 +37,15 @@ def obtain_recycle_bin_detail(lng, lat, rb_id):
 
 
 @user_from_sid(Error404)
-def update_price(user, type_price):
+def update_price(user, type_price, validate_code):
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, _("您无权修改价格"))
     rsi = RecyclingStaffInfo.objects.filter(uid=user).first()
     if rsi is None:
         raise WLException(401, _("您无权修改价格"))
     recycle_bin = rsi.recycle_bin
+    if validate_code != recycle_bin.validate_code:
+        raise WLException(402, _("验证码不正确"))
     for i in type_price:
         bpt = BusinessProductTypeBind.objects.filter(p_type__id=i.get('pst_id')).first()
         if bpt is None:
