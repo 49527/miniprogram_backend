@@ -5,7 +5,6 @@ from business_sys.views import obtain, operate
 obtain_urls =[
     url(r'nearby/$', obtain.ObtainNearbyRecycleBinView.as_view()),
     url(r'rb_detail/$', obtain.ObtainRecycleBinDetailView.as_view()),
-    url(r'^product_price_list/$', obtain.CategoryPriceListView.as_view()),
 ]
 
 
