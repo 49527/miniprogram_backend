@@ -53,11 +53,12 @@ def obtain_overview(user):
 def obtain_delivery_info(user):
     # type: (UserBase) -> (UserDeliveryInfo, int)
     user_delivery = user.user_delivery_info.filter(in_use=True)
+    pn = user.pn
     if user_delivery.count() == 0:
         exist = False
     else:
         exist = True
-    return user_delivery.order_by('id').last(), exist
+    return user_delivery.order_by('id').last(), exist, pn
 
 
 @user_from_sid(Error404)
