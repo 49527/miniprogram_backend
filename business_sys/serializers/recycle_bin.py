@@ -18,6 +18,11 @@ class RecycleBinDisplaySerializer(serializers.ModelSerializer):
         type_list = []
         recycle_bin = instance
         for c_type in ProductTopType.objects.filter(operator=top_type_choice.CONSUMER, in_use=True):
+            try:
+                unit = c_type.c_subtype.filter(in_use=True).first().unit
+            except AttributeError:
+                unit = None
+
             dic = {
                 "type_id": c_type.id,
                 "c_type": c_type.t_top_name,
@@ -27,7 +32,7 @@ class RecycleBinDisplaySerializer(serializers.ModelSerializer):
                 "max_price": recycle_bin.product_subtype.filter(
                     p_type__toptype_c=c_type,
                     p_type__in_use=True).aggregate(Max("price"))["price__max"],
-                "unit": c_type.c_subtype.first().unit,
+                "unit": unit
             }
             type_list.append(dic)
         data["type_list"] = type_list
