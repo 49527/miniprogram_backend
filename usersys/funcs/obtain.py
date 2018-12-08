@@ -26,3 +26,10 @@ def obtain_qr_info(user):
     qr_info = qr_format(str(uuid.uuid1()))
     caches["sessions"].set(qr_info, user.id, 300)
     return qr_info
+
+
+@user_from_sid(Error404)
+def obtain_self_info_b(user):
+    # type: (UserBase) -> (int, int)
+    n_times, total_amount = obtain_overview(user=user)
+    return user.pn, total_amount
