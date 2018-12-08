@@ -10,6 +10,9 @@ https://docs.djangoproject.com/en/1.11/howto/deployment/wsgi/
 
 import os
 import sys  # 4
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 from os.path import dirname, abspath
 from django.core.wsgi import get_wsgi_application
 

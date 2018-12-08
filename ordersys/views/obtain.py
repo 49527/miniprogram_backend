@@ -2,13 +2,12 @@ from rest_framework.views import APIView
 from base.views import WLAPIView
 from ordersys.serializers.obtain_api import ObtainOrderListSerializer, ObtainOverviewSerializer,\
     ObtainDeliveryInfoSerializer, ObtainUncompletedorderSerilaizer, RecycleOrderListSerilaizer, \
-    RecycleOrderDetailsSerilaizer, ObtainOrderListDateSerializer, ObtainOrderListCountSerializer
+    RecycleOrderDetailsSerilaizer, ObtainOrderListDateSerializer, ObtainOrderListCountSerializer, ObtainOrderDetailSerializer
 from ordersys.funcs.obtain import obtain_order_list, obtain_overview, obtain_delivery_info, obtain_uncompleted,\
     obtain_c_toptype_list, obtain_cancel_reason, obtain_order_list_by_o_state, obtain_order_details, obtain_order_list_b,\
-    obtain_order_count
+    obtain_order_count, obtain_order_detail
 from ordersys.serializers.order import OrderDisplaySerializer, CancelReasonDisplaySerializer, OrderDetailsSerializer, \
     OrderInfoSerializer, TimeSerializer
-
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 
 
@@ -76,6 +75,24 @@ class ObtainUncompletedOrderView(WLAPIView, APIView):
             data={
                 "uncompleted": seri_info.data,
                 "exist": exist
+            },
+            context=context
+        )
+
+
+class ObtainOrderDetailView(WLAPIView, APIView):
+    def get(self, request):
+        data, context = self.get_request_obj(request)
+        seri = ObtainOrderDetailSerializer(data=data)
+        self.validate_serializer(seri)
+
+        order_info = obtain_order_detail(**seri.data)
+
+        seri_info = OrderDisplaySerializer(order_info)
+
+        return self.generate_response(
+            data={
+                "order_info": seri_info.data,
             },
             context=context
         )

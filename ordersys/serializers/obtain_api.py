@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from ordersys.models import OrderInfo
 
 
 class ObtainOrderListSerializer(serializers.Serializer):
@@ -16,6 +17,11 @@ class ObtainDeliveryInfoSerializer(serializers.Serializer):
 
 class ObtainUncompletedorderSerilaizer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
+
+
+class ObtainOrderDetailSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    oid = serializers.PrimaryKeyRelatedField(queryset=OrderInfo.objects.all())
 
 
 class RecycleOrderListSerilaizer(serializers.Serializer):
