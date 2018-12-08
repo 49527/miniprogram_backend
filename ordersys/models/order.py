@@ -42,12 +42,12 @@ class OrderProductTypeBind(models.Model):
     p_type = models.ForeignKey(
         ProductTopType,
         verbose_name=_("C端客户对应顶级品类"),
-        related_name="order"
+        related_name="order_bind_c"
     )
     oid = models.ForeignKey(
         OrderInfo,
         verbose_name=_("订单id"),
-        related_name="product_type"
+        related_name="order_detail_c"
     )
     quantity = models.FloatField()
 
@@ -59,12 +59,12 @@ class OrderProductType(models.Model):
     p_type = models.ForeignKey(
         ProductSubType,
         verbose_name=_("B端客户对应商品"),
-        related_name="product_type"
+        related_name="order_bind_b"
     )
     oid = models.ForeignKey(
         OrderInfo,
         verbose_name=_("订单id"),
-        related_name="order"
+        related_name="order_detail_b"
     )
     quantity = models.FloatField()
     price = models.FloatField()
