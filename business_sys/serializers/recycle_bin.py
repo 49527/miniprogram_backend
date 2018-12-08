@@ -6,18 +6,17 @@ from category_sys.choices.model_choices import top_type_choice
 
 
 class RecycleBinDisplaySerializer(serializers.ModelSerializer):
-    c_type = serializers.ReadOnlyField(source="product_subtype.")
 
     class Meta:
         model = RecycleBin
         fields = (
-            "id", "GPS_L", "GPS_A", "rb_name", "r_b_type", "loc_desc", "pn", "c_type"
+            "id", "GPS_L", "GPS_A", "rb_name", "r_b_type", "loc_desc", "pn"
         )
 
     def to_representation(self, instance):
         data = super(RecycleBinDisplaySerializer, self).to_representation(instance)
         type_list = []
-        recycle_bin = RecycleBin.objects.get(id=data["id"])
+        recycle_bin = instance
         for c_type in ProductTopType.objects.filter(operator=top_type_choice.CONSUMER, in_use=True):
             dic = {
                 "type_id": c_type.id,
@@ -27,7 +26,8 @@ class RecycleBinDisplaySerializer(serializers.ModelSerializer):
                     p_type__in_use=True).aggregate(Min("price"))["price__min"],
                 "max_price": recycle_bin.product_subtype.filter(
                     p_type__toptype_c=c_type,
-                    p_type__in_use=True).aggregate(Max("price"))["price__max"]
+                    p_type__in_use=True).aggregate(Max("price"))["price__max"],
+                "unit": c_type.c_subtype.first().unit,
             }
             type_list.append(dic)
         data["type_list"] = type_list
