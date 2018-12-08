@@ -1,1 +1,0 @@
-from obtain import CategoryListView
