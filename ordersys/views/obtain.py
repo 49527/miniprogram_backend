@@ -49,12 +49,13 @@ class ObtainDeliveryInfoView(WLAPIView, APIView):
         seri = ObtainDeliveryInfoSerializer(data=data)
         self.validate_serializer(seri)
 
-        delivery_info, address_exist = obtain_delivery_info(**seri.data)
+        delivery_info, address_exist, pn = obtain_delivery_info(**seri.data)
         seri_info = UserDeliveryInfoDisplay(delivery_info)
         return self.generate_response(
             data={
                 "delivery_info": seri_info.data,
-                "address_exist": address_exist
+                "address_exist": address_exist,
+                "pn": pn
             },
             context=context
         )
