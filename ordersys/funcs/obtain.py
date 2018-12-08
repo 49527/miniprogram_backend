@@ -95,6 +95,7 @@ def obtain_c_toptype_list():
         dic = {
             "type_id": c_type.id,
             "c_type": c_type.t_top_name,
+            "unit" : c_type.c_subtype.first().unit,
             "min_price": qs.filter(product_subtype__p_type__toptype_c=c_type,
                                    product_subtype__p_type__in_use=True).aggregate(
                 models.Min("product_subtype__price"))["product_subtype__price__min"],
