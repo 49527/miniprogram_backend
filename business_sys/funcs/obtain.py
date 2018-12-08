@@ -1,12 +1,11 @@
 # coding=utf-8
 from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
+from usersys.models.usermodel import UserBase
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
 from business_sys.models import BusinessProductTypeBind, RecyclingStaffInfo, RecycleBin
 from usersys.choices.model_choice import user_role_choice
-from category_sys.models import ProductTopType
-from category_sys.choices.model_choices import top_type_choice
 from business_sys.funcs.utils.positon import find_near_recycle_bin, get_one_to_many_distance, get_one_to_one_distance,\
     get_position_desc
 
@@ -37,23 +36,26 @@ def obtain_recycle_bin_detail(lng, lat, rb_id):
 
 
 @user_from_sid(Error404)
-def update_price(user, type_price):
+def update_price(user, type_price, validate_code):
+    # type: (UserBase, list, str) -> None
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, _("您无权修改价格"))
-    rsi = RecyclingStaffInfo.objects.filter(uid=user).first()
-    if rsi is None:
+
+    try:
+        recycle_bin = user.recycling_staff_info.recycle_bin
+    except RecyclingStaffInfo.DoesNotExist:
         raise WLException(401, _("您无权修改价格"))
-    recycle_bin = rsi.recycle_bin
-    for i in type_price:
-        bpt = BusinessProductTypeBind.objects.filter(id=i.get('bpt_id')).first()
-        if bpt is None:
+
+    if validate_code != recycle_bin.validate_code:
+        raise WLException(402, _("验证码不正确"))
+    for dict_price_product in type_price:
+        try:
+            bpt = BusinessProductTypeBind.objects.get(
+                p_type__id=dict_price_product['pst_id'],
+                recycle_bin=recycle_bin,
+            )
+        except BusinessProductTypeBind.DoesNotExist:
             raise WLException(400, _("该记录不存在，操作失败"))
-        if bpt.recycle_bin != recycle_bin:
-            raise WLException(401, _("您无权修改价格"))
-        bpt.price = i.get('price')
+
+        bpt.price = dict_price_product['price']
         bpt.save()
-
-
-def get_category_list():
-    category = ProductTopType.objects.filter(operator=top_type_choice.BUSINESS)
-    return category
