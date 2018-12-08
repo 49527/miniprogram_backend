@@ -7,4 +7,16 @@ from category_sys.models import ProductSubType, ProductTopType
 
 # Register your models here.
 
-admin.site.register([ProductSubType, ProductTopType])
+class SubTypeInline(admin.TabularInline):
+    model = ProductSubType
+
+
+class TopTypeAdmin(admin.ModelAdmin):
+    list_display = ('t_top_name', 'operator')
+    list_editable = ('in_use', )
+
+    inlines = (SubTypeInline, )
+
+
+admin.site.register(ProductTopType, TopTypeAdmin)
+admin.site.register([ProductSubType])
