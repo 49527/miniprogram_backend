@@ -83,8 +83,11 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
 
 
 class OrderInfoSerializer(serializers.ModelSerializer):
-    client = serializers.ReadOnlyField(source="uid_c.pn")
+    pn = serializers.ReadOnlyField(source="uid_c.pn")
+    address = serializers.ReadOnlyField(source="c_delivery_info.address")
+    contact = serializers.ReadOnlyField(source="c_delivery_info.contact")
+    contact_pn = serializers.ReadOnlyField(source="c_delivery_info.contact_pn")
 
     class Meta:
         model = OrderInfo
-        fields = ("id", "amount", "client")
+        fields = ("id", "amount", "pn", "address", "contact", "contact_pn")
