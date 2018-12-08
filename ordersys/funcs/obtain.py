@@ -13,6 +13,7 @@ from category_sys.choices.model_choices import top_type_choice
 from ordersys.funcs.utils import get_uncompleted_order
 from django.utils.timezone import now
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 
 
 def get_user_order_queryset(user):
@@ -76,6 +77,15 @@ def obtain_uncompleted(user):
             OrderReasonBind.objects.create(desc=u'订单超时', order=order)
 
     return order, exist
+
+
+@user_from_sid(Error404)
+def obtain_order_detail(user, oid):
+    # type: (UserBase, int) -> (OrderInfo)
+    order = OrderInfo.objects.get(id=oid)
+    if not order.uid_c == user:
+        raise WLException(403, _("没有权限查看该订单"))
+    return order
 
 
 def obtain_c_toptype_list():
