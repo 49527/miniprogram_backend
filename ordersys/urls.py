@@ -7,6 +7,7 @@ obtain_urls = [
     url(r'^overview/$', obtain.ObtainOverviewView.as_view()),
     url(r'^delivery_info/$', obtain.ObtainDeliveryInfoView.as_view()),
     url(r'^uncompleted/$', obtain.ObtainUncompletedOrderView.as_view()),
+    url(r'^order_details_c/$', obtain.ObtainOrderDetailView.as_view()),
     url(r'^c_type/$', obtain.ObtainTopTypeCListView.as_view()),
     url(r'^cancel_reason/$', obtain.ObtainCancelReasonView.as_view()),
     url(r'^order_list_b/$', obtain.RecycleOrderListView.as_view()),
