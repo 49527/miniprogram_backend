@@ -14,7 +14,7 @@ class SubTypeInline(admin.TabularInline):
 class TopTypeAdmin(admin.ModelAdmin):
     list_display = ('t_top_name', 'operator')
     list_editable = ('in_use', )
-
+    list_filter = ('operator', )
     inlines = (SubTypeInline, )
 
 
