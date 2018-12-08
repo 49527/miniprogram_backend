@@ -174,21 +174,18 @@ def obtain_order_count(user):
         raise WLException(401, u"无权操作")
     now, week_s, week_e, month_s, month_e = get_datetime()
     qs = OrderProductType.objects.filter(oid__o_state=order_state_choice.COMPLETED, oid__uid_b=user)
-    month_quantity = qs.filter(oid__create_time__gte=month_s, oid__create_time__lte=month_e).\
-                    aggregate(models.Sum('quantity'))["quantity__sum"]
-    month_price = qs.filter(oid__create_time__gte=month_s, oid__create_time__lte=month_e).\
-                    aggregate(models.Sum('price'))["price__sum"]
-    week_quantity = qs.filter(oid__create_time__gte=week_s, oid__create_time__lte=week_e).\
-                    aggregate(models.Sum('quantity'))["quantity__sum"]
-    week_price = qs.filter(oid__create_time__gte=week_s, oid__create_time__lte=week_e).\
-                    aggregate(models.Sum('price'))["price__sum"]
-    day_quantity = qs.filter(oid__create_time__gte=now, oid__create_time__lte=now).\
-                    aggregate(models.Sum('quantity'))["quantity__sum"]
-    day_price = qs.filter(oid__create_time__gte=now, oid__create_time__lte=now).\
-                    aggregate(models.Sum('price'))["price__sum"]
 
-    data = {"month": {"quantity": month_quantity, "price": month_price},
-            "week": {"quantity": week_quantity, "price": week_price},
-            "day": {"quantity": day_quantity, "price": day_price}
+    month_ = qs.filter(oid__create_time__gte=month_s, oid__create_time__lte=month_e). \
+        aggregate(models.Sum('quantity'), models.Sum('price'))
+
+    week_ = qs.filter(oid__create_time__gte=week_s, oid__create_time__lte=week_e). \
+        aggregate(models.Sum('quantity'), models.Sum('price'))
+
+    day_ = qs.filter(oid__create_time__gte=now, oid__create_time__lte=now). \
+        aggregate(models.Sum('quantity'), models.Sum('price'))
+
+    data = {"month": {"quantity": month_["quantity__sum"], "price": month_["price__sum"]},
+            "week": {"quantity": week_["quantity__sum"], "price": week_["price__sum"]},
+            "day": {"quantity": day_["quantity__sum"], "price": day_["price__sum"]}
             }
     return data
