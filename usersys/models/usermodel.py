@@ -60,10 +60,10 @@ class UserBase(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = _('usersbase')
 
     def get_short_name(self):
-        return self.internal_name
+        return u"{} - {}".format(self.internal_name, self.pn)
 
     def get_full_name(self):
-        return self.internal_name
+        return u"{} - {}".format(self.internal_name, self.pn)
 
 
 class WechatUserContext(models.Model):
