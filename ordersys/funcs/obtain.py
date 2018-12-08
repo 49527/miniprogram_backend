@@ -16,6 +16,7 @@ from ordersys.funcs.utils import get_uncompleted_order
 from django.utils.timezone import now
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from usersys.funcs.utils.position import get_lat_lng_desc
 
 
 def get_user_order_queryset(user):
@@ -137,7 +138,8 @@ def obtain_order_details(user, oid):
     if order.uid_b != user:
         raise WLException(404, u"订单不存在")
     order_product = OrderProductType.objects.filter(oid=order)
-    return order_product, order
+    position = get_lat_lng_desc(order.c_delivery_info.address)
+    return order_product, order, position
 
 
 @user_from_sid(Error404)

@@ -152,13 +152,14 @@ class RecycleOrderDetailsView(WLAPIView, APIView):
         data, context = self.get_request_obj(request)
         seri = RecycleOrderDetailsSerilaizer(data=data)
         self.validate_serializer(seri)
-        order_product, order = obtain_order_details(**seri.data)
+        order_product, order, position = obtain_order_details(**seri.data)
         seri_order = OrderDetailsSerializer(order_product, many=True)
         order_ = OrderInfoSerializer(order)
         return self.generate_response(
             data={
                 "order_product": seri_order.data,
-                "order": order_.data
+                "order": order_.data,
+                "position": position
             },
             context=context
         )

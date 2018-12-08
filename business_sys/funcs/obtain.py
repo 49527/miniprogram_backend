@@ -54,8 +54,12 @@ def update_price(user, type_price):
         bpt.save()
 
 
-def get_category_list(rb_id):
-    rb = RecycleBin.objects.get(id=rb_id)
+@user_from_sid(Error404)
+def get_category_list(user):
+    rsi = RecyclingStaffInfo.objects.filter(uid=user).first()
+    if rsi is None:
+        raise WLException(401, _("您无权修改价格"))
+    rb = rsi.recycle_bin
     top_b = ProductTopType.objects.filter(operator=top_type_choice.BUSINESS, in_use=True)
     queryset = BusinessProductTypeBind.objects.filter(recycle_bin=rb, p_type__toptype_b__in=top_b, p_type__in_use=True)
     return queryset, top_b
@@ -73,4 +77,6 @@ def get_categorys(top_type_list, sub_type_list):
             t_top_type["product_sub_type"] = product_sub_type
             t_top_type["id"] = i.get('id')
         categorys.append(t_top_type)
-    return categorys
+    # sorted(sub_type_list, 'modified_time')
+    modified_time = max([i['modified_time'] for i in sub_type_list])
+    return categorys, modified_time

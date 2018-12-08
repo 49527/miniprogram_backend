@@ -16,10 +16,11 @@ class CategoryPriceListView(WLAPIView, APIView):
         categorys, top_type_qs = get_category_list(**seri.data)
         seri_order = BusinessPriceSerializer(categorys, many=True)
         top_types = ProductTopTypeSerializer(top_type_qs, many=True)
-        categorys = get_categorys(top_types.data, seri_order.data)
+        categorys, modified_time = get_categorys(top_types.data, seri_order.data)
         return self.generate_response(
             data={
                 "categorys": categorys,
+                "modified_time": modified_time
             },
             context=context
         )
