@@ -124,8 +124,8 @@ def obtain_order_list_by_o_state(page, count_per_page):
         qs, count_per_page, page,
         index_error_excepiton=WLException(400, "Page out of range")
     )
-
-    return qs.order_by("-id")[start:end], n_pages
+    count = qs.count()
+    return qs.order_by("-id")[start:end], n_pages, count
 
 
 @user_from_sid(Error404)
