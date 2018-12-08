@@ -30,6 +30,6 @@ def get_orders_summary_c(user):
         oid__o_state=order_state_choice.COMPLETED,
         oid__uid_c=user,
     ).values("p_type__toptype_c", "p_type__toptype_c__t_top_name", "p_type__unit").annotate(
-        price=models.Sum(models.F("price") * models.F("quantity")),
+        price=models.Sum(models.F("price")),
         quantity=models.Sum("quantity")
     )

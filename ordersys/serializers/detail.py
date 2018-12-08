@@ -7,7 +7,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     t_name = serializers.ReadOnlyField(source='p_type.toptype_c.t_top_name')
     unit = serializers.ReadOnlyField(source='p_type.unit')
     tid = serializers.ReadOnlyField(source='p_type.toptype_c.id')
-    total_price = serializers.SerializerMethodField()
+    total_price = serializers.ReadOnlyField(source='price')
 
     class Meta:
         model = OrderProductType
@@ -18,9 +18,6 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             'unit',
             'tid',
         )
-
-    def get_total_price(self, obj):
-        return obj.quantity * obj.price
 
 
 class CompletedOrderSummerySerializer(serializers.Serializer):
