@@ -17,7 +17,7 @@ def get_order_detail(user, oid):
     if oid.o_state != order_state_choice.COMPLETED:
         raise WLException(401, u"订单未完成")
 
-    return oid.order_detail_b.all()
+    return oid.order_detail_b.select_related("p_type__toptype_c").all()
 
 
 @user_from_sid(Error404)
@@ -26,10 +26,10 @@ def get_orders_summary_c(user):
     if user.role != user_role_choice.CLIENT:
         raise WLException(401, u"无权调用该接口")
 
-    return OrderProductType.objects.select_related("oid").filter(
+    return OrderProductType.objects.select_related("oid", "p_type__toptype_c").filter(
         oid__o_state=order_state_choice.COMPLETED,
         oid__uid_c=user,
-    ).values("p_type__toptype_c", "p_type__toptype_c__t_top_name").annotate(
+    ).values("p_type__toptype_c", "p_type__toptype_c__t_top_name", "p_type__unit").annotate(
         price=models.Sum(models.F("price") * models.F("quantity")),
         quantity=models.Sum("quantity")
     )
