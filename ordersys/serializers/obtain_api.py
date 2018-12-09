@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from base.util.timestamp_filed import TimestampField
 from ordersys.models import OrderInfo
 
 
@@ -32,3 +33,14 @@ class RecycleOrderListSerilaizer(serializers.Serializer):
 class RecycleOrderDetailsSerilaizer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
     oid = serializers.CharField(max_length=128)
+
+
+class ObtainOrderListDateSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    page = serializers.IntegerField(default=0)
+    start_date = TimestampField()
+    end_date = TimestampField()
+
+
+class ObtainOrderListCountSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
