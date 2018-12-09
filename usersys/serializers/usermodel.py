@@ -20,3 +20,12 @@ class UserDeliveryInfoDisplay(serializers.ModelSerializer):
         fields = (
             "id", "address", "contact", "house_number", "contact_pn"
         )
+
+
+class UserDeliveryDetailDisplay(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserDeliveryInfo
+        fields = (
+            "id", "address", "contact", "house_number", "contact_pn", "lat", "lng", "is_analysis"
+        )

@@ -140,5 +140,4 @@ def obtain_order_details(user, oid):
         raise WLException(404, u"订单不存在")
     if order.uid_b != user:
         raise WLException(404, u"订单不存在")
-    order_product = OrderProductType.objects.filter(oid=order)
-    return order_product
+    return order
