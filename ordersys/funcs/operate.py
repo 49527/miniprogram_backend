@@ -1,14 +1,15 @@
 # coding=UTF-8
 from __future__ import unicode_literals
+from django.core.cache import caches
 from django.utils.translation import ugettext_lazy as _
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
-from usersys.models import UserDeliveryInfo
+from usersys.models import UserDeliveryInfo, UserBase
 from ordersys.models import OrderReasonBind, OrderProductTypeBind, OrderInfo, OrderCancel, OrderProductType
 from ordersys.choices.model_choices import order_state_choice
 from ordersys.funcs.utils import get_uncompleted_order
 from category_sys.models import ProductSubType
-from business_sys.models import BusinessProductTypeBind
+from business_sys.models import BusinessProductTypeBind, RecyclingStaffInfo
 from usersys.choices.model_choice import user_role_choice
 
 
@@ -101,8 +102,8 @@ def cancel_order_b(user, oid, reason):
 def bookkeeping_order(user, oid, type_quantity):
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, "无权限操作")
-    for i in type_quantity:
-        p_id = i.get("p_type")
+    for sub_type_orice in type_quantity:
+        p_id = sub_type_orice.get("p_type")
         try:
             order = OrderInfo.objects.get(id=oid)
         except OrderInfo.DoesNotExist:
@@ -118,7 +119,88 @@ def bookkeeping_order(user, oid, type_quantity):
         OrderProductType.objects.create(
             p_type=p_type,
             oid=order,
-            quantity=i.get("quantity"),
-            price=bpt.price
+            quantity=sub_type_orice.get("quantity"),
+            price=bpt.price * sub_type_orice.get("quantity")
         )
+    return True
+
+
+@user_from_sid(Error404)
+def bookkeeping_order_pn(user, pn, type_quantity):
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, "无权限操作")
+    try:
+        recycle_bin = RecyclingStaffInfo.objects.get(uid=user).recycle_bin
+    except RecyclingStaffInfo.DoesNotExist:
+        raise WLException(402, "还没有绑定回收站")
+    order = OrderInfo.objects.create(
+        uid_b=user,
+        o_state=order_state_choice.COMPLETED
+    )
+    amount = 0.0
+    for sub_type_orice in type_quantity:
+        p_id = sub_type_orice.get("p_type")
+        try:
+            p_type = ProductSubType.objects.get(id=p_id)
+        except ProductSubType.DoesNotExist:
+            raise WLException(401, "品类不存在，清添加后操作")
+        try:
+            bpt = BusinessProductTypeBind.objects.get(p_type=p_type, recycle_bin=recycle_bin)
+        except BusinessProductTypeBind.DoesNotExist:
+            raise (401, "品类不存在，清添加后操作")
+        price = bpt.price * sub_type_orice.get("quantity")
+        OrderProductType.objects.create(
+            p_type=p_type,
+            oid=order,
+            quantity=sub_type_orice.get("quantity"),
+            price=price
+        )
+        amount += price
+    order.amount = amount
+    order.pn = pn
+    order.save()
+    return True
+
+
+@user_from_sid(Error404)
+def bookkeeping_order_scan(user, qr_info, type_quantity):
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, "无权限操作")
+    try:
+        user_c_id = caches["sessions"].get(qr_info)
+        user_c = UserBase.objects.get(id=user_c_id)
+    except UserBase.DoesNotExist:
+        raise WLException(405, "获取客户信息失败")
+
+    try:
+        recycle_bin = RecyclingStaffInfo.objects.get(uid=user).recycle_bin
+    except RecyclingStaffInfo.DoesNotExist:
+        raise WLException(402, "还没有绑定回收站")
+    order = OrderInfo.objects.create(
+        uid_b=user,
+        uid_c=user_c,
+        o_state=order_state_choice.COMPLETED
+    )
+    amount = 0.0
+    for sub_type_orice in type_quantity:
+        p_id = sub_type_orice.get("p_type")
+        try:
+            p_type = ProductSubType.objects.get(id=p_id)
+        except ProductSubType.DoesNotExist:
+            raise (401, "品类不存在，清添加后操作")
+        try:
+            bpt = BusinessProductTypeBind.objects.get(p_type=p_type, recycle_bin=recycle_bin)
+        except BusinessProductTypeBind.DoesNotExist:
+            raise (401, "品类不存在，清添加后操作")
+
+        price = bpt.price * sub_type_orice.get("quantity")
+        OrderProductType.objects.create(
+            p_type=p_type,
+            oid=order,
+            quantity=sub_type_orice.get("quantity"),
+            price=price
+        )
+        amount += price
+    order.amount = amount
+    order.save()
     return True

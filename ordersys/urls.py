@@ -22,6 +22,8 @@ operate_urls = [
     url(r'^order_compete_b/$', operate.RecycleOrderCompeteView.as_view()),
     url(r'^order_cancel_b/$', operate.RecycleOrderCancelView.as_view()),
     url(r'^order_bookkeeping_b/$', operate.BookkeepingOrderView.as_view()),
+    url(r'^order_bookkeeping_pn/$', operate.BookkeepingPnOrderView.as_view()),
+    url(r'^order_bookkeeping_scan/$', operate.BookkeepingScanOrderView.as_view()),
 ]
 
 

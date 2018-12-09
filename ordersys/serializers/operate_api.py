@@ -61,3 +61,15 @@ class BookkeepingOrderSerializer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
     oid = serializers.CharField(max_length=128)
     type_quantity = TypeQuantity4BSerializer(many=True)
+
+
+class BookkeepingPnOrderSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    pn = serializers.CharField(max_length=128)
+    type_quantity = TypeQuantity4BSerializer(many=True)
+
+
+class BookkeepingScanOrderSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    qr_info = serializers.CharField(max_length=128)
+    type_quantity = TypeQuantity4BSerializer(many=True)

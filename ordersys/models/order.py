@@ -33,6 +33,9 @@ class OrderInfo(models.Model):
         null=True,
         blank=True
     )
+    pn = models.CharField(_('电话号码'), max_length=25, null=True, validators=[
+        validators.get_validator("phone number")
+    ])
 
     def __unicode__(self):
         return u"{}:{} vs {}".format(self.id, self.uid_c, self.uid_b)
