@@ -5,6 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from ordersys.choices.model_choices import order_state_choice
 from usersys.models import UserBase
 from category_sys.models import ProductTopType, ProductSubType
+from base.util.misc_validators import validators
 from usersys.models import UserDeliveryInfo
 
 
