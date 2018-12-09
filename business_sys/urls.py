@@ -1,5 +1,5 @@
 from django.conf.urls import url, include
-from business_sys.views import obtain, operate
+from business_sys.views import obtain, operate, user_center
 
 
 obtain_urls =[
@@ -13,7 +13,13 @@ operate_urls = [
 ]
 
 
+b_urls = [
+    url(r'^user_center/$', user_center.ObtainRecyclingStaffInfoView.as_view())
+]
+
+
 urlpatterns = [
     url(r'^obtain/', include(obtain_urls)),
     url(r"^operate/", include(operate_urls)),
+    url(r'^b/', include(b_urls)),
 ]

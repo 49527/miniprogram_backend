@@ -14,3 +14,7 @@ class ObtainRecycleBinSerializer(serializers.Serializer):
     rb_id = serializers.PrimaryKeyRelatedField(
         queryset=RecycleBin.objects.filter(r_b_type=recycle_bin_type.FIXED)
     )
+
+
+class ObtainRecyclingStaffInfoApiSerializer(serializers.Serializer):
+    user_sid = serializers.CharField()
