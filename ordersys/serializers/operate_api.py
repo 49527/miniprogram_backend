@@ -53,7 +53,7 @@ class CancelOrder4BSerializer(serializers.Serializer):
 
 
 class TypeQuantity4BSerializer(serializers.Serializer):
-    p_type = serializers.CharField(max_length=128)
+    p_type = serializers.IntegerField()
     quantity = serializers.FloatField(min_value=0)
 
 
