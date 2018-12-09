@@ -2,21 +2,23 @@
 import requests
 import logging
 import time
+import uuid
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
+from django.core.cache import caches
 from base.exceptions import *
-from usersys.funcs.utils.sid_management import sid_create, sid_destroy, sid_reuse, sid_access
-from usersys.models import UserBase, UserSid, WechatUserContext
-from usersys.choices.state_choice import state_choice
-from usersys.choices.model_choice import user_role_choice
-from django.conf import settings
 from base.util.phone_validator import phone_validator
 from base.util.misc_validators import validators
 from base.util.temp_session import create_session, update_session_dict, \
     destroy_session, get_session_dict, get_session, update_session
+from usersys.funcs.utils.sid_management import sid_create, sid_destroy, sid_reuse, sid_access
+from usersys.models import UserBase, UserSid, WechatUserContext
+from usersys.choices.state_choice import state_choice
+from usersys.choices.model_choice import user_role_choice
+from business_sys.models import RecyclingStaffInfo
 from .session import RegistrationSessionKeys, ValidateStatus
-import uuid
-from django.core.cache import caches
+
+
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
@@ -187,16 +189,22 @@ def logout(user_sid):
 def recycling_staff_login(pn, password, ipaddr, session_key=None):
     if session_key is None:
         session_key = uuid.uuid4()
-    user = authenticate(username=pn, password=password, role=user_role_choice.RECYCLING_STAFF)
+    user = authenticate(username=pn, password=password, role=user_role_choice.RECYCLING_STAFF) # type: UserBase
     if user is None:
-        raise WLException(400, "帐号或密码错误")
+        raise WLException(400, u"帐号或密码错误")
     sid_obj = sid_reuse(user, ipaddr, session_key)
     if sid_obj is not None:
         sid_access(sid_obj)
         sid = sid_obj.sid
     else:
         sid = login(user, ipaddr, session_key)
-    return sid
+
+    try:
+        recycle_type = user.recycling_staff_info.recycle_bin
+    except RecyclingStaffInfo.DoesNotExist:
+        raise WLException(401, u"用户未绑定回收站")
+
+    return sid, recycle_type
 
 
 def send_sms(pn):
