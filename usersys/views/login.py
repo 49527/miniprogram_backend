@@ -79,11 +79,12 @@ class RecyclingStaffLoginView(WLAPIView, APIView):
         data, context = self.get_request_obj(request)
         seri = RecyclingStaffLoginSerializer(data=data)
         self.validate_serializer(seri)
-        user_sid = recycling_staff_login(seri.data['pn'], seri.data['pwd'], ipaddr=get_client_ip(request))
+        user_sid, recycle_bin_type = recycling_staff_login(ipaddr=get_client_ip(request), **seri.data)
         return self.generate_response(
             data={
                 'pn': seri.data.get('pn'),
                 'user_sid': user_sid,
+                'recycle_bin_type': recycle_bin_type,
             },
             context=context
         )

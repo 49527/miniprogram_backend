@@ -1,3 +1,4 @@
+# coding=utf-8
 import uuid
 from django.core.cache import caches
 from usersys.funcs.utils.usersid import user_from_sid
@@ -34,10 +35,3 @@ def checkout_qr_info(user, qr_info):
         caches["sessions"].set(qr_info, user.id, 300)
         return True
     return False
-
-
-@user_from_sid(Error404)
-def obtain_self_info_b(user):
-    # type: (UserBase) -> (int, int)
-    n_times, total_amount = obtain_overview(user=user)
-    return user.pn, total_amount

@@ -6,4 +6,14 @@ from django.contrib import admin
 
 # Register your models here.
 
-admin.site.register([RecycleBin, RecyclingStaffInfo, BusinessProductTypeBind])
+
+class BusinessProductTypeBindInline(admin.TabularInline):
+    model = BusinessProductTypeBind
+
+
+class RecycleBinAdmin(admin.ModelAdmin):
+    inlines = [BusinessProductTypeBindInline]
+
+
+admin.site.register(RecycleBin, RecycleBinAdmin)
+admin.site.register([RecyclingStaffInfo, BusinessProductTypeBind])
