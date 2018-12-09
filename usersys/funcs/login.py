@@ -186,10 +186,10 @@ def logout(user_sid):
         raise WLException(404, "user_id do not exist")
 
 
-def recycling_staff_login(pn, password, ipaddr, session_key=None):
+def recycling_staff_login(pn, pwd, ipaddr, session_key=None):
     if session_key is None:
         session_key = uuid.uuid4()
-    user = authenticate(username=pn, password=password, role=user_role_choice.RECYCLING_STAFF) # type: UserBase
+    user = authenticate(username=pn, password=pwd, role=user_role_choice.RECYCLING_STAFF) # type: UserBase
     if user is None:
         raise WLException(400, u"帐号或密码错误")
     sid_obj = sid_reuse(user, ipaddr, session_key)
