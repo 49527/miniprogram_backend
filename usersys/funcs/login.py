@@ -200,7 +200,7 @@ def recycling_staff_login(pn, pwd, ipaddr, session_key=None):
         sid = login(user, ipaddr, session_key)
 
     try:
-        recycle_type = user.recycling_staff_info.recycle_bin
+        recycle_type = user.recycling_staff_info.recycle_bin.r_b_type
     except RecyclingStaffInfo.DoesNotExist:
         raise WLException(401, u"用户未绑定回收站")
 
