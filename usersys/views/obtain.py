@@ -1,8 +1,9 @@
 from rest_framework.views import APIView
 from base.views import WLAPIView
-from usersys.serializers.obtain_api import ObtainSelfInfoSerializer, ObtainRecyclingStaffInfoSerializer
+from usersys.serializers.obtain_api import ObtainSelfInfoSerializer, ObtainRecyclingStaffInfoSerializer, \
+    ObtainCheckQrInfoSerializer
 from usersys.serializers.usermodel import UserInfoDisplay
-from usersys.funcs.obtain import obtain_self_info, obtain_qr_info, obtain_self_info_b
+from usersys.funcs.obtain import obtain_self_info, obtain_qr_info, obtain_self_info_b, checkout_qr_info
 
 
 class ObtainSelfInfoView(WLAPIView, APIView):
@@ -34,6 +35,21 @@ class QRInfoView(WLAPIView, APIView):
         return self.generate_response(
             data={
                 "qr_info": qr_info
+            },
+            context=context
+        )
+
+
+class CheckQRInfoView(WLAPIView, APIView):
+    def get(self, request):
+        data, context = self.get_request_obj(request)
+        seri = ObtainCheckQrInfoSerializer(data=data)
+        self.validate_serializer(seri)
+
+        state = checkout_qr_info(**seri.data)
+        return self.generate_response(
+            data={
+                "state": state
             },
             context=context
         )

@@ -29,6 +29,14 @@ def obtain_qr_info(user):
 
 
 @user_from_sid(Error404)
+def checkout_qr_info(user, qr_info):
+    if caches["sessions"].get(qr_info):
+        caches["sessions"].set(qr_info, user.id, 300)
+        return True
+    return False
+
+
+@user_from_sid(Error404)
 def obtain_self_info_b(user):
     # type: (UserBase) -> (int, int)
     n_times, total_amount = obtain_overview(user=user)
