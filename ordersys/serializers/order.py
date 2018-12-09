@@ -30,6 +30,11 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
     time_remain = serializers.SerializerMethodField()
     recycling_staff = RecyclingStaffDisplay(source="uid_b")
 
+    def to_representation(self, instance):
+        ret = super(OrderDisplaySerializer, self).to_representation(instance)
+        ret["is_cancel"] = self.is_cancel(instance)
+        return ret
+
     class Meta:
         model = OrderInfo
         fields = (
@@ -44,6 +49,12 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
         time_elapsed = now() - obj.create_time
         time_remain = max(0, int(settings.TIME_FOR_SET_ORDER - time_elapsed.total_seconds()))
         return time_remain
+
+    def is_cancel(self, obj):
+        # type: (OrderInfo) -> True
+        if obj.amount < 20.0:
+            return True
+        return False
 
 
 class CancelReasonDisplaySerializer(serializers.ModelSerializer):
