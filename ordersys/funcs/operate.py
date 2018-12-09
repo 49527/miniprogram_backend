@@ -9,7 +9,7 @@ from ordersys.models import OrderReasonBind, OrderProductTypeBind, OrderInfo, Or
 from ordersys.choices.model_choices import order_state_choice
 from ordersys.funcs.utils import get_uncompleted_order
 from category_sys.models import ProductSubType
-from business_sys.models import BusinessProductTypeBind, RecyclingStaffInfo
+from business_sys.models import BusinessProductTypeBind, RecyclingStaffInfo, RecycleBin
 from usersys.choices.model_choice import user_role_choice
 
 
@@ -125,41 +125,59 @@ def bookkeeping_order(user, oid, type_quantity):
     return True
 
 
+def check_type_quantity(type_quantity, recycle_bin):
+    # type: (dict, RecycleBin) -> (list, float)
+    amount = 0.0
+    list_product_types = []
+    category_ids = [sub_type["p_type"] for sub_type in type_quantity]
+    p_type_queryset_dict = dict(
+        map(lambda x: (x.id, x), list(ProductSubType.objects.filter(id__in=category_ids)))
+    )
+    if len(p_type_queryset_dict) != len(type_quantity):
+        raise WLException(401, u"品类不存在，清添加后操作")
+
+    bpt_queryset = BusinessProductTypeBind.objects.filter(p_type__in=category_ids, recycle_bin=recycle_bin)
+    bpt_queryset_dict = dict(
+        map(lambda x: (x.id, x), list(bpt_queryset))
+    )
+    if len(bpt_queryset_dict) != len(type_quantity):
+        raise WLException(401, u"品类不存在，清添加后操作")
+
+    for sub_type_price in type_quantity:
+        p_id = sub_type_price["p_type"]
+        price = bpt_queryset_dict[p_id].price * sub_type_price.get("quantity")
+        list_product_types.append({
+            "p_type": p_type_queryset_dict[p_id],
+            "quantity": sub_type_price.get("quantity"),
+            "price": price
+        })
+        amount += price
+    return list_product_types, amount
+
+
 @user_from_sid(Error404)
 def bookkeeping_order_pn(user, pn, type_quantity):
+    # type: (UserBase, str, dict) -> None
+
     if user.role != user_role_choice.RECYCLING_STAFF:
-        raise WLException(401, "无权限操作")
+        raise WLException(401, u"无权限操作")
+
     try:
         recycle_bin = RecyclingStaffInfo.objects.get(uid=user).recycle_bin
     except RecyclingStaffInfo.DoesNotExist:
-        raise WLException(402, "还没有绑定回收站")
+        raise WLException(402, u"还没有绑定回收站")
+
+    list_product_types, amount = check_type_quantity(type_quantity, recycle_bin)
+
     order = OrderInfo.objects.create(
         uid_b=user,
-        o_state=order_state_choice.COMPLETED
+        o_state=order_state_choice.COMPLETED,
+        pn=pn,
+        amount=amount
     )
-    amount = 0.0
-    for sub_type_orice in type_quantity:
-        p_id = sub_type_orice.get("p_type")
-        try:
-            p_type = ProductSubType.objects.get(id=p_id)
-        except ProductSubType.DoesNotExist:
-            raise WLException(401, "品类不存在，清添加后操作")
-        try:
-            bpt = BusinessProductTypeBind.objects.get(p_type=p_type, recycle_bin=recycle_bin)
-        except BusinessProductTypeBind.DoesNotExist:
-            raise (401, "品类不存在，清添加后操作")
-        price = bpt.price * sub_type_orice.get("quantity")
-        OrderProductType.objects.create(
-            p_type=p_type,
-            oid=order,
-            quantity=sub_type_orice.get("quantity"),
-            price=price
-        )
-        amount += price
-    order.amount = amount
-    order.pn = pn
-    order.save()
-    return True
+
+    for product_type in list_product_types:
+        OrderProductType.objects.create(oid=order, **product_type)
 
 
 @user_from_sid(Error404)
