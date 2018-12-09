@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from category_sys.models import ProductSubType
-from category_sys.serializers import ProductTopTypeSerializers
+from category_sys.serializers.category import ProductTopTypeSerializer
 from business_sys.models import BusinessProductTypeBind
 
 
@@ -22,7 +22,7 @@ class BusinessProductSubTypeSerializer(serializers.ModelSerializer):
         fields = ("id", "t_sub_name", 'unit', 'business_bind')
 
 
-class BusinessProductTopTypeSerializer(ProductTopTypeSerializers):
+class BusinessProductTopTypeSerializer(ProductTopTypeSerializer):
     product_sub_type = BusinessProductSubTypeSerializer(many=True, source='pst_prefetch')
 
     def to_representation(self, instance):

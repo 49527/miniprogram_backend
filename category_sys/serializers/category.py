@@ -8,8 +8,9 @@ class ProductSubTypeSerializer(serializers.ModelSerializer):
         model = ProductSubType
         fields = ('id', 'unit', 't_sub_name')
 
-class ProductTopTypeSerializers(serializers.ModelSerializer):
-    product_sub_type = ProductSubTypeSerializers(many=True)
+
+class ProductTopTypeSerializer(serializers.ModelSerializer):
+    product_sub_type = ProductSubTypeSerializer(many=True)
 
     class Meta:
         model = ProductTopType
