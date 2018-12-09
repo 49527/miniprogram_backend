@@ -18,6 +18,11 @@ class RecycleBinDisplaySerializer(serializers.ModelSerializer):
         data = super(RecycleBinDisplaySerializer, self).to_representation(instance)
         type_list = []
         for c_type in ProductTopType.objects.filter(operator=top_type_choice.CONSUMER, in_use=True):
+            try:
+                unit = c_type.c_subtype.filter(in_use=True).first().unit
+            except AttributeError:
+                unit = None
+
             dic = {
                 "type_id": c_type.id,
                 "c_type": c_type.t_top_name,
@@ -26,7 +31,8 @@ class RecycleBinDisplaySerializer(serializers.ModelSerializer):
                     p_type__in_use=True).aggregate(Min("price"))["price__min"],
                 "max_price": instance.product_subtype.filter(
                     p_type__toptype_c=c_type,
-                    p_type__in_use=True).aggregate(Max("price"))["price__max"]
+                    p_type__in_use=True).aggregate(Max("price"))["price__max"],
+                "unit": unit
             }
             type_list.append(dic)
         data["type_list"] = type_list
@@ -66,9 +72,3 @@ class RecycleBinBusinessPriceDisplaySerializer(serializers.ModelSerializer):
 class NearbyDisplaySerializer(serializers.Serializer):
     recycle_bin = RecycleBinDisplaySerializer()
     distance = serializers.FloatField()
-
-
-def test():
-    rb1 = RecycleBin.objects.first()
-    dt = RecycleBinBusinessPriceDisplaySerializer(rb1).data
-    print dt

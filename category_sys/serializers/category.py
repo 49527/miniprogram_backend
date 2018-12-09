@@ -2,12 +2,11 @@ from rest_framework import serializers
 from category_sys.models import ProductTopType, ProductSubType
 
 
-class ProductSubTypeSerializers(serializers.ModelSerializer):
+class ProductSubTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductSubType
-        fields = ("id", "t_sub_name")
-
+        fields = ('id', 'unit', 't_sub_name')
 
 class ProductTopTypeSerializers(serializers.ModelSerializer):
     product_sub_type = ProductSubTypeSerializers(many=True)

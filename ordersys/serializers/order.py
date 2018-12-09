@@ -4,7 +4,7 @@ from django.utils.timezone import now
 from ordersys.models import OrderInfo, OrderCancelReason, OrderProductType
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 from base.util.timestamp_filed import TimestampField
-from category_sys.serializers import ProductSubTypeSerializers
+from category_sys.serializers.category import ProductSubTypeSerializer
 from usersys.models import UserBase
 
 
@@ -57,7 +57,7 @@ class CancelReasonDisplaySerializer(serializers.ModelSerializer):
 
 class OrderDetailsSerializer(serializers.ModelSerializer):
 
-    p_type = ProductSubTypeSerializers()
+    p_type = ProductSubTypeSerializer()
 
     class Meta:
         model = OrderProductType

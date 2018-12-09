@@ -1,8 +1,9 @@
+# coding=utf-8
 import uuid
 from django.core.cache import caches
 from usersys.funcs.utils.usersid import user_from_sid
-from base.exceptions import Error404
-from usersys.choices.model_choice import user_validate_status
+from base.exceptions import Error404, WLException
+from usersys.choices.model_choice import user_validate_status, user_role_choice
 from usersys.models import UserBase, UserValidate
 from ordersys.funcs.obtain import obtain_overview
 from .utils.qr import qr_format
