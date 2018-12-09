@@ -190,7 +190,7 @@ LOGGING = {
     'loggers': {
         'django.db.backends': {
             'handlers': ['debug_stream'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
         '': {
             'level': 'WARNING',
