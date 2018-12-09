@@ -183,7 +183,7 @@ def bookkeeping_order_pn(user, pn, type_quantity):
 @user_from_sid(Error404)
 def bookkeeping_order_scan(user, qr_info, type_quantity):
     if user.role != user_role_choice.RECYCLING_STAFF:
-        raise WLException(401, "无权限操作")
+        raise WLException(401, u"无权限操作")
 
     user_c_id = caches["sessions"].get(qr_info)
     if user_c_id is None:
@@ -192,12 +192,12 @@ def bookkeeping_order_scan(user, qr_info, type_quantity):
     try:
         user_c = UserBase.objects.get(id=user_c_id)
     except UserBase.DoesNotExist:
-        raise WLException(405, "获取客户信息失败")
+        raise WLException(405, u"获取客户信息失败")
 
     try:
         recycle_bin = RecyclingStaffInfo.objects.get(uid=user).recycle_bin
     except RecyclingStaffInfo.DoesNotExist:
-        raise WLException(402, "还没有绑定回收站")
+        raise WLException(402, u"还没有绑定回收站")
 
     list_product_types, amount = check_type_quantity(type_quantity, recycle_bin)
 
