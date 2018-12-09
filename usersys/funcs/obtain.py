@@ -2,8 +2,8 @@
 import uuid
 from django.core.cache import caches
 from usersys.funcs.utils.usersid import user_from_sid
-from base.exceptions import Error404, WLException
-from usersys.choices.model_choice import user_validate_status, user_role_choice
+from base.exceptions import Error404
+from usersys.choices.model_choice import user_validate_status
 from usersys.models import UserBase, UserValidate
 from ordersys.funcs.obtain import obtain_overview
 from .utils.qr import qr_format
@@ -27,3 +27,11 @@ def obtain_qr_info(user):
     qr_info = qr_format(str(uuid.uuid1()))
     caches["sessions"].set(qr_info, user.id, 300)
     return qr_info
+
+
+@user_from_sid(Error404)
+def checkout_qr_info(user, qr_info):
+    if caches["sessions"].get(qr_info):
+        caches["sessions"].set(qr_info, user.id, 300)
+        return True
+    return False
