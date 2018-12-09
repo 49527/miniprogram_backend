@@ -165,7 +165,7 @@ class RecycleOrderDetailsView(WLAPIView, APIView):
 
 
 class ObtainOrderListDateView(WLAPIView, APIView):
-    def get(self, request):
+    def post(self, request):
         data, context = self.get_request_obj(request)
         seri = ObtainOrderListDateSerializer(data=data)
         self.validate_serializer(seri)

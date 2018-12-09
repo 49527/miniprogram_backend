@@ -10,4 +10,4 @@ class TimestampField(serializers.Field):
 
     def to_internal_value(self, data):
         # type: (int) -> datetime
-        return datetime.datetime.utcfromtimestamp(data).replace(tzinfo=timezone('UTC'))
+        return datetime.datetime.utcfromtimestamp(float(data)).replace(tzinfo=timezone('UTC'))
