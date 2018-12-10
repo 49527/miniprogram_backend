@@ -79,3 +79,16 @@ def get_recycle_bin_for_price(user):
         raise WLException(401, u"用户无绑定回收站")
 
     return rb
+
+
+@user_from_sid(Error404)
+def check_validate_code(user, validate_code):
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, _("您无权修改价格"))
+
+    try:
+        recycle_bin = user.recycling_staff_info.recycle_bin
+    except RecyclingStaffInfo.DoesNotExist:
+        raise WLException(401, _("您无权修改价格"))
+
+    return validate_code == recycle_bin.validate_code
