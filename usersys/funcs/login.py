@@ -3,6 +3,7 @@ import requests
 import logging
 import time
 import uuid
+from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 from django.core.cache import caches
@@ -23,7 +24,7 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
-def wechat_login(code, ipaddr):
+def wechat_login(code, ipaddr, pn):
     # get openid and session_key
     url = 'https://api.weixin.qq.com/sns/jscode2session?appid={AppID}&secret={AppSecret}&js_code={code}' \
           '&grant_type=authorization_code'.format(code=code, **settings.MINIPROGRAM)
@@ -59,15 +60,23 @@ def wechat_login(code, ipaddr):
             openid=openid,
         )
 
-    state = state_choice.PN_NOT_BIND if user.pn is None else state_choice.PN_BIND
+    if user.pn is None:
+        state = state_choice.PN_NOT_BIND
+        sid = get_sid_by_pn(pn)
+    else:
+        state = state_choice.PN_BIND
+        sid = None
+        if user.pn != pn:
+            raise WLException(409, _("请输入注册时用的手机号"))
+
     sid_obj = sid_reuse(user, ipaddr, session_key)
     if sid_obj is not None:
         sid_access(sid_obj)
-        sid = sid_obj.sid
+        user_sid = sid_obj.sid
     else:
-        sid = login(user, ipaddr, session_key)
+        user_sid = login(user, ipaddr, session_key)
 
-    return sid, state
+    return user_sid, state, sid
 
 
 def login(user, ipaddr, session_key):
