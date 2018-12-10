@@ -16,7 +16,6 @@ class PNvalidateSerializer(serializers.Serializer):
     pn = serializers.CharField(max_length=20)
     sid = serializers.CharField(max_length=60)
     vcode = serializers.CharField(max_length=6)
-    user_sid = serializers.CharField(max_length=128)
 
 
 class LogoutSerializer(serializers.Serializer):
