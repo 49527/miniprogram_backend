@@ -6,4 +6,4 @@ class ProductSubTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductSubType
-        fields = ('unit', 't_sub_name')
+        fields = ('id', 'unit', 't_sub_name')
