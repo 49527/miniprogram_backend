@@ -107,6 +107,9 @@ class UserDeliveryInfo(models.Model):
         validators.get_validator("phone number")
     ])
     in_use = models.BooleanField(default=True)
+    lat = models.FloatField(null=True, blank=True)
+    lng = models.FloatField(null=True, blank=True)
+    can_resolve_gps = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u"{} {} {} {}".format(self.address, self.house_number, self.contact, self.contact_pn)

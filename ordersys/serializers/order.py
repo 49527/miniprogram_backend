@@ -29,6 +29,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
     create_time = TimestampField()
     time_remain = serializers.SerializerMethodField()
     recycling_staff = RecyclingStaffDisplay(source="uid_b")
+    can_cancel = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderInfo
@@ -37,6 +38,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
             "id", "create_time", "o_state", "c_delivery_info",
             "time_remain",
             "amount",
+            'can_cancel',
         )
 
     def get_time_remain(self, obj):
@@ -44,6 +46,10 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
         time_elapsed = now() - obj.create_time
         time_remain = max(0, int(settings.TIME_FOR_SET_ORDER - time_elapsed.total_seconds()))
         return time_remain
+
+    def get_can_cancel(self, obj):
+        # type: (OrderInfo) -> bool
+        return obj.amount < 20.0
 
 
 class CancelReasonDisplaySerializer(serializers.ModelSerializer):
@@ -55,15 +61,24 @@ class CancelReasonDisplaySerializer(serializers.ModelSerializer):
         )
 
 
-class OrderDetailsSerializer(serializers.ModelSerializer):
+class OrderDetailsSubTypeSerializer(serializers.ModelSerializer):
 
-    p_type = ProductSubTypeSerializer()
+    sub_type = ProductSubTypeSerializer(source="p_type")
 
     class Meta:
         model = OrderProductType
         fields = (
-            "id",
             "quantity",
-            "p_type",
-            "price"
+            "sub_type",
+            "price",
         )
+
+
+class OrderDetailsSerializer(serializers.ModelSerializer):
+
+    delivery_info = UserDeliveryInfoDisplay(source="c_delivery_info")
+    sub_type = OrderDetailsSubTypeSerializer(many=True, source="order_detail_b")
+
+    class Meta:
+        model = OrderInfo
+        fields = ("amount", "delivery_info", "sub_type")
