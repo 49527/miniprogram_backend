@@ -17,5 +17,12 @@ class _BusinessStaffBindStatusChoice(FieldChoice):
     )
 
 
+class _TruckStateChoice(FieldChoice):
+    CHOICE_DISPLAY = (
+        (0, _("默认状态"), "DEFAULT"),
+    )
+
+
 recycle_bin_type = _RecycleBinTypeChoice()
 business_staff_status = _BusinessStaffBindStatusChoice()
+truck_state_choice = _TruckStateChoice()

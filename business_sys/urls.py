@@ -1,5 +1,5 @@
 from django.conf.urls import url, include
-from business_sys.views import obtain, operate, user_center
+from business_sys.views import obtain, operate, user_center, truck
 
 
 obtain_urls =[
@@ -16,6 +16,8 @@ operate_urls = [
 b_urls = [
     url(r'^user_center/$', user_center.ObtainRecyclingStaffInfoView.as_view()),
     url(r'^rb_product_detail/$', obtain.ObtainRecycleBinPriceListView.as_view()),
+    url(r'^create_truck/$', truck.CreateTruckOrderInfoView.as_view()),
+    url(r'^get_truck/$', truck.ObtainTruckOrderInfoView.as_view()),
 ]
 
 
