@@ -98,33 +98,6 @@ def cancel_order_b(user, oid, reason):
     )
 
 
-@user_from_sid(Error404)
-def bookkeeping_order(user, oid, type_quantity):
-    if user.role != user_role_choice.RECYCLING_STAFF:
-        raise WLException(401, "无权限操作")
-    for sub_type_orice in type_quantity:
-        p_id = sub_type_orice.get("p_type")
-        try:
-            order = OrderInfo.objects.get(id=oid)
-        except OrderInfo.DoesNotExist:
-            raise WLException(407, "订单不存在")
-        p_type = ProductSubType.objects.filter(id=p_id).first()
-        if p_type is None:
-            raise WLException(401, "品类不存在，清添加后操作")
-        bpt = BusinessProductTypeBind.objects.filter(p_type=p_type).first()
-        if bpt is None:
-            raise WLException(401, "品类不存在，清添加后操作")
-        if OrderProductType.objects.filter(p_type=p_type, oid=order).first():
-            continue
-        OrderProductType.objects.create(
-            p_type=p_type,
-            oid=order,
-            quantity=sub_type_orice.get("quantity"),
-            price=bpt.price * sub_type_orice.get("quantity")
-        )
-    return True
-
-
 def check_type_quantity(type_quantity, recycle_bin):
     # type: (dict, RecycleBin) -> (list, float)
     amount = 0.0
@@ -153,6 +126,30 @@ def check_type_quantity(type_quantity, recycle_bin):
         })
         amount += price
     return list_product_types, amount
+
+
+@user_from_sid(Error404)
+def bookkeeping_order(user, oid, type_quantity):
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, u"无权限操作")
+
+    try:
+        recycle_bin = RecyclingStaffInfo.objects.get(uid=user).recycle_bin
+    except RecyclingStaffInfo.DoesNotExist:
+        raise WLException(402, u"还没有绑定回收站")
+
+    list_product_types, amount = check_type_quantity(type_quantity, recycle_bin)
+
+    try:
+        order = OrderInfo.objects.get(id=oid)
+    except OrderInfo.DoesNotExist:
+        raise WLException(407, u"订单不存在")
+
+    order.amount = amount
+    order.save()
+
+    for product_type in list_product_types:
+        OrderProductType.objects.create(oid=order, **product_type)
 
 
 @user_from_sid(Error404)
@@ -210,4 +207,3 @@ def bookkeeping_order_scan(user, qr_info, type_quantity):
 
     for product_type in list_product_types:
         OrderProductType.objects.create(oid=order, **product_type)
-
