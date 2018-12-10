@@ -6,8 +6,12 @@ from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
 from business_sys.models import BusinessProductTypeBind, RecyclingStaffInfo, RecycleBin
 from usersys.choices.model_choice import user_role_choice
-from business_sys.funcs.utils.positon import find_near_recycle_bin, get_one_to_many_distance, get_one_to_one_distance,\
+from business_sys.funcs.utils.positon import (
+    find_near_recycle_bin,
+    get_one_to_many_distance,
+    get_one_to_one_distance,
     get_position_desc
+)
 
 
 def obtain_nearby_recycle_bin(lng, lat):
@@ -59,3 +63,32 @@ def update_price(user, type_price, validate_code):
 
         bpt.price = dict_price_product['price']
         bpt.save()
+
+
+def get_recycle_bin(user):
+    try:
+        return user.recycling_staff_info.recycle_bin
+    except RecyclingStaffInfo.DoesNotExist:
+        return None
+
+
+@user_from_sid(Error404)
+def get_recycle_bin_for_price(user):
+    rb = get_recycle_bin(user)
+    if rb is None:
+        raise WLException(401, _("用户无绑定回收站"))
+
+    return rb
+
+
+@user_from_sid(Error404)
+def check_validate_code(user, validate_code):
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, _("您无权修改价格"))
+
+    try:
+        recycle_bin = user.recycling_staff_info.recycle_bin
+    except RecyclingStaffInfo.DoesNotExist:
+        raise WLException(401, _("您无权修改价格"))
+
+    return validate_code == recycle_bin.validate_code

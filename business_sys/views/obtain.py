@@ -1,8 +1,12 @@
 from rest_framework.views import APIView
 from base.views import WLAPIView
-from business_sys.serializers.obtain_api import ObtainNearbyRecycleBinSerializer, ObtainRecycleBinSerializer
-from business_sys.funcs.obtain import obtain_nearby_recycle_bin, obtain_recycle_bin_detail
-from business_sys.serializers.recycle_bin import NearbyDisplaySerializer, RecycleBinDisplaySerializer
+from business_sys.serializers.obtain_api import (
+    ObtainNearbyRecycleBinSerializer, ObtainRecycleBinSerializer, ObtainRecyclingStaffInfoApiSerializer
+)
+from business_sys.funcs.obtain import obtain_nearby_recycle_bin, obtain_recycle_bin_detail, get_recycle_bin_for_price
+from business_sys.serializers.recycle_bin import (
+    NearbyDisplaySerializer, RecycleBinDisplaySerializer, RecycleBinBusinessPriceDisplaySerializer
+)
 
 
 class ObtainNearbyRecycleBinView(WLAPIView, APIView):
@@ -39,5 +43,21 @@ class ObtainRecycleBinDetailView(WLAPIView, APIView):
                 "distance": distance,
                 "position_desc": position_desc
             },
+            context=context
+        )
+
+
+class ObtainRecycleBinPriceListView(WLAPIView, APIView):
+    def get(self, request):
+        data, context = self.get_request_obj(request)
+        seri = ObtainRecyclingStaffInfoApiSerializer(data=data)
+        self.validate_serializer(seri)
+
+        rb = get_recycle_bin_for_price(**seri.data)
+
+        seri_rb = RecycleBinBusinessPriceDisplaySerializer(rb)
+
+        return self.generate_response(
+            data=seri_rb.data,
             context=context
         )

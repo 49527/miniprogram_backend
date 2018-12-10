@@ -12,6 +12,8 @@ obtain_urls = [
     url(r'^cancel_reason/$', obtain.ObtainCancelReasonView.as_view()),
     url(r'^order_list_b/$', obtain.RecycleOrderListView.as_view()),
     url(r'^order_details_b/$', obtain.RecycleOrderDetailsView.as_view()),
+    url(r'^order_list_by_date/$', obtain.ObtainOrderListDateView.as_view()),
+    url(r'^order_list_count/$', obtain.ObtainOrderListCountView.as_view()),
 
 ]
 
@@ -22,6 +24,8 @@ operate_urls = [
     url(r'^order_compete_b/$', operate.RecycleOrderCompeteView.as_view()),
     url(r'^order_cancel_b/$', operate.RecycleOrderCancelView.as_view()),
     url(r'^order_bookkeeping_b/$', operate.BookkeepingOrderView.as_view()),
+    url(r'^order_bookkeeping_pn/$', operate.BookkeepingPnOrderView.as_view()),
+    url(r'^order_bookkeeping_scan/$', operate.BookkeepingScanOrderView.as_view()),
 ]
 
 

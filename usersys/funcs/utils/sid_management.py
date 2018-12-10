@@ -53,7 +53,7 @@ def sid_reuse(user, ipaddr, session_key):
     try:
         sid_reusable = UserSid.objects.filter(
             uid=user,
-            last_ipaddr=ipaddr,
+            # last_ipaddr=ipaddr, # Wechat Mini program's frontend uses random ip addresses.
             is_login=True,
             session_key=session_key,
             expire_datetime__gte=now(),

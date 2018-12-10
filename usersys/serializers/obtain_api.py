@@ -5,5 +5,6 @@ class ObtainSelfInfoSerializer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
 
 
-class ObtainRecyclingStaffInfoSerializer(serializers.Serializer):
+class ObtainCheckQrInfoSerializer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
+    qr_info = serializers.CharField(max_length=128)

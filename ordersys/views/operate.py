@@ -1,9 +1,10 @@
 from rest_framework.views import APIView
 from base.views import WLAPIView
 from ordersys.serializers.operate_api import SubmitDeliveryInfoSerializer, CancelOrderSerializer,\
-    OneClickOrderSerializer, CompeteOrderSerializer, CancelOrder4BSerializer, BookkeepingOrderSerializer
+    OneClickOrderSerializer, CompeteOrderSerializer, CancelOrder4BSerializer, BookkeepingOrderSerializer, \
+    BookkeepingPnOrderSerializer, BookkeepingScanOrderSerializer
 from ordersys.funcs.operate import submit_delivery_info, cancel_order, one_click_order, compete_order, cancel_order_b, \
-    bookkeeping_order
+    bookkeeping_order, bookkeeping_order_pn, bookkeeping_order_scan
 from ordersys.serializers.order import OrderDisplaySerializer
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 
@@ -93,6 +94,32 @@ class BookkeepingOrderView(WLAPIView, APIView):
         self.validate_serializer(seri)
 
         bookkeeping_order(**seri.validated_data)
+        return self.generate_response(
+            data={},
+            context=context
+        )
+
+
+class BookkeepingPnOrderView(WLAPIView, APIView):
+    def post(self, request):
+        data, context = self.get_request_obj(request)
+        seri = BookkeepingPnOrderSerializer(data=data)
+        self.validate_serializer(seri)
+
+        bookkeeping_order_pn(**seri.validated_data)
+        return self.generate_response(
+            data={},
+            context=context
+        )
+
+
+class BookkeepingScanOrderView(WLAPIView, APIView):
+    def post(self, request):
+        data, context = self.get_request_obj(request)
+        seri = BookkeepingScanOrderSerializer(data=data)
+        self.validate_serializer(seri)
+
+        bookkeeping_order_scan(**seri.validated_data)
         return self.generate_response(
             data={},
             context=context

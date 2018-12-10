@@ -1,4 +1,7 @@
 # coding=utf-8
+import datetime
+from pytz import timezone
+from dateutil import relativedelta
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
 from usersys.choices.model_choice import user_role_choice
@@ -127,8 +130,8 @@ def obtain_order_list_by_o_state(page, count_per_page):
         qs, count_per_page, page,
         index_error_excepiton=WLException(400, "Page out of range")
     )
-
-    return qs.order_by("-id")[start:end], n_pages
+    count = qs.count()
+    return qs.order_by("-id")[start:end], n_pages, count
 
 
 @user_from_sid(Error404)
@@ -141,3 +144,59 @@ def obtain_order_details(user, oid):
     if order.uid_b != user:
         raise WLException(404, u"订单不存在")
     return order
+
+
+@user_from_sid(Error404)
+def obtain_order_list_b(user, start_date, end_date, page, count_per_page):
+    # type: (UserBase, datetime, datetime, int, int) -> (QuerySet, int)
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, u"无权操作")
+    qs = OrderInfo.objects.filter(create_time__gte=start_date, create_time__lte=end_date)
+    start, end, n_pages = get_page_info(
+        qs, count_per_page, page,
+        index_error_excepiton=WLException(400, "Page out of range")
+    )
+
+    return qs.order_by("-id")[start:end], n_pages
+
+
+def get_datetime(t):
+    # get start and end of this week
+    week_s = t + relativedelta.relativedelta(hour=0, minute=0, second=0, weekday=relativedelta.MO(-1))
+    week_e = t + relativedelta.relativedelta(hour=23, minute=59, second=59, weekday=relativedelta.SU(0))
+    month_s = t + relativedelta.relativedelta(hour=0, minute=0, second=0, day=1)
+    month_e = t + relativedelta.relativedelta(hour=23, minute=59, second=59, day=1, months=1, days=-1)
+    day_s = t + relativedelta.relativedelta(hour=0, minute=0, second=0)
+    day_e = t + relativedelta.relativedelta(hour=23, minute=59, second=59)
+    return week_s, week_e, month_s, month_e, day_s, day_e
+
+
+@user_from_sid(Error404)
+def obtain_order_count(user):
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, u"无权操作")
+    t_now = datetime.datetime.now().replace(tzinfo=timezone(settings.TIME_ZONE))
+    week_s, week_e, month_s, month_e, day_s, day_e = get_datetime(t_now)
+    qs = OrderProductType.objects.filter(oid__o_state=order_state_choice.COMPLETED, oid__uid_b=user)
+
+    month_ = qs.filter(
+        oid__create_time__gte=month_s,
+        oid__create_time__lte=month_e
+    ).aggregate(models.Sum('quantity'), models.Sum('price'))
+
+    week_ = qs.filter(
+        oid__create_time__gte=week_s,
+        oid__create_time__lte=week_e
+    ).aggregate(models.Sum('quantity'), models.Sum('price'))
+
+    day_ = qs.filter(
+        oid__create_time__gte=day_s,
+        oid__create_time__lte=day_e
+    ).aggregate(models.Sum('quantity'), models.Sum('price'))
+
+    data = {
+        "month": {"quantity": month_["quantity__sum"], "price": month_["price__sum"]},
+        "week": {"quantity": week_["quantity__sum"], "price": week_["price__sum"]},
+        "day": {"quantity": day_["quantity__sum"], "price": day_["price__sum"]},
+    }
+    return data

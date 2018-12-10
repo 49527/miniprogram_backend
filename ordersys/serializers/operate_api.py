@@ -53,11 +53,23 @@ class CancelOrder4BSerializer(serializers.Serializer):
 
 
 class TypeQuantity4BSerializer(serializers.Serializer):
-    p_type = serializers.CharField(max_length=128)
+    p_type = serializers.IntegerField()
     quantity = serializers.FloatField(min_value=0)
 
 
 class BookkeepingOrderSerializer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
     oid = serializers.CharField(max_length=128)
+    type_quantity = TypeQuantity4BSerializer(many=True)
+
+
+class BookkeepingPnOrderSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    pn = serializers.CharField(max_length=128)
+    type_quantity = TypeQuantity4BSerializer(many=True)
+
+
+class BookkeepingScanOrderSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    qr_info = serializers.CharField(max_length=128)
     type_quantity = TypeQuantity4BSerializer(many=True)
