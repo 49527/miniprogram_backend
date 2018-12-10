@@ -76,7 +76,7 @@ def get_recycle_bin(user):
 def get_recycle_bin_for_price(user):
     rb = get_recycle_bin(user)
     if rb is None:
-        raise WLException(401, u"用户无绑定回收站")
+        raise WLException(401, _("用户无绑定回收站"))
 
     return rb
 
