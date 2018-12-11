@@ -3,6 +3,7 @@ import requests
 import logging
 import time
 import uuid
+from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 from django.core.cache import caches
@@ -23,7 +24,7 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
-def wechat_login(code, ipaddr):
+def wechat_login(code, ipaddr, pn):
     # get openid and session_key
     url = 'https://api.weixin.qq.com/sns/jscode2session?appid={AppID}&secret={AppSecret}&js_code={code}' \
           '&grant_type=authorization_code'.format(code=code, **settings.MINIPROGRAM)
@@ -51,7 +52,7 @@ def wechat_login(code, ipaddr):
         )
 
         if created:
-            logger.warning("wx login: openid=%s duplicated.")
+            logger.warning("wx login: openid=%s duplicated." % openid)
 
         WechatUserContext.objects.create(
             uid=user,
@@ -59,15 +60,24 @@ def wechat_login(code, ipaddr):
             openid=openid,
         )
 
-    state = state_choice.PN_NOT_BIND if user.pn is None else state_choice.PN_BIND
-    sid_obj = sid_reuse(user, ipaddr, session_key)
-    if sid_obj is not None:
-        sid_access(sid_obj)
-        sid = sid_obj.sid
+    if user.pn is None:
+        state = state_choice.PN_NOT_BIND
+        sid = get_sid_by_pn(pn, user)
+        user_sid = None
     else:
-        sid = login(user, ipaddr, session_key)
+        state = state_choice.PN_BIND
+        sid = None
+        if user.pn != pn:
+            raise WLException(409, _("请输入注册时用的手机号"))
 
-    return sid, state
+        sid_obj = sid_reuse(user, ipaddr, session_key)
+        if sid_obj is not None:
+            sid_access(sid_obj)
+            user_sid = sid_obj.sid
+        else:
+            user_sid = login(user, ipaddr, session_key)
+
+    return user_sid, state, sid
 
 
 def login(user, ipaddr, session_key):
@@ -77,7 +87,7 @@ def login(user, ipaddr, session_key):
 
 
 @default_exception(Error500)
-def get_sid_by_pn(pn):
+def get_sid_by_pn(pn, user):
     # validate phone number format
     if not validators.validate(pn, "phone number"):
         raise Error401("Format of phone number is incorrect.")
@@ -121,6 +131,7 @@ def get_sid_by_pn(pn):
         RegistrationSessionKeys.VALIDATE_STATUS: ValidateStatus.VALIDATE_SENT,
         RegistrationSessionKeys.PHONE_NUMBER: pn,
         RegistrationSessionKeys.VCODE: vcode,
+        RegistrationSessionKeys.USER_ID: user.id,
         RegistrationSessionKeys.VCODE_LAST_TIME: time.time()
     }
     update_session_dict(sid, session)
@@ -131,7 +142,7 @@ def get_sid_by_pn(pn):
     return sid
 
 
-def validate_sid(sid, pn, vcode, user_sid):
+def validate_sid(sid, pn, vcode):
     try:
         session = get_session_dict(sid)
     except KeyError:
@@ -143,8 +154,17 @@ def validate_sid(sid, pn, vcode, user_sid):
     if session.get(RegistrationSessionKeys.VALIDATE_STATUS) == ValidateStatus.VALIDATE_FAILED:
         raise Error401("Validate code not match")
 
+    userid = session.get(RegistrationSessionKeys.USER_ID)
+    if userid is None:
+        raise Error405(u"用户会话错误")
+
+    try:
+        user = UserBase.objects.get(id=userid)
+    except UserBase.DoesNotExist:
+        raise Error405(u"用户会话错误")
+
     if session.get(RegistrationSessionKeys.VALIDATE_STATUS) == ValidateStatus.VALIDATE_SUCCEEDED:
-        register(sid, pn, user_sid)
+        register(sid, pn, user)
         return
 
     if session.get(RegistrationSessionKeys.VALIDATE_STATUS) is None:
@@ -157,7 +177,7 @@ def validate_sid(sid, pn, vcode, user_sid):
         if session.get(RegistrationSessionKeys.VCODE) == vcode:
             session[RegistrationSessionKeys.VALIDATE_STATUS] = ValidateStatus.VALIDATE_SUCCEEDED
             update_session_dict(sid, session)
-            register(sid, pn, user_sid)
+            register(sid, pn, user)
             return
         else:
             session[RegistrationSessionKeys.VALIDATE_STATUS] = ValidateStatus.VALIDATE_FAILED
@@ -167,9 +187,8 @@ def validate_sid(sid, pn, vcode, user_sid):
     raise Error500("Unexpected fork")
 
 
-def register(sid, pn, user_sid):
+def register(sid, pn, user):
     try:
-        user = UserSid.objects.get(sid=user_sid).uid
         user.pn = pn
         user.is_active = True
         user.save()
