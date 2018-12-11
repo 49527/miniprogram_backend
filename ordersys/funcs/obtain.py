@@ -2,7 +2,6 @@
 import datetime
 from pytz import timezone
 from dateutil import relativedelta
-from django.utils.timezone import now
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
 from usersys.choices.model_choice import user_role_choice
