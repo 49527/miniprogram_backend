@@ -1,6 +1,7 @@
 # coding=UTF-8
 from __future__ import unicode_literals
 from django.db import models
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from ordersys.choices.model_choices import order_state_choice
 from usersys.models import UserBase
@@ -47,6 +48,19 @@ class OrderInfo(models.Model):
 
     def __unicode__(self):
         return u"{}:{} vs {}".format(self.id, self.uid_c, self.uid_b)
+
+    @property
+    def can_cancel_b(self):
+        return self.budget_amount < settings.BUDGET_MAX_CAN_CANCEL
+
+    # TODO: FILL NEXT 2 PROPERTY
+    @property
+    def can_cancel_c(self):
+        return True
+
+    @property
+    def budget_amount(self):
+        return 0
 
 
 class OrderProductTypeBind(models.Model):
