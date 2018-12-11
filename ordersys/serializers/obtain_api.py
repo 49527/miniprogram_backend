@@ -50,3 +50,9 @@ class ObtainOrderListTypeSerializer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
     page = serializers.IntegerField(default=0)
     o_type = serializers.IntegerField()
+
+
+class ObtainOrderListStateSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    page = serializers.IntegerField(default=0)
+    o_state = serializers.IntegerField()
