@@ -125,7 +125,7 @@ def obtain_cancel_reason():
 
 
 def obtain_order_list_by_o_state(page, count_per_page):
-    # type: (int, int) -> (QuerySet, int)
+    # type: (int, int) -> (QuerySet, int, int)
     qs = OrderInfo.objects.filter(o_state=order_state_choice.CREATED)
     start, end, n_pages = get_page_info(
         qs, count_per_page, page,
@@ -160,7 +160,7 @@ def obtain_order_details(user, oid):
 
 @user_from_sid(Error404)
 def obtain_order_list_b(user, start_date, end_date, page, count_per_page):
-    # type: (UserBase, datetime, datetime, int, int) -> (QuerySet, int)
+    # type: (UserBase, datetime, datetime, int, int) -> (QuerySet, int, int)
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权操作")
     qs = OrderInfo.objects.filter(create_time__gte=start_date, create_time__lte=end_date)
@@ -174,7 +174,7 @@ def obtain_order_list_b(user, start_date, end_date, page, count_per_page):
 
 @user_from_sid(Error404)
 def obtain_order_list_by_o_type(user, o_type, page, count_per_page):
-    # type: (UserBase, int, int, int) -> (QuerySet, int)
+    # type: (UserBase, int, int, int) -> (QuerySet, int, int)
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权操作")
     qs = OrderInfo.objects.select_related('recycle_bin').filter(recycle_bin__r_b_type=o_type)
@@ -188,7 +188,7 @@ def obtain_order_list_by_o_type(user, o_type, page, count_per_page):
 
 @user_from_sid(Error404)
 def obtain_order_list_by_state(user, o_state, page, count_per_page):
-    # type: (UserBase, datetime, datetime, int, int) -> (QuerySet, int)
+    # type: (UserBase, int, int, int) -> (QuerySet, int, int)
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权操作")
     qs = OrderInfo.objects.filter(o_state=o_state)
