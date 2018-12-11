@@ -1,1 +1,1 @@
-from .obtain import update_price
+from .obtain import update_price, check_validate_code

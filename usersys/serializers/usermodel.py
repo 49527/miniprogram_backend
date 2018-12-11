@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from usersys.models import UserValidate, UserBase, UserDeliveryInfo
+from usersys.models import UserBase, UserDeliveryInfo
 
 
 class UserInfoDisplay(serializers.ModelSerializer):
@@ -18,5 +18,5 @@ class UserDeliveryInfoDisplay(serializers.ModelSerializer):
     class Meta:
         model = UserDeliveryInfo
         fields = (
-            "id", "address", "contact", "house_number", "contact_pn"
+            "id", "address", "contact", "house_number", "contact_pn", "lat", "lng", "can_resolve_gps"
         )

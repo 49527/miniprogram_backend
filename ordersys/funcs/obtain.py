@@ -143,8 +143,7 @@ def obtain_order_details(user, oid):
         raise WLException(404, u"订单不存在")
     if order.uid_b != user:
         raise WLException(404, u"订单不存在")
-    order_product = OrderProductType.objects.filter(oid=order)
-    return order_product
+    return order
 
 
 @user_from_sid(Error404)
@@ -180,6 +179,8 @@ def obtain_order_count(user):
     week_s, week_e, month_s, month_e, day_s, day_e = get_datetime(t_now)
     qs = OrderProductType.objects.filter(oid__o_state=order_state_choice.COMPLETED, oid__uid_b=user)
 
+    all_ = qs.aggregate(models.Sum('quantity'), models.Sum('price'))
+
     month_ = qs.filter(
         oid__create_time__gte=month_s,
         oid__create_time__lte=month_e
@@ -199,5 +200,6 @@ def obtain_order_count(user):
         "month": {"quantity": month_["quantity__sum"], "price": month_["price__sum"]},
         "week": {"quantity": week_["quantity__sum"], "price": week_["price__sum"]},
         "day": {"quantity": day_["quantity__sum"], "price": day_["price__sum"]},
+        "all": {"quantity": all_["quantity__sum"], "price": all_["price__sum"]},
     }
     return data

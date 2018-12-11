@@ -9,6 +9,7 @@ obtain_urls =[
 
 
 operate_urls = [
+    url(r'^check_validate_code/$', operate.CheckValidateCodeView.as_view()),
     url(r'^product_price_update/$', operate.CategoryPriceUpdateView.as_view()),
 ]
 
