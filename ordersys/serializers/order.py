@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from django.conf import settings
-from django.core.cache import caches
 from django.utils.timezone import now
 from base.util.timestamp import datetime_to_timestamp
 from ordersys.models import OrderInfo, OrderCancelReason, OrderProductType
@@ -8,7 +7,6 @@ from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 from base.util.timestamp_filed import TimestampField
 from category_sys.serializers.category import ProductSubTypeSerializer
 from usersys.models import UserBase
-from business_sys.funcs.utils.positon import get_one_to_one_distance
 
 
 class RecyclingStaffDisplay(serializers.ModelSerializer):
@@ -33,7 +31,6 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
     time_remain = serializers.SerializerMethodField()
     time_remain_b = serializers.SerializerMethodField()
     recycling_staff = RecyclingStaffDisplay(source="uid_b")
-    can_cancel = serializers.SerializerMethodField()
     target_time = serializers.SerializerMethodField()
 
     class Meta:
@@ -44,8 +41,8 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
             "time_remain",
             "time_remain_b",
             "amount",
-            'can_cancel',
-            "target_time"
+            "target_time",
+            'can_cancel_b',
         )
 
     def get_time_remain(self, obj):
@@ -62,22 +59,6 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
 
     def get_target_time(self, obj):
         return datetime_to_timestamp(obj.create_time) + settings.COUNTDOWN_FOR_ORDER
-
-    def get_can_cancel(self, obj):
-        # type: (OrderInfo) -> bool
-        return obj.amount < 20.0
-
-    def get_distance(self, obj):
-        # type: (OrderInfo) -> int
-        can_resolve_gps = obj.c_delivery_info.can_resolve_gps
-        if can_resolve_gps:
-            user_b_gps=caches["sessions"].get("user_b_gps")
-            lat_c = obj.c_delivery_info.lat
-            lng_c = obj.c_delivery_info.lng
-            lat_b = user_b_gps['lat']
-            lng_b = user_b_gps['lng']
-            return get_one_to_one_distance(lat_b, lng_b, lat_c, lng_c)
-        return 0
 
 
 class CancelReasonDisplaySerializer(serializers.ModelSerializer):

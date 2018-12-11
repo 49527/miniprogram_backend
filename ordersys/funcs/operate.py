@@ -110,10 +110,6 @@ def compete_order(user, oid):
 @user_from_sid(Error404)
 def cancel_order_b(user, order, reason, desc=None):
 
-    def can_cancel(user, order, reason):
-        # TODO: Complete cancel conditions.
-        return True
-
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权限操作")
     try:
@@ -125,7 +121,7 @@ def cancel_order_b(user, order, reason, desc=None):
     if order.uid_b != user:
         raise WLException(402, u"这个订单不属于该用户,不能执行此操作")
 
-    if can_cancel(user, order, reason):
+    if order.can_cancel_b:
         order.o_state = order_state_choice.CANCELED
         order.save()
         cancel_bind, created = OrderCancelReasonBind.objects.get_or_create(
