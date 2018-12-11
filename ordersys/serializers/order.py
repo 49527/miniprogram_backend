@@ -2,8 +2,7 @@ from rest_framework import serializers
 from django.conf import settings
 from django.core.cache import caches
 from django.utils.timezone import now
-import datetime
-import time
+from base.util.timestamp import datetime_to_timestamp
 from ordersys.models import OrderInfo, OrderCancelReason, OrderProductType
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 from base.util.timestamp_filed import TimestampField
@@ -62,8 +61,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
         return time_remain
 
     def get_target_time(self, obj):
-        t = int(time.mktime(obj.create_time.timetuple())) + settings.COUNTDOWN_FOR_ORDER
-        return t
+        return datetime_to_timestamp(obj.create_time) + settings.COUNTDOWN_FOR_ORDER
 
     def get_can_cancel(self, obj):
         # type: (OrderInfo) -> bool
@@ -80,8 +78,6 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
             lng_b = user_b_gps['lng']
             return get_one_to_one_distance(lat_b, lng_b, lat_c, lng_c)
         return 0
-
-
 
 
 class CancelReasonDisplaySerializer(serializers.ModelSerializer):
