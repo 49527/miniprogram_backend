@@ -148,6 +148,7 @@ def bookkeeping_order(user, oid, type_quantity):
         raise WLException(407, u"订单不存在")
 
     order.amount = amount
+    order.o_state = order_state_choice.COMPLETED
     order.save()
 
     for product_type in list_product_types:
