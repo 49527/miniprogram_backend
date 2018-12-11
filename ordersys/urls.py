@@ -17,6 +17,7 @@ obtain_urls = [
     url(r'^order_list_count/$', obtain.ObtainOrderListCountView.as_view()),
     url(r'^order_list_by_type/$', obtain.ObtainOrderListTypeView.as_view()),
     url(r'^order_list_by_state/$', obtain.ObtainOrderListStateView.as_view()),
+    url(r'^order_list_by_filter/$', obtain.ObtainOrderListComplexFilterView.as_view()),
 
 ]
 

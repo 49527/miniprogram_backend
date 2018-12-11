@@ -262,3 +262,23 @@ class ObtainOrderListStateView(WLAPIView, APIView):
             },
             context=context
         )
+
+
+class ObtainOrderListComplexFilterView(WLAPIView, APIView):
+    def get(self, request):
+        data, context = self.get_request_obj(request)
+        seri = obtain_api.ObtainOrderComplexFilterSerializer(data=data)
+        self.validate_serializer(seri)
+
+        orders, n_pages, count = obtain_funcs.obtain_order_list_by_complex_filter(
+            count_per_page=5, **seri.validated_data
+        )
+        seri_order = order_seri.OrderDisplaySerializer(orders, many=True)
+        return self.generate_response(
+            data={
+                "orders": seri_order.data,
+                "n_pages": n_pages,
+                "count": count
+            },
+            context=context
+        )
