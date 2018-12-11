@@ -16,7 +16,9 @@ def get_quantity_price(user):
     end_time = TruckUserBind.objects.filter(uid_b=user).aggregate(models.Max("truck__end_time"))["truck__end_time__max"]
     qs = OrderProductType.objects.filter(oid__o_state=order_state_choice.COMPLETED, oid__uid_b=user)
     if end_time is None:
-        end_time = '2018-12-10 00:00:00'
+        end_time = settings.CREATE_TRUCK_TIME
+        end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone(settings.TIME_ZONE))
+
     opt = qs.filter(
         oid__create_time__gte=end_time,
         oid__create_time__lte=t_now
@@ -33,9 +35,8 @@ def get_truck_info(user):
         raise WLException(401, u"无权访问")
 
     quantity, price, end_time, t_now = get_quantity_price(user)
-
     return {"end_time": end_time,
-            "time_diff": end_time-t_now,
+            "time_diff": t_now - end_time,
             "price": price,
             "quantity": quantity}
 
@@ -51,6 +52,7 @@ def create_truck_info(user, number_plate):
         number_plate=number_plate,
         amount=price,
         start_time=end_time,
+        end_time=t_now,
         quantity=quantity
     )
 

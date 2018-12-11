@@ -8,7 +8,7 @@ from business_sys.choices.model_choices import truck_state_choice
 class Truck(models.Model):
     number_plate = models.CharField(_(u"车牌号"), max_length=20)
     start_time = models.DateTimeField(_(u"开始时间"))
-    end_time = models.DateTimeField(_(u"结束时间"), auto_now_add=True)
+    end_time = models.DateTimeField(_(u"结束时间"))
     amount = models.FloatField(_(u"金额"), default=0.0)
     quantity = models.FloatField(_(u"数量"), default=0.0)
     state = models.IntegerField(_(u"状态"), choices=truck_state_choice.choice, default=truck_state_choice.DEFAULT)

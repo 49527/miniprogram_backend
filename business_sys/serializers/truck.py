@@ -7,7 +7,7 @@ class ObtainTruckOrderSerializer(serializers.Serializer):
 
 class TruckOrderInfoSerializer(serializers.Serializer):
     end_time = serializers.DateTimeField()
-    time_diff = serializers.DateTimeField()
+    time_diff = serializers.CharField()
     price = serializers.FloatField()
     quantity = serializers.FloatField()
 
