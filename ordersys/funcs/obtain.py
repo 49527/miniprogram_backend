@@ -174,6 +174,9 @@ def get_datetime(t):
 
 @user_from_sid(Error404)
 def obtain_order_count(user):
+    def none_to_zero(obj):
+        return obj if obj is not None else 0
+
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权操作")
     t_now = now().astimezone(timezone(settings.TIME_ZONE))
@@ -203,4 +206,10 @@ def obtain_order_count(user):
         "day": {"quantity": day_["quantity__sum"], "price": day_["price__sum"]},
         "all": {"quantity": all_["quantity__sum"], "price": all_["price__sum"]},
     }
+
+    # make all null values to 0
+    data = {
+        k: {
+            k_inner: none_to_zero(v_inner) for k_inner, v_inner in v.iteritems()
+        } for k, v in data.iteritems()}
     return data
