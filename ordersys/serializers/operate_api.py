@@ -20,7 +20,9 @@ class SubmitDeliveryInfoSerializer(serializers.ModelSerializer):
 class CancelOrderSerializer(serializers.ModelSerializer):
     user_sid = serializers.CharField(max_length=128)
     reason = serializers.PrimaryKeyRelatedField(
-        queryset=OrderCancelReason.objects.filter(reason_type=user_role_choice.CLIENT)
+        queryset=OrderCancelReason.objects.filter(reason_type=user_role_choice.CLIENT),
+        allow_null=True,
+        default=None,
     )
 
     class Meta:
@@ -53,7 +55,9 @@ class CompeteOrderSerializer(serializers.Serializer):
 class CancelOrder4BSerializer(serializers.ModelSerializer):
     user_sid = serializers.CharField(max_length=128)
     reason = serializers.PrimaryKeyRelatedField(
-        queryset=OrderCancelReason.objects.filter(reason_type=user_role_choice.RECYCLING_STAFF)
+        queryset=OrderCancelReason.objects.filter(reason_type=user_role_choice.RECYCLING_STAFF),
+        allow_null=True,
+        default=None,
     )
     order = serializers.IntegerField()
 
