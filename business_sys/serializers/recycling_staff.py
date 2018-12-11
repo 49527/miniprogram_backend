@@ -16,3 +16,10 @@ class BusinessUserCenterSerializer(serializers.Serializer):
     pn = serializers.CharField()
     total_amount = serializers.FloatField()
     recycle_bin = RecycleBinBasicInfoSerializer()
+
+
+class UploadGpsSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    lat = serializers.FloatField()
+    lng = serializers.FloatField()
+
