@@ -53,20 +53,6 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
         # type: (OrderInfo) -> bool
         return obj.amount < 20.0
 
-    def get_distance(self, obj):
-        # type: (OrderInfo) -> int
-        can_resolve_gps = obj.c_delivery_info.can_resolve_gps
-        if can_resolve_gps:
-            user_b_gps=caches["sessions"].get("user_b_gps")
-            lat_c = obj.c_delivery_info.lat
-            lng_c = obj.c_delivery_info.lng
-            lat_b = user_b_gps['lat']
-            lng_b = user_b_gps['lng']
-            return get_one_to_one_distance(lat_b, lng_b, lat_c, lng_c)
-        return 0
-
-
-
 
 class CancelReasonDisplaySerializer(serializers.ModelSerializer):
 
