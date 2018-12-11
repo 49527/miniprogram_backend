@@ -2,6 +2,7 @@
 import datetime
 from pytz import timezone
 from dateutil import relativedelta
+from django.utils.timezone import now
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
 from usersys.choices.model_choice import user_role_choice
@@ -175,7 +176,7 @@ def get_datetime(t):
 def obtain_order_count(user):
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权操作")
-    t_now = datetime.datetime.now().replace(tzinfo=timezone(settings.TIME_ZONE))
+    t_now = now().astimezone(timezone(settings.TIME_ZONE))
     week_s, week_e, month_s, month_e, day_s, day_e = get_datetime(t_now)
     qs = OrderProductType.objects.filter(oid__o_state=order_state_choice.COMPLETED, oid__uid_b=user)
 

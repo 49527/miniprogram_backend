@@ -20,6 +20,7 @@ class BTypeBind(admin.TabularInline):
 
 
 class OrderInfoAdmin(admin.ModelAdmin):
+    readonly_fields = ('create_time', )
     list_display = ('id', 'uid_c', 'uid_b', 'o_state', 'amount', 'c_delivery_info', 'create_time')
     list_editable = ('o_state', 'uid_c', 'uid_b', 'amount')
     list_display_links = ('id', )
