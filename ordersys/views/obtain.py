@@ -5,8 +5,8 @@ from ordersys.serializers.obtain_api import ObtainOrderListSerializer, ObtainOve
     RecycleOrderDetailsSerilaizer, ObtainOrderListDateSerializer, ObtainOrderListCountSerializer, \
     ObtainOrderDetailSerializer, ObtainOrderListTypeSerializer, ObtainOrderListStateSerializer
 from ordersys.funcs.obtain import obtain_order_list, obtain_overview, obtain_delivery_info, obtain_uncompleted,\
-    obtain_c_toptype_list, obtain_cancel_reason, obtain_order_list_by_o_state, obtain_order_details, obtain_order_list_b,\
-    obtain_order_count, obtain_order_detail, obtain_order_list_by_o_type, obtain_order_list_by_state
+    obtain_c_toptype_list, obtain_cancel_reason_c, obtain_order_list_by_o_state, obtain_order_details, obtain_order_list_b,\
+    obtain_order_count, obtain_order_detail, obtain_cancel_reason_b, obtain_order_list_by_o_type, obtain_order_list_by_state
 from ordersys.serializers.order import OrderDisplaySerializer, CancelReasonDisplaySerializer, OrderDetailsSerializer, \
     TimeSerializer, OrderCDetailsSerializer
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
@@ -118,11 +118,26 @@ class ObtainTopTypeCListView(WLAPIView, APIView):
         )
 
 
-class ObtainCancelReasonView(WLAPIView, APIView):
+class ObtainCancelReasonCView(WLAPIView, APIView):
     def get(self, request):
         data, context = self.get_request_obj(request)
 
-        reasons = obtain_cancel_reason()
+        reasons = obtain_cancel_reason_c()
+        seri_reasons = CancelReasonDisplaySerializer(reasons, many=True)
+
+        return self.generate_response(
+            data={
+                "reasons": seri_reasons.data
+            },
+            context=context
+        )
+
+
+class ObtainCancelReasonBView(WLAPIView, APIView):
+    def get(self, request):
+        data, context = self.get_request_obj(request)
+
+        reasons = obtain_cancel_reason_b()
         seri_reasons = CancelReasonDisplaySerializer(reasons, many=True)
 
         return self.generate_response(
