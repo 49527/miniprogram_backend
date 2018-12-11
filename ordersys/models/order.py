@@ -2,11 +2,11 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from ordersys.choices.model_choices import order_state_choice
-from usersys.models import UserBase
-from category_sys.models import ProductTopType, ProductSubType
 from base.util.misc_validators import validators
-from usersys.models import UserDeliveryInfo
+from usersys.models import UserBase, UserDeliveryInfo
+from usersys.choices.model_choice import user_role_choice
+from ordersys.choices.model_choices import order_state_choice
+from category_sys.models import ProductTopType, ProductSubType
 
 
 class OrderInfo(models.Model):
@@ -79,38 +79,26 @@ class OrderProductType(models.Model):
 class OrderCancelReason(models.Model):
     in_use = models.BooleanField(default=True)
     reason = models.CharField(max_length=256)
+    reason_type = models.IntegerField(choices=user_role_choice.choice)
 
     def __unicode__(self):
         return self.reason
 
 
-class OrderReasonBind(models.Model):
+class OrderCancelReasonBind(models.Model):
     reason = models.ForeignKey(
         OrderCancelReason,
         related_name="order",
-        verbose_name="对应订单",
+        verbose_name=_("对应订单"),
         null=True,
         blank=True
     )
-    order = models.ForeignKey(
+    order = models.OneToOneField(
         OrderInfo,
         related_name="cancel_reason",
-        verbose_name="取消原因"
+        verbose_name=_("取消原因")
     )
     desc = models.TextField(_("具体描述"), null=True, blank=True)
 
     def __unicode__(self):
         return u"[{}] - {}, desc: {}".format(self.order, self.reason, self.desc)
-
-
-class OrderCancel(models.Model):
-    in_use = models.BooleanField(default=True)
-    reason = models.CharField(max_length=256)
-    order = models.ForeignKey(
-        OrderInfo,
-        related_name="order_b",
-        verbose_name="对应订单"
-    )
-
-    def __unicode__(self):
-        return self.reason

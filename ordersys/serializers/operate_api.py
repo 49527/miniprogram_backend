@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from usersys.models import UserDeliveryInfo
-from ordersys.models import OrderReasonBind
+from ordersys.models import OrderCancelReasonBind
 from category_sys.models import ProductTopType
 from category_sys.choices.model_choices import top_type_choice
 
@@ -20,7 +20,7 @@ class CancelOrderSerializer(serializers.ModelSerializer):
     user_sid = serializers.CharField(max_length=128)
 
     class Meta:
-        model = OrderReasonBind
+        model = OrderCancelReasonBind
         fields = (
             "user_sid",
             "reason", "order", "desc"
