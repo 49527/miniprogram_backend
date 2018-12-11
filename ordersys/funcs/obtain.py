@@ -36,7 +36,7 @@ def get_user_order_queryset(user):
 @user_from_sid(Error404)
 def obtain_order_list(user, page, count_per_page):
     # type: (UserBase, int, int) -> (QuerySet, int)
-    qs = get_user_order_queryset(user)
+    qs = get_user_order_queryset(user).filter(o_state=order_state_choice.COMPLETED)
     start, end, n_pages = get_page_info(
         qs, count_per_page, page,
         index_error_excepiton=WLException(400, "Page out of range")
