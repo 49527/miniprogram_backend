@@ -17,12 +17,13 @@ class ObtainOrderListView(WLAPIView, APIView):
         seri = ObtainOrderListSerializer(data=data)
         self.validate_serializer(seri)
 
-        orders, n_pages = obtain_order_list(count_per_page=5, **seri.data)
+        orders, n_pages, count = obtain_order_list(count_per_page=5, **seri.data)
         seri_order = OrderDisplaySerializer(orders, many=True)
         return self.generate_response(
             data={
                 "orders": seri_order.data,
-                "n_pages": n_pages
+                "n_pages": n_pages,
+                "count": count,
             },
             context=context
         )
