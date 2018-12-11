@@ -109,9 +109,11 @@ def check_type_quantity(type_quantity, recycle_bin):
     if len(p_type_queryset_dict) != len(type_quantity):
         raise WLException(401, u"品类不存在，清添加后操作")
 
-    bpt_queryset = BusinessProductTypeBind.objects.filter(p_type__in=category_ids, recycle_bin=recycle_bin)
+    bpt_queryset = BusinessProductTypeBind.objects.select_related('p_type_id').filter(
+        p_type_id__in=category_ids, recycle_bin=recycle_bin
+    )
     bpt_queryset_dict = dict(
-        map(lambda x: (x.p_type, x), list(bpt_queryset))
+        map(lambda x: (x.p_type.id, x), list(bpt_queryset))
     )
     if len(bpt_queryset_dict) != len(type_quantity):
         raise WLException(401, u"品类不存在，清添加后操作")
