@@ -1,11 +1,13 @@
 from rest_framework import serializers
 from django.conf import settings
+from django.core.cache import caches
 from django.utils.timezone import now
 from ordersys.models import OrderInfo, OrderCancelReason, OrderProductType
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 from base.util.timestamp_filed import TimestampField
 from category_sys.serializers.category import ProductSubTypeSerializer
 from usersys.models import UserBase
+from business_sys.funcs.utils.positon import get_one_to_one_distance
 
 
 class RecyclingStaffDisplay(serializers.ModelSerializer):
@@ -51,6 +53,20 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
         # type: (OrderInfo) -> bool
         return obj.amount < 20.0
 
+    def get_distance(self, obj):
+        # type: (OrderInfo) -> int
+        can_resolve_gps = obj.c_delivery_info.can_resolve_gps
+        if can_resolve_gps:
+            user_b_gps=caches["sessions"].get("user_b_gps")
+            lat_c = obj.c_delivery_info.lat
+            lng_c = obj.c_delivery_info.lng
+            lat_b = user_b_gps['lat']
+            lng_b = user_b_gps['lng']
+            return get_one_to_one_distance(lat_b, lng_b, lat_c, lng_c)
+        return 0
+
+
+
 
 class CancelReasonDisplaySerializer(serializers.ModelSerializer):
 
@@ -82,3 +98,13 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderInfo
         fields = ("amount", "delivery_info", "sub_type")
+
+
+class OrderCDetailsSerializer(serializers.ModelSerializer):
+
+    delivery_info = UserDeliveryInfoDisplay(source="c_delivery_info")
+    customer_submitted_products = OrderDetailsSubTypeSerializer(many=True, source="order_detail_c")
+
+    class Meta:
+        model = OrderInfo
+        fields = ("amount", "delivery_info", "customer_submitted_products")

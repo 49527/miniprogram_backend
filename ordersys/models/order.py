@@ -7,6 +7,7 @@ from usersys.models import UserBase, UserDeliveryInfo
 from usersys.choices.model_choice import user_role_choice
 from ordersys.choices.model_choices import order_state_choice
 from category_sys.models import ProductTopType, ProductSubType
+from business_sys.models import RecycleBin
 
 
 class OrderInfo(models.Model):
@@ -36,6 +37,13 @@ class OrderInfo(models.Model):
     pn = models.CharField(_('电话号码'), max_length=25, null=True, blank=True, validators=[
         validators.get_validator("phone number")
     ])
+
+    recycle_bin = models.ForeignKey(
+        RecycleBin,
+        verbose_name=_("回收站"),
+        null=True,
+        blank=True,
+    )
 
     def __unicode__(self):
         return u"{}:{} vs {}".format(self.id, self.uid_c, self.uid_b)

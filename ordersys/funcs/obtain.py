@@ -2,7 +2,6 @@
 import datetime
 from pytz import timezone
 from dateutil import relativedelta
-from django.utils.timezone import now
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
 from usersys.choices.model_choice import user_role_choice
@@ -18,6 +17,8 @@ from ordersys.funcs.utils import get_uncompleted_order
 from django.utils.timezone import now
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from business_sys.funcs.utils.positon import get_one_to_one_distance
+from django.core.cache import caches
 
 
 def get_user_order_queryset(user):
@@ -34,13 +35,13 @@ def get_user_order_queryset(user):
 @user_from_sid(Error404)
 def obtain_order_list(user, page, count_per_page):
     # type: (UserBase, int, int) -> (QuerySet, int)
-    qs = get_user_order_queryset(user)
+    qs = get_user_order_queryset(user).filter(o_state=order_state_choice.COMPLETED)
     start, end, n_pages = get_page_info(
         qs, count_per_page, page,
         index_error_excepiton=WLException(400, "Page out of range")
     )
 
-    return qs.order_by("-id")[start:end], n_pages
+    return qs.order_by("-id")[start:end], n_pages, qs.count()
 
 
 @user_from_sid(Error404)
@@ -127,9 +128,8 @@ def obtain_cancel_reason_b():
     return OrderCancelReason.objects.filter(in_use=True, reason_type=user_role_choice.RECYCLING_STAFF)
 
 
-# @user_from_sid(Error404)
 def obtain_order_list_by_o_state(page, count_per_page):
-    # type: (int, int) -> (QuerySet, int)
+    # type: (int, int) -> (QuerySet, int, int)
     qs = OrderInfo.objects.filter(o_state=order_state_choice.CREATED)
     start, end, n_pages = get_page_info(
         qs, count_per_page, page,
@@ -141,19 +141,30 @@ def obtain_order_list_by_o_state(page, count_per_page):
 
 @user_from_sid(Error404)
 def obtain_order_details(user, oid):
-    # type: (UserBase, int) -> OrderProductType
+    # type: (UserBase, int) -> (OrderProductType, int)
     try:
         order = OrderInfo.objects.get(id=oid)
     except OrderInfo.DoesNotExist:
         raise WLException(404, u"订单不存在")
     if order.uid_b != user:
         raise WLException(404, u"订单不存在")
-    return order
+
+    if order.c_delivery_info.can_resolve_gps:
+        lat_c = order.c_delivery_info.lat
+        lng_c = order.c_delivery_info.lng
+        user_b_gps = caches["sessions"].get("user_b_gps")
+        lat_b = user_b_gps['lat']
+        lng_b = user_b_gps['lng']
+        distance = get_one_to_one_distance(lat_b, lng_b, lat_c, lng_c)
+    else:
+        distance = None
+
+    return order, distance
 
 
 @user_from_sid(Error404)
 def obtain_order_list_b(user, start_date, end_date, page, count_per_page):
-    # type: (UserBase, datetime, datetime, int, int) -> (QuerySet, int)
+    # type: (UserBase, datetime, datetime, int, int) -> (QuerySet, int, int)
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权操作")
     qs = OrderInfo.objects.filter(create_time__gte=start_date, create_time__lte=end_date)
@@ -162,7 +173,35 @@ def obtain_order_list_b(user, start_date, end_date, page, count_per_page):
         index_error_excepiton=WLException(400, "Page out of range")
     )
 
-    return qs.order_by("-id")[start:end], n_pages
+    return qs.order_by("-id")[start:end], n_pages, qs.count()
+
+
+@user_from_sid(Error404)
+def obtain_order_list_by_o_type(user, o_type, page, count_per_page):
+    # type: (UserBase, int, int, int) -> (QuerySet, int, int)
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, u"无权操作")
+    qs = OrderInfo.objects.select_related('recycle_bin').filter(recycle_bin__r_b_type=o_type)
+    start, end, n_pages = get_page_info(
+        qs, count_per_page, page,
+        index_error_excepiton=WLException(400, "Page out of range")
+    )
+
+    return qs.order_by("-id")[start:end], n_pages, qs.count()
+
+
+@user_from_sid(Error404)
+def obtain_order_list_by_state(user, o_state, page, count_per_page):
+    # type: (UserBase, int, int, int) -> (QuerySet, int, int)
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, u"无权操作")
+    qs = OrderInfo.objects.filter(o_state=o_state)
+    start, end, n_pages = get_page_info(
+        qs, count_per_page, page,
+        index_error_excepiton=WLException(400, "Page out of range")
+    )
+
+    return qs.order_by("-id")[start:end], n_pages, qs.count()
 
 
 def get_datetime(t):
