@@ -18,6 +18,8 @@ from ordersys.funcs.utils import get_uncompleted_order
 from django.utils.timezone import now
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from business_sys.funcs.utils.positon import get_one_to_one_distance
+from django.core.cache import caches
 
 
 def get_user_order_queryset(user):
@@ -123,7 +125,6 @@ def obtain_cancel_reason():
     return OrderCancelReason.objects.filter(in_use=True)
 
 
-# @user_from_sid(Error404)
 def obtain_order_list_by_o_state(page, count_per_page):
     # type: (int, int) -> (QuerySet, int)
     qs = OrderInfo.objects.filter(o_state=order_state_choice.CREATED)
@@ -137,14 +138,20 @@ def obtain_order_list_by_o_state(page, count_per_page):
 
 @user_from_sid(Error404)
 def obtain_order_details(user, oid):
-    # type: (UserBase, int) -> OrderProductType
+    # type: (UserBase, int) -> (OrderProductType, int)
     try:
         order = OrderInfo.objects.get(id=oid)
     except OrderInfo.DoesNotExist:
         raise WLException(404, u"订单不存在")
     if order.uid_b != user:
         raise WLException(404, u"订单不存在")
-    return order
+    lat_c = order.c_delivery_info.lat
+    lng_c = order.c_delivery_info.lng
+    user_b_gps = caches["sessions"].get("user_b_gps")
+    lat_b = user_b_gps['lat']
+    lng_b = user_b_gps['lng']
+    distance = get_one_to_one_distance(lat_b, lng_b, lat_c, lng_c)
+    return order, distance
 
 
 @user_from_sid(Error404)
