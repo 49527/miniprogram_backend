@@ -63,6 +63,8 @@ def compete_order(user, oid):
         raise WLException(401, "无权限操作")
     if order.uid_b is not None:
         raise WLException(400, "订单已被抢")
+    if OrderInfo.objects.filter(uid_b=user, o_state=order_state_choice.ACCEPTED).count() >= 3:
+        raise WLException(406, "最多可以抢3单")
     o_state = order.o_state
     if o_state == order_state_choice.ACCEPTED:
         raise WLException(402, "已接单")
