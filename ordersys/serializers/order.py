@@ -30,6 +30,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
     location = serializers.ReadOnlyField(source="c_delivery_info.address")
     create_time = TimestampField()
     time_remain = serializers.SerializerMethodField()
+    time_remain_b = serializers.SerializerMethodField()
     recycling_staff = RecyclingStaffDisplay(source="uid_b")
     can_cancel = serializers.SerializerMethodField()
 
@@ -39,6 +40,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
             "location", "recycling_staff",
             "id", "create_time", "o_state", "c_delivery_info",
             "time_remain",
+            "time_remain_b",
             "amount",
             'can_cancel',
         )
@@ -47,6 +49,12 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
         # type: (OrderInfo) -> int
         time_elapsed = now() - obj.create_time
         time_remain = max(0, int(settings.TIME_FOR_SET_ORDER - time_elapsed.total_seconds()))
+        return time_remain
+
+    def get_time_remain_b(self, obj):
+        # type: (OrderInfo) -> int
+        time_elapsed = now() - obj.create_time
+        time_remain = max(0, int(settings.COUNTDOWN_FOR_ORDER - time_elapsed.total_seconds()))
         return time_remain
 
     def get_can_cancel(self, obj):
