@@ -55,6 +55,7 @@ class CancelOrder4BSerializer(serializers.ModelSerializer):
     reason = serializers.PrimaryKeyRelatedField(
         queryset=OrderCancelReason.objects.filter(reason_type=user_role_choice.RECYCLING_STAFF)
     )
+    order = serializers.IntegerField()
 
     class Meta:
         model = OrderCancelReasonBind
