@@ -9,7 +9,7 @@ from usersys.models import UserBase, UserDeliveryInfo
 from base.util.pages import get_page_info
 from django.db import models
 from ordersys.choices.model_choices import order_state_choice
-from ordersys.models import OrderCancelReason, OrderInfo, OrderProductType, OrderReasonBind
+from ordersys.models import OrderCancelReason, OrderInfo, OrderProductType, OrderCancelReasonBind
 from business_sys.models import RecycleBin
 from category_sys.models import ProductTopType
 from category_sys.choices.model_choices import top_type_choice
@@ -80,7 +80,7 @@ def obtain_uncompleted(user):
                 and order.o_state == order_state_choice.CREATED:
             order.o_state = order_state_choice.CANCELED
             order.save()
-            OrderReasonBind.objects.create(desc=u'订单超时', order=order)
+            OrderCancelReasonBind.objects.create(desc=u'订单超时', order=order)
 
     return order, exist
 
@@ -120,8 +120,12 @@ def obtain_c_toptype_list():
     return type_list, modified_time
 
 
-def obtain_cancel_reason():
-    return OrderCancelReason.objects.filter(in_use=True)
+def obtain_cancel_reason_c():
+    return OrderCancelReason.objects.filter(in_use=True, reason_type=user_role_choice.CLIENT)
+
+
+def obtain_cancel_reason_b():
+    return OrderCancelReason.objects.filter(in_use=True, reason_type=user_role_choice.RECYCLING_STAFF)
 
 
 def obtain_order_list_by_o_state(page, count_per_page):
@@ -148,10 +152,13 @@ def obtain_order_details(user, oid):
     if order.c_delivery_info.can_resolve_gps:
         lat_c = order.c_delivery_info.lat
         lng_c = order.c_delivery_info.lng
-        user_b_gps = caches["sessions"].get("user_b_gps")
-        lat_b = user_b_gps['lat']
-        lng_b = user_b_gps['lng']
-        distance = get_one_to_one_distance(lat_b, lng_b, lat_c, lng_c)
+        user_b_gps = caches["sessions"].get("user_b_gps__%d" % user.id)
+        if user_b_gps is not None:
+            lat_b = user_b_gps['lat']
+            lng_b = user_b_gps['lng']
+            distance = get_one_to_one_distance(lat_b, lng_b, lat_c, lng_c)
+        else:
+            distance = None
     else:
         distance = None
 

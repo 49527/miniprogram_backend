@@ -9,9 +9,10 @@ obtain_urls = [
     url(r'^uncompleted/$', obtain.ObtainUncompletedOrderView.as_view()),
     url(r'^order_details_c/$', obtain.ObtainOrderDetailView.as_view()),
     url(r'^c_type/$', obtain.ObtainTopTypeCListView.as_view()),
-    url(r'^cancel_reason/$', obtain.ObtainCancelReasonView.as_view()),
+    url(r'^cancel_reason/$', obtain.ObtainCancelReasonCView.as_view()),
     url(r'^order_list_b/$', obtain.RecycleOrderListView.as_view()),
     url(r'^order_details_b/$', obtain.RecycleOrderDetailsView.as_view()),
+    url(r'^order_details_customer/$', obtain.RecycleOrderCustomerDetailsView.as_view()),
     url(r'^order_list_by_date/$', obtain.ObtainOrderListDateView.as_view()),
     url(r'^order_list_count/$', obtain.ObtainOrderListCountView.as_view()),
     url(r'^order_list_by_type/$', obtain.ObtainOrderListTypeView.as_view()),
@@ -39,10 +40,12 @@ detail_urls = [
 
 c_urls = [
     url(r'^detail/', include(detail_urls)),
+    url(r'^cancel_reason/$', obtain.ObtainCancelReasonCView.as_view()),
 ]
 
 
 b_urls = [
+    url(r'^cancel_reason/$', obtain.ObtainCancelReasonBView.as_view()),
 ]
 
 urlpatterns = [

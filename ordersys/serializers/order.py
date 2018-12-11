@@ -32,7 +32,6 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
     time_remain = serializers.SerializerMethodField()
     time_remain_b = serializers.SerializerMethodField()
     recycling_staff = RecyclingStaffDisplay(source="uid_b")
-    distance = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderInfo
@@ -43,7 +42,6 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
             "time_remain_b",
             "amount",
             'can_cancel',
-            'distance',
         )
 
     def get_time_remain(self, obj):
@@ -57,18 +55,6 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
         time_elapsed = now() - obj.create_time
         time_remain = max(0, int(settings.COUNTDOWN_FOR_ORDER - time_elapsed.total_seconds()))
         return time_remain
-
-    def get_distance(self, obj):
-        # type: (OrderInfo) -> object
-        can_resolve_gps = obj.c_delivery_info.can_resolve_gps
-        if can_resolve_gps:
-            user_b_gps = caches["sessions"].get("user_b_gps")
-            lat_c = obj.c_delivery_info.lat
-            lng_c = obj.c_delivery_info.lng
-            lat_b = user_b_gps['lat']
-            lng_b = user_b_gps['lng']
-            return get_one_to_one_distance(lat_b, lng_b, lat_c, lng_c)
-        return None
 
 
 class CancelReasonDisplaySerializer(serializers.ModelSerializer):
@@ -101,3 +87,13 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderInfo
         fields = ("amount", "delivery_info", "sub_type")
+
+
+class OrderCDetailsSerializer(serializers.ModelSerializer):
+
+    delivery_info = UserDeliveryInfoDisplay(source="c_delivery_info")
+    customer_submitted_products = OrderDetailsSubTypeSerializer(many=True, source="order_detail_c")
+
+    class Meta:
+        model = OrderInfo
+        fields = ("amount", "delivery_info", "customer_submitted_products")

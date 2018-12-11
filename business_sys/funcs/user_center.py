@@ -37,7 +37,7 @@ def upload_gps(user, lat, lng):
     except RecyclingStaffInfo.DoesNotExist:
         raise WLException(402, u"该用户信息尚未完善")
 
-    caches["sessions"].set("user_b_gps", {"lat": lat, "lng": lng}, 300)
+    caches["sessions"].set("user_b_gps__%d" % user.id, {"lat": lat, "lng": lng}, 300)
     RecyclingStaffInfoGps.objects.create(
         uid=user,
         lat=lat,

@@ -1,5 +1,6 @@
 # coding=UTF-8
 from __future__ import unicode_literals
+import logging
 import requests
 from django.conf import settings
 from django.core.cache import caches
@@ -7,12 +8,15 @@ from django.utils.translation import ugettext_lazy as _
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
 from usersys.models import UserDeliveryInfo, UserBase
-from ordersys.models import OrderReasonBind, OrderProductTypeBind, OrderInfo, OrderCancel, OrderProductType
+from ordersys.models import OrderCancelReasonBind, OrderProductTypeBind, OrderInfo, OrderProductType
 from ordersys.choices.model_choices import order_state_choice
 from ordersys.funcs.utils import get_uncompleted_order
 from category_sys.models import ProductSubType
 from business_sys.models import BusinessProductTypeBind, RecyclingStaffInfo, RecycleBin
 from usersys.choices.model_choice import user_role_choice
+
+
+logger = logging.Logger(__name__)
 
 
 def get_lng_lat(desc):
@@ -35,6 +39,7 @@ def get_lng_lat(desc):
         }
     return lat_lng_desc
 
+
 @user_from_sid(Error404)
 def submit_delivery_info(user, **data):
     data.update(get_lng_lat(data["address"]))
@@ -51,7 +56,7 @@ def cancel_order(user, order, reason=None, desc=None, **kwargs):
     if reason is None and desc is None:
         raise WLException(402, _("reason或者desc中至少有一个字段不能为空"))
 
-    cancel_reason = OrderReasonBind.objects.create(order=order, reason=reason, **kwargs)
+    cancel_reason = OrderCancelReasonBind.objects.create(order=order, reason=reason, **kwargs)
     cancel_reason.desc = cancel_reason.reason.reason if desc is None else desc
     cancel_reason.save()
     order.o_state = order_state_choice.CANCELED
@@ -103,24 +108,41 @@ def compete_order(user, oid):
 
 
 @user_from_sid(Error404)
-def cancel_order_b(user, oid, reason):
-    if user.role != user_role_choice.RECYCLING_STAFF:
-        raise WLException(401, "无权限操作")
-    try:
-        order = OrderInfo.objects.get(id=oid)
-    except OrderInfo.DoesNotExist:
-        raise WLException(407, "订单不存在")
-    if order.o_state in (order_state_choice.CANCELED, order_state_choice.COMPLETED):
-        raise WLException(400, "此订单已完成或者已被取消，不能执行此操作")
-    if order.uid_b != user:
-        raise WLException(402, "这个订单不属于该用户,不能执行此操作")
+def cancel_order_b(user, order, reason, desc=None):
 
-    order.o_state = order_state_choice.CANCELED
-    order.save()
-    OrderCancel.objects.create(
-        reason=reason,
-        order=order
-    )
+    def can_cancel(user, order, reason):
+        # TODO: Complete cancel conditions.
+        return True
+
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, u"无权限操作")
+    try:
+        order = OrderInfo.objects.get(id=order)
+    except OrderInfo.DoesNotExist:
+        raise WLException(407, u"订单不存在")
+    if order.o_state in (order_state_choice.CANCELED, order_state_choice.COMPLETED):
+        raise WLException(400, u"此订单已完成或者已被取消，不能执行此操作")
+    if order.uid_b != user:
+        raise WLException(402, u"这个订单不属于该用户,不能执行此操作")
+
+    if can_cancel(user, order, reason):
+        order.o_state = order_state_choice.CANCELED
+        order.save()
+        cancel_bind, created = OrderCancelReasonBind.objects.get_or_create(
+            order=order,
+            defaults={
+                "reason": reason,
+                "desc": desc,
+            }
+        )
+        if not created:
+            logger.warn("A non-canceled order has a related cancel reason bind: %d - %d" % (order.id, cancel_bind.id))
+            cancel_bind.reason = reason
+            cancel_bind.desc = desc
+            cancel_bind.save()
+
+    else:
+        raise WLException(403, u"您不能取消这个订单")
 
 
 def check_type_quantity(type_quantity, recycle_bin):
