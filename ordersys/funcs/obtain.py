@@ -207,6 +207,26 @@ def obtain_order_list_by_state(user, o_state, page, count_per_page):
     return qs.order_by("-id")[start:end], n_pages, qs.count()
 
 
+@user_from_sid(Error404)
+def obtain_order_list_by_complex_filter(user, o_state, o_type, page, count_per_page):
+    # type: (UserBase, int, int, int,  int) -> (QuerySet, int, int)
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, u"无权操作")
+    dict_filter = {
+        k: v for k, v in {
+            "o_state": o_state,
+            "recycle_bin__r_b_type": o_type,
+        }.iteritems() if v is not None
+    }
+    qs = OrderInfo.objects.filter(**dict_filter)
+    start, end, n_pages = get_page_info(
+        qs, count_per_page, page,
+        index_error_excepiton=WLException(400, "Page out of range")
+    )
+
+    return qs.order_by("-id")[start:end], n_pages, qs.count()
+
+
 def get_datetime(t):
     # get start and end of this week
     week_s = t + relativedelta.relativedelta(hour=0, minute=0, second=0, weekday=relativedelta.MO(-1))
