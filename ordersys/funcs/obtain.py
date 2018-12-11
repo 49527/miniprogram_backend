@@ -156,7 +156,7 @@ def obtain_order_details(user, oid):
         if user_b_gps is not None:
             lat_b = user_b_gps['lat']
             lng_b = user_b_gps['lng']
-            distance = get_one_to_one_distance(lat_b, lng_b, lat_c, lng_c)
+            distance = get_one_to_one_distance(lat=lat_b, lng=lng_b, GPS_L=lng_c, GPS_A=lat_c)
         else:
             distance = None
     else:
