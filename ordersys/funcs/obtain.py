@@ -9,7 +9,7 @@ from usersys.models import UserBase, UserDeliveryInfo
 from base.util.pages import get_page_info
 from django.db import models
 from ordersys.choices.model_choices import order_state_choice
-from ordersys.models import OrderCancelReason, OrderInfo, OrderProductType, OrderReasonBind
+from ordersys.models import OrderCancelReason, OrderInfo, OrderProductType, OrderCancelReasonBind
 from business_sys.models import RecycleBin
 from category_sys.models import ProductTopType
 from category_sys.choices.model_choices import top_type_choice
@@ -80,7 +80,7 @@ def obtain_uncompleted(user):
                 and order.o_state == order_state_choice.CREATED:
             order.o_state = order_state_choice.CANCELED
             order.save()
-            OrderReasonBind.objects.create(desc=u'订单超时', order=order)
+            OrderCancelReasonBind.objects.create(desc=u'订单超时', order=order)
 
     return order, exist
 
@@ -120,8 +120,12 @@ def obtain_c_toptype_list():
     return type_list, modified_time
 
 
-def obtain_cancel_reason():
-    return OrderCancelReason.objects.filter(in_use=True)
+def obtain_cancel_reason_c():
+    return OrderCancelReason.objects.filter(in_use=True, reason_type=user_role_choice.CLIENT)
+
+
+def obtain_cancel_reason_b():
+    return OrderCancelReason.objects.filter(in_use=True, reason_type=user_role_choice.RECYCLING_STAFF)
 
 
 def obtain_order_list_by_o_state(page, count_per_page):
