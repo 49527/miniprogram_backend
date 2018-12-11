@@ -98,3 +98,13 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderInfo
         fields = ("amount", "delivery_info", "sub_type")
+
+
+class OrderCDetailsSerializer(serializers.ModelSerializer):
+
+    delivery_info = UserDeliveryInfoDisplay(source="c_delivery_info")
+    customer_submitted_products = OrderDetailsSubTypeSerializer(many=True, source="order_detail_c")
+
+    class Meta:
+        model = OrderInfo
+        fields = ("amount", "delivery_info", "customer_submitted_products")
