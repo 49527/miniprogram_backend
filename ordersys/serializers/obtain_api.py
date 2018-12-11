@@ -44,3 +44,9 @@ class ObtainOrderListDateSerializer(serializers.Serializer):
 
 class ObtainOrderListCountSerializer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
+
+
+class ObtainOrderListTypeSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    page = serializers.IntegerField(default=0)
+    o_type = serializers.IntegerField()

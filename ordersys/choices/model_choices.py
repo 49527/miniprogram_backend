@@ -13,4 +13,12 @@ class _OrderStateChoice(FieldChoice):
     )
 
 
+class _OrderTypeChoice(FieldChoice):
+    CHOICE_DISPLAY = (
+        (0, _("固定"), "FIXED"),
+        (1, _("流动"), "FLOW"),
+    )
+
+
 order_state_choice = _OrderStateChoice()
+order_type_choice = _OrderTypeChoice()

@@ -161,6 +161,20 @@ def obtain_order_list_b(user, start_date, end_date, page, count_per_page):
     return qs.order_by("-id")[start:end], n_pages
 
 
+@user_from_sid(Error404)
+def obtain_order_list_by_o_type(user, o_type, page, count_per_page):
+    # type: (UserBase, datetime, datetime, int, int) -> (QuerySet, int)
+    if user.role != user_role_choice.RECYCLING_STAFF:
+        raise WLException(401, u"无权操作")
+    qs = OrderInfo.objects.filter(o_type=o_type)
+    start, end, n_pages = get_page_info(
+        qs, count_per_page, page,
+        index_error_excepiton=WLException(400, "Page out of range")
+    )
+
+    return qs.order_by("-id")[start:end], n_pages, qs.count()
+
+
 def get_datetime(t):
     # get start and end of this week
     week_s = t + relativedelta.relativedelta(hour=0, minute=0, second=0, weekday=relativedelta.MO(-1))

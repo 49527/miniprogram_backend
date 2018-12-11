@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from ordersys.choices.model_choices import order_state_choice
+from ordersys.choices.model_choices import order_state_choice, order_type_choice
 from usersys.models import UserBase
 from category_sys.models import ProductTopType, ProductSubType
 from base.util.misc_validators import validators
@@ -36,6 +36,8 @@ class OrderInfo(models.Model):
     pn = models.CharField(_('电话号码'), max_length=25, null=True, blank=True, validators=[
         validators.get_validator("phone number")
     ])
+
+    o_type = models.IntegerField(_("订单类型"), choices=order_type_choice.choice, null=True, blank=True)
 
     def __unicode__(self):
         return u"{}:{} vs {}".format(self.id, self.uid_c, self.uid_b)
