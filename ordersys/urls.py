@@ -14,6 +14,8 @@ obtain_urls = [
     url(r'^order_details_b/$', obtain.RecycleOrderDetailsView.as_view()),
     url(r'^order_list_by_date/$', obtain.ObtainOrderListDateView.as_view()),
     url(r'^order_list_count/$', obtain.ObtainOrderListCountView.as_view()),
+    url(r'^order_list_by_type/$', obtain.ObtainOrderListTypeView.as_view()),
+    url(r'^order_list_by_state/$', obtain.ObtainOrderListStateView.as_view()),
 
 ]
 
