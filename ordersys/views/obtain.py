@@ -143,7 +143,8 @@ class RecycleOrderListView(WLAPIView, APIView):
             data={
                 "orders": seri_order.data,
                 "n_pages": n_pages,
-                "count": count
+                "count": count,
+                "numbers": int(count/5) + 1
             },
             context=context
         )
