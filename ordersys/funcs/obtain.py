@@ -12,7 +12,7 @@ from ordersys.choices.model_choices import order_state_choice
 from ordersys.models import OrderCancelReason, OrderInfo, OrderProductType, OrderCancelReasonBind
 from business_sys.models import RecycleBin
 from category_sys.models import ProductTopType
-from category_sys.choices.model_choices import top_type_choice
+from category_sys.choices.model_choices import top_type_choice, type_unit_choice
 from ordersys.funcs.utils import get_uncompleted_order
 from django.utils.timezone import now
 from django.conf import settings
@@ -217,42 +217,50 @@ def get_datetime(t):
 
 @user_from_sid(Error404)
 def obtain_order_count(user):
-    def none_to_zero(obj):
-        return obj if obj is not None else 0
+
+    def format_qs(qs):
+        dict_initial = {
+            unit: 0 for unit in type_unit_choice.get_choices()
+        }
+        dict_initial["price"] = 0
+
+        for unit_dict in qs:
+            dict_initial[unit_dict['p_type__unit']] = unit_dict['quantity__sum']
+            dict_initial["price"] += unit_dict['price__sum']
+
+        return dict_initial
 
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权操作")
     t_now = now().astimezone(timezone(settings.TIME_ZONE))
     week_s, week_e, month_s, month_e, day_s, day_e = get_datetime(t_now)
-    qs = OrderProductType.objects.filter(oid__o_state=order_state_choice.COMPLETED, oid__uid_b=user)
+    qs = OrderProductType.objects.filter(
+        oid__o_state=order_state_choice.COMPLETED,
+        oid__uid_b=user
+    ).values("p_type__unit")
 
-    all_ = qs.aggregate(models.Sum('quantity'), models.Sum('price'))
+    all_ = qs.annotate(models.Sum('quantity'), models.Sum('price'))
 
     month_ = qs.filter(
         oid__create_time__gte=month_s,
         oid__create_time__lte=month_e
-    ).aggregate(models.Sum('quantity'), models.Sum('price'))
+    ).annotate(models.Sum('quantity'), models.Sum('price'))
 
     week_ = qs.filter(
         oid__create_time__gte=week_s,
         oid__create_time__lte=week_e
-    ).aggregate(models.Sum('quantity'), models.Sum('price'))
+    ).annotate(models.Sum('quantity'), models.Sum('price'))
 
     day_ = qs.filter(
         oid__create_time__gte=day_s,
         oid__create_time__lte=day_e
-    ).aggregate(models.Sum('quantity'), models.Sum('price'))
+    ).annotate(models.Sum('quantity'), models.Sum('price'))
 
     data = {
-        "month": {"quantity": month_["quantity__sum"], "price": month_["price__sum"]},
-        "week": {"quantity": week_["quantity__sum"], "price": week_["price__sum"]},
-        "day": {"quantity": day_["quantity__sum"], "price": day_["price__sum"]},
-        "all": {"quantity": all_["quantity__sum"], "price": all_["price__sum"]},
+        "month": format_qs(month_),
+        "week": format_qs(week_),
+        "day": format_qs(day_),
+        "all": format_qs(all_),
     }
 
-    # make all null values to 0
-    data = {
-        k: {
-            k_inner: none_to_zero(v_inner) for k_inner, v_inner in v.iteritems()
-        } for k, v in data.iteritems()}
     return data
