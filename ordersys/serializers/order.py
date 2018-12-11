@@ -41,7 +41,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
             "time_remain",
             "time_remain_b",
             "amount",
-            'can_cancel',
+            'can_cancel_b',
         )
 
     def get_time_remain(self, obj):
