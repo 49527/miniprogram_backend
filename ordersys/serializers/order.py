@@ -1,13 +1,12 @@
 from rest_framework import serializers
 from django.conf import settings
-from django.core.cache import caches
 from django.utils.timezone import now
+from base.util.timestamp import datetime_to_timestamp
 from ordersys.models import OrderInfo, OrderCancelReason, OrderProductType
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 from base.util.timestamp_filed import TimestampField
 from category_sys.serializers.category import ProductSubTypeSerializer
 from usersys.models import UserBase
-from business_sys.funcs.utils.positon import get_one_to_one_distance
 
 
 class RecyclingStaffDisplay(serializers.ModelSerializer):
@@ -32,6 +31,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
     time_remain = serializers.SerializerMethodField()
     time_remain_b = serializers.SerializerMethodField()
     recycling_staff = RecyclingStaffDisplay(source="uid_b")
+    target_time = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderInfo
@@ -41,6 +41,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
             "time_remain",
             "time_remain_b",
             "amount",
+            "target_time",
             'can_cancel_b',
         )
 
@@ -55,6 +56,9 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
         time_elapsed = now() - obj.create_time
         time_remain = max(0, int(settings.COUNTDOWN_FOR_ORDER - time_elapsed.total_seconds()))
         return time_remain
+
+    def get_target_time(self, obj):
+        return datetime_to_timestamp(obj.create_time) + settings.COUNTDOWN_FOR_ORDER
 
 
 class CancelReasonDisplaySerializer(serializers.ModelSerializer):
