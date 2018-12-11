@@ -145,12 +145,17 @@ def obtain_order_details(user, oid):
         raise WLException(404, u"订单不存在")
     if order.uid_b != user:
         raise WLException(404, u"订单不存在")
-    lat_c = order.c_delivery_info.lat
-    lng_c = order.c_delivery_info.lng
-    user_b_gps = caches["sessions"].get("user_b_gps")
-    lat_b = user_b_gps['lat']
-    lng_b = user_b_gps['lng']
-    distance = get_one_to_one_distance(lat_b, lng_b, lat_c, lng_c)
+
+    if order.c_delivery_info.can_resolve_gps:
+        lat_c = order.c_delivery_info.lat
+        lng_c = order.c_delivery_info.lng
+        user_b_gps = caches["sessions"].get("user_b_gps")
+        lat_b = user_b_gps['lat']
+        lng_b = user_b_gps['lng']
+        distance = get_one_to_one_distance(lat_b, lng_b, lat_c, lng_c)
+    else:
+        distance = None
+
     return order, distance
 
 
