@@ -174,7 +174,7 @@ def bookkeeping_order(user, oid, type_quantity):
 
     order.amount = amount
     order.o_state = order_state_choice.COMPLETED
-    order.o_type = recycle_bin.r_b_type
+    order.recycle_bin = recycle_bin
     order.save()
 
     for product_type in list_product_types:
@@ -198,7 +198,7 @@ def bookkeeping_order_pn(user, pn, type_quantity):
     order = OrderInfo.objects.create(
         uid_b=user,
         o_state=order_state_choice.COMPLETED,
-        o_type=recycle_bin.r_b_type,
+        recycle_bin=recycle_bin,
         pn=pn,
         amount=amount
     )
@@ -232,7 +232,7 @@ def bookkeeping_order_scan(user, qr_info, type_quantity):
         uid_b=user,
         uid_c=user_c,
         o_state=order_state_choice.COMPLETED,
-        o_type=recycle_bin.r_b_type,
+        recycle_bin=recycle_bin,
         amount=amount
     )
 

@@ -2,7 +2,6 @@
 import datetime
 from pytz import timezone
 from dateutil import relativedelta
-from django.utils.timezone import now
 from usersys.funcs.utils.usersid import user_from_sid
 from base.exceptions import Error404, WLException
 from usersys.choices.model_choice import user_role_choice
@@ -175,10 +174,10 @@ def obtain_order_list_b(user, start_date, end_date, page, count_per_page):
 
 @user_from_sid(Error404)
 def obtain_order_list_by_o_type(user, o_type, page, count_per_page):
-    # type: (UserBase, datetime, datetime, int, int) -> (QuerySet, int)
+    # type: (UserBase, int, int, int) -> (QuerySet, int)
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权操作")
-    qs = OrderInfo.objects.filter(o_type=o_type)
+    qs = OrderInfo.objects.select_related('recycle_bin').filter(recycle_bin__r_b_type=o_type)
     start, end, n_pages = get_page_info(
         qs, count_per_page, page,
         index_error_excepiton=WLException(400, "Page out of range")
