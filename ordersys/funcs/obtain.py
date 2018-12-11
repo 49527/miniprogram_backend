@@ -10,7 +10,7 @@ from usersys.models import UserBase, UserDeliveryInfo
 from base.util.pages import get_page_info
 from django.db import models
 from ordersys.choices.model_choices import order_state_choice
-from ordersys.models import OrderCancelReason, OrderInfo, OrderProductType, OrderReasonBind
+from ordersys.models import OrderCancelReason, OrderInfo, OrderProductType, OrderReasonBind, OrderCancelReasons
 from business_sys.models import RecycleBin
 from category_sys.models import ProductTopType
 from category_sys.choices.model_choices import top_type_choice
@@ -213,3 +213,7 @@ def obtain_order_count(user):
             k_inner: none_to_zero(v_inner) for k_inner, v_inner in v.iteritems()
         } for k, v in data.iteritems()}
     return data
+
+
+def obtain_reason_list():
+    return OrderCancelReasons.objects.filter(in_use=True)

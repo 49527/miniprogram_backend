@@ -103,6 +103,14 @@ class OrderReasonBind(models.Model):
         return u"[{}] - {}, desc: {}".format(self.order, self.reason, self.desc)
 
 
+class OrderCancelReasons(models.Model):
+    in_use = models.BooleanField(default=True)
+    reason = models.CharField(max_length=256)
+
+    def __unicode__(self):
+        return self.reason
+
+
 class OrderCancel(models.Model):
     in_use = models.BooleanField(default=True)
     reason = models.CharField(max_length=256)

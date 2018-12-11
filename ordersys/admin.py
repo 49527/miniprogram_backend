@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from ordersys.models import OrderInfo, OrderCancelReason, OrderProductTypeBind, OrderReasonBind, OrderProductType
+from ordersys.models import OrderInfo, OrderCancelReason, OrderProductTypeBind, OrderReasonBind, OrderProductType, OrderCancelReasons
 
 # Register your models here.
 
@@ -30,3 +30,4 @@ class OrderInfoAdmin(admin.ModelAdmin):
 
 admin.site.register(OrderInfo, OrderInfoAdmin)
 admin.site.register([OrderCancelReason, OrderProductTypeBind, OrderReasonBind, OrderProductType])
+admin.site.register([OrderCancelReasons])

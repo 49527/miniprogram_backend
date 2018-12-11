@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.conf import settings
 from django.utils.timezone import now
-from ordersys.models import OrderInfo, OrderCancelReason, OrderProductType
+from ordersys.models import OrderInfo, OrderCancelReason, OrderProductType, OrderCancelReasons
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 from base.util.timestamp_filed import TimestampField
 from category_sys.serializers.category import ProductSubTypeSerializer
@@ -82,3 +82,12 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderInfo
         fields = ("amount", "delivery_info", "sub_type")
+
+
+class CancelReasonDisplayBSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OrderCancelReasons
+        fields = (
+            "id", "reason",
+        )
