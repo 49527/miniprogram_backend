@@ -1,5 +1,7 @@
 # coding=UTF-8
 from __future__ import unicode_literals
+import requests
+from django.conf import settings
 from django.core.cache import caches
 from django.utils.translation import ugettext_lazy as _
 from usersys.funcs.utils.usersid import user_from_sid
@@ -13,8 +15,29 @@ from business_sys.models import BusinessProductTypeBind, RecyclingStaffInfo, Rec
 from usersys.choices.model_choice import user_role_choice
 
 
+def get_lng_lat(desc):
+    url = "https://apis.map.qq.com/ws/geocoder/v1/?address={address}&key={key}".format(
+        address=desc, key=settings.MAP_KEY
+    )
+    try:
+        re = requests.get(url).json()["result"]
+        print re
+        lat_lng_desc = {
+            "lat": re["location"]["lat"],
+            "lng": re["location"]["lng"],
+            "can_resolve_gps": True
+        }
+    except KeyError:
+        return {
+            "lat": None,
+            "lng": None,
+            "can_resolve_gps": False
+        }
+    return lat_lng_desc
+
 @user_from_sid(Error404)
 def submit_delivery_info(user, **data):
+    data.update(get_lng_lat(data["address"]))
     return UserDeliveryInfo.objects.create(uid=user, **data)
 
 
