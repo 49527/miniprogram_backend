@@ -1,4 +1,5 @@
 # coding=UTF-8
+from __future__ import unicode_literals
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -13,7 +14,7 @@ class RecyclingStaffInfoGps(models.Model):
     )
     lat = models.FloatField()
     lng = models.FloatField()
-    create_time = models.DateTimeField(_('创建时间'), auto_now_add=True)
+    create_time = models.DateTimeField(verbose_name=_('创建时间'), auto_now_add=True)
 
     def __unicode__(self):
         return u"{}-{}-{}".format(self.uid, self.lat, self.lng)
