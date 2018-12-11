@@ -112,7 +112,7 @@ def cancel_order_b(user, order, reason, desc=None):
 
     def can_cancel(user, order, reason):
         # TODO: Complete cancel conditions.
-        return order.amount < 20
+        return order.amount > 20
 
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权限操作")
