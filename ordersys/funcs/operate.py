@@ -108,16 +108,16 @@ def compete_order(user, oid):
 
 
 @user_from_sid(Error404)
-def cancel_order_b(user, oid, reason_id, reason_text=None):
+def cancel_order_b(user, order, reason, desc=None):
 
-    def can_cancel(user, oid, reason_id):
+    def can_cancel(user, order, reason):
         # TODO: Complete cancel conditions.
         return True
 
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权限操作")
     try:
-        order = OrderInfo.objects.get(id=oid)
+        order = OrderInfo.objects.get(id=order)
     except OrderInfo.DoesNotExist:
         raise WLException(407, u"订单不存在")
     if order.o_state in (order_state_choice.CANCELED, order_state_choice.COMPLETED):
@@ -125,20 +125,20 @@ def cancel_order_b(user, oid, reason_id, reason_text=None):
     if order.uid_b != user:
         raise WLException(402, u"这个订单不属于该用户,不能执行此操作")
 
-    if can_cancel(user, oid, reason_id):
+    if can_cancel(user, order, reason):
         order.o_state = order_state_choice.CANCELED
         order.save()
         cancel_bind, created = OrderCancelReasonBind.objects.get_or_create(
             order=order,
             defaults={
-                "reason": reason_id,
-                "desc": reason_text,
+                "reason": reason,
+                "desc": desc,
             }
         )
         if not created:
-            logger.warn("A non-canceled order has a related cancel reason bind: %d - %d" % (oid.id, cancel_bind.id))
-            cancel_bind.reason = reason_id
-            cancel_bind.desc = reason_text
+            logger.warn("A non-canceled order has a related cancel reason bind: %d - %d" % (order.id, cancel_bind.id))
+            cancel_bind.reason = reason
+            cancel_bind.desc = desc
             cancel_bind.save()
 
     else:
