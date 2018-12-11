@@ -60,7 +60,16 @@ class OrderInfo(models.Model):
 
     @property
     def budget_amount(self):
-        return 0
+        type_binds = self.order_detail_c.all()
+        amount = 0
+        recycling_staff = self.uid_b
+        for type_bind in type_binds:
+            price = recycling_staff.recycling_staff_info.recycle_bin.product_subtype.filter(
+                p_type__toptype_c=type_bind.p_type,
+                p_type__in_use=True).aggregate(models.Min("price"))["price__min"]
+            price = 0 if price is None else price
+            amount += price * type_bind.quantity
+        return amount
 
 
 class OrderProductTypeBind(models.Model):
