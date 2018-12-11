@@ -11,8 +11,8 @@ class RecyclingStaffInfoGps(models.Model):
         related_name="staff_info_gps",
         verbose_name=_("用户id"),
     )
-    lat = models.FloatField(null=True, blank=True)
-    lng = models.FloatField(null=True, blank=True)
+    lat = models.FloatField()
+    lng = models.FloatField()
     create_time = models.DateTimeField(_('创建时间'), auto_now_add=True)
 
     def __unicode__(self):
