@@ -4,6 +4,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from base.util.misc_validators import validators
+from base.exceptions import WLException
 from usersys.models import UserBase, UserDeliveryInfo
 from usersys.choices.model_choice import user_role_choice
 from ordersys.choices.model_choices import order_state_choice
@@ -63,6 +64,8 @@ class OrderInfo(models.Model):
         type_binds = self.order_detail_c.all()
         amount = 0
         recycling_staff = self.uid_b
+        if recycling_staff is None:
+            raise WLException(401, _("该订单没有绑定回收员"))
         for type_bind in type_binds:
             price = recycling_staff.recycling_staff_info.recycle_bin.product_subtype.filter(
                 p_type__toptype_c=type_bind.p_type,
