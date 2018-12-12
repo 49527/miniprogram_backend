@@ -16,7 +16,10 @@ class WrappedPhoneNumberField(serializers.CharField):
 
     def to_representation(self, value):
         value = super(WrappedPhoneNumberField, self).to_representation(value)
-        return value[0:3] + "****" + value[-4:]
+        if value is not None and len(value) >= 7:
+            return value[0:3] + "****" + value[-4:]
+        else:
+            return value
 
 
 class BusinessUserCenterSerializer(serializers.Serializer):
