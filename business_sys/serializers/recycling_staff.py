@@ -12,8 +12,15 @@ class RecycleBinBasicInfoSerializer(serializers.ModelSerializer):
         )
 
 
+class WrappedPhoneNumberField(serializers.CharField):
+
+    def to_representation(self, value):
+        value = super(WrappedPhoneNumberField, self).to_representation(value)
+        return value[0:3] + "****" + value[-4:]
+
+
 class BusinessUserCenterSerializer(serializers.Serializer):
-    pn = serializers.CharField()
+    pn = WrappedPhoneNumberField()
     total_amount = serializers.FloatField()
     recycle_bin = RecycleBinBasicInfoSerializer()
 
