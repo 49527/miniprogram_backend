@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from django.conf import settings
+from django.db import models
 from django.utils.timezone import now
 from base.util.timestamp import datetime_to_timestamp
-from ordersys.models import OrderInfo, OrderCancelReason, OrderProductType
+from ordersys.models import OrderInfo, OrderCancelReason, OrderProductType, OrderProductTypeBind
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 from base.util.timestamp_filed import TimestampField
-from category_sys.serializers.category import ProductSubTypeSerializer
+from category_sys.serializers.category import ProductSubTypeSerializer, ProductTopTypeSerializer
 from usersys.models import UserBase
 
 
@@ -95,10 +96,47 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
         fields = ("amount", "delivery_info", "sub_type")
 
 
+class OrderCustomerSubmittedProductSerializer(serializers.ModelSerializer):
+
+    p_type = ProductTopTypeSerializer()
+    budget = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrderProductTypeBind
+        fields = (
+            'quantity',
+            'p_type',
+            'budget',
+        )
+
+    def get_budget(self, obj):
+        # type: (OrderProductTypeBind) -> float
+        attr_budget = getattr(obj, 'budget', None)
+        if attr_budget is not None:
+            return attr_budget
+        else:
+            if obj.oid.recycle_bin is not None:
+                # Recycle bin bind, get budget of that bin.
+                budget = obj.oid.recycle_bin.product_subtype.filter(
+                    p_type__toptype_c=obj.p_type,
+                    p_type__in_use=True,
+                ).aggregate(
+                    budget=models.Avg("price")
+                )["budget"]
+
+            else:
+                # Recycle bin not bind, get budget of all recycle bin.
+                budget = obj.p_type.c_subtype.filter(in_use=True).aggregate(
+                    budget=models.Avg("business__price")
+                )["budget"]
+
+            return budget * obj.quantity if budget is not None else 0
+
+
 class OrderCDetailsSerializer(serializers.ModelSerializer):
 
     delivery_info = UserDeliveryInfoDisplay(source="c_delivery_info")
-    customer_submitted_products = OrderDetailsSubTypeSerializer(many=True, source="order_detail_c")
+    customer_submitted_products = OrderCustomerSubmittedProductSerializer(many=True, source="order_detail_c")
 
     class Meta:
         model = OrderInfo
