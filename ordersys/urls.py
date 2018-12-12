@@ -47,6 +47,7 @@ c_urls = [
 
 b_urls = [
     url(r'^cancel_reason/$', obtain.ObtainCancelReasonBView.as_view()),
+    url(r'^order_list_filter/$', obtain.ObtainOrderListComplexFilterView.as_view()),
 ]
 
 urlpatterns = [
