@@ -51,16 +51,41 @@ class OrderInfo(models.Model):
 
     @property
     def can_cancel_b(self):
-        return self.budget_amount < settings.BUDGET_MAX_CAN_CANCEL
+        if self.budget_amount_avg is None:
+            return False
+
+        return self.budget_amount_avg < settings.BUDGET_MAX_CAN_CANCEL
 
     # TODO: FILL NEXT 2 PROPERTY
     @property
     def can_cancel_c(self):
         return True
 
+    def budget_amount_op(self, operator):
+        type_binds = self.order_detail_c.all()
+        amount = 0
+        recycling_staff = self.uid_b
+        if recycling_staff is None:
+            return None
+        for type_bind in type_binds:
+            price = recycling_staff.recycling_staff_info.recycle_bin.product_subtype.filter(
+                p_type__toptype_c=type_bind.p_type,
+                p_type__in_use=True).aggregate(budget=operator("price"))["budget"]
+            price = 0 if price is None else price
+            amount += price * type_bind.quantity
+        return amount
+
     @property
-    def budget_amount(self):
-        return 0
+    def budget_amount_max(self):
+        return self.budget_amount_op(models.Max)
+
+    @property
+    def budget_amount_min(self):
+        return self.budget_amount_op(models.Min)
+
+    @property
+    def budget_amount_avg(self):
+        return self.budget_amount_op(models.Avg)
 
 
 class OrderProductTypeBind(models.Model):
