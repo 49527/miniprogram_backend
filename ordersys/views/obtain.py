@@ -149,8 +149,9 @@ class RecycleOrderListView(WLAPIView, APIView):
         seri = obtain_api.RecycleOrderListSerilaizer(data=data)
         self.validate_serializer(seri)
 
-        orders, n_pages, count = obtain_funcs.obtain_order_list_by_o_state(count_per_page=COUNT_PER_PAGE, page=seri.data["page"])
-        seri_order = order_seri.OrderDisplaySerializer(orders, many=True)
+        orders, n_pages, count, user_b_gps = obtain_funcs.obtain_order_list_by_o_state(count_per_page=COUNT_PER_PAGE,
+                                                                                       **seri.validated_data)
+        seri_order = order_seri.OrderDisplaySerializer(orders, many=True, context={"user_b_gps": user_b_gps})
         return self.generate_response(
             data={
                 "orders": seri_order.data,

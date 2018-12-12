@@ -128,7 +128,8 @@ def obtain_cancel_reason_b():
     return OrderCancelReason.objects.filter(in_use=True, reason_type=user_role_choice.RECYCLING_STAFF)
 
 
-def obtain_order_list_by_o_state(page, count_per_page):
+@user_from_sid(Error404)
+def obtain_order_list_by_o_state(user, page, count_per_page):
     # type: (int, int) -> (QuerySet, int, int)
     qs = OrderInfo.objects.filter(o_state=order_state_choice.CREATED)
     start, end, n_pages = get_page_info(
@@ -136,7 +137,8 @@ def obtain_order_list_by_o_state(page, count_per_page):
         index_error_excepiton=WLException(400, "Page out of range")
     )
     count = qs.count()
-    return qs.order_by("-id")[start:end], n_pages, count
+    user_b_gps = caches["sessions"].get("user_b_gps__%d" % user.id)
+    return qs.order_by("-id")[start:end], n_pages, count, user_b_gps
 
 
 @user_from_sid(Error404)

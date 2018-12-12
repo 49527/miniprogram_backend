@@ -7,6 +7,7 @@ from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 from base.util.timestamp_filed import TimestampField
 from category_sys.serializers.category import ProductSubTypeSerializer
 from usersys.models import UserBase
+from business_sys.funcs.utils.positon import get_one_to_one_distance
 
 
 class RecyclingStaffDisplay(serializers.ModelSerializer):
@@ -32,6 +33,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
     time_remain_b = serializers.SerializerMethodField()
     recycling_staff = RecyclingStaffDisplay(source="uid_b")
     target_time = serializers.SerializerMethodField()
+    distance = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderInfo
@@ -43,6 +45,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
             "amount",
             "target_time",
             'can_cancel_b',
+            "distance"
         )
 
     def get_time_remain(self, obj):
@@ -59,6 +62,22 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
 
     def get_target_time(self, obj):
         return datetime_to_timestamp(obj.create_time) + settings.COUNTDOWN_FOR_ORDER
+
+    def get_distance(self, obj):
+        # type: (OrderInfo) -> int
+        user_b_gps=self.context["user_b_gps"]
+        lat_c = obj.c_delivery_info.lat
+        lng_c = obj.c_delivery_info.lng
+        if obj.c_delivery_info.can_resolve_gps:
+            if user_b_gps is not None:
+                lat_b = user_b_gps['lat']
+                lng_b = user_b_gps['lng']
+                distance = get_one_to_one_distance(lat=lat_b, lng=lng_b, GPS_L=lng_c, GPS_A=lat_c)
+            else:
+                distance = None
+        else:
+            distance = None
+        return distance
 
 
 class CancelReasonDisplaySerializer(serializers.ModelSerializer):
