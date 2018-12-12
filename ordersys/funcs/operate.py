@@ -170,6 +170,10 @@ def check_type_quantity(type_quantity, recycle_bin):
             "price": price
         })
         amount += price
+
+    if amount == 0:
+        raise WLException(403, u"记账总额为不能为0.")
+
     return list_product_types, amount
 
 
