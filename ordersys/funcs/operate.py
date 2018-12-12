@@ -163,6 +163,10 @@ def check_type_quantity(type_quantity, recycle_bin):
 
     for sub_type_price in type_quantity:
         p_id = sub_type_price["p_type"]
+
+        if sub_type_price.get("quantity", 0) == 0:
+            continue
+
         price = bpt_queryset_dict[p_id].price * sub_type_price.get("quantity")
         list_product_types.append({
             "p_type": p_type_queryset_dict[p_id],
