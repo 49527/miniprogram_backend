@@ -9,9 +9,15 @@ class ProductSubTypeSerializer(serializers.ModelSerializer):
         fields = ('id', 'unit', 't_sub_name')
 
 
-class ProductTopTypeSerializer(serializers.ModelSerializer):
+class NestedProductTopTypeSerializer(serializers.ModelSerializer):
     product_sub_type = ProductSubTypeSerializer(many=True)
 
     class Meta:
         model = ProductTopType
         fields = ("id", "t_top_name", "product_sub_type")
+
+
+class ProductTopTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductTopType
+        fields = ("id", "t_top_name")

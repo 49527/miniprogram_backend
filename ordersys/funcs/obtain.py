@@ -131,7 +131,7 @@ def obtain_cancel_reason_b():
 
 @user_from_sid(Error404)
 def obtain_order_details(user, oid):
-    # type: (UserBase, int) -> (OrderProductType, int)
+    # type: (UserBase, int) -> OrderProductType
     try:
         order = OrderInfo.objects.get(id=oid)
     except OrderInfo.DoesNotExist:
@@ -139,20 +139,20 @@ def obtain_order_details(user, oid):
     if order.uid_b != user:
         raise WLException(404, u"订单不存在")
 
-    if order.c_delivery_info.can_resolve_gps:
-        lat_c = order.c_delivery_info.lat
-        lng_c = order.c_delivery_info.lng
-        user_b_gps = caches["sessions"].get("user_b_gps__%d" % user.id)
-        if user_b_gps is not None:
-            lat_b = user_b_gps['lat']
-            lng_b = user_b_gps['lng']
-            distance = get_one_to_one_distance(lat=lat_b, lng=lng_b, GPS_L=lng_c, GPS_A=lat_c)
-        else:
-            distance = None
-    else:
-        distance = None
+    return order
 
-    return order, distance
+
+@user_from_sid(Error404)
+def obtain_order_details_with_budget(user, oid):
+    # type: (UserBase, int) -> OrderProductType
+    try:
+        order = OrderInfo.objects.get(id=oid)
+    except OrderInfo.DoesNotExist:
+        raise WLException(404, u"订单不存在")
+    if order.uid_b != user:
+        raise WLException(404, u"订单不存在")
+
+    return order
 
 
 @user_from_sid(Error404)
