@@ -173,7 +173,7 @@ def obtain_order_list_by_complex_filter(
             "create_time__lte": end_date,
         }.iteritems() if v is not None
     }
-    qs = OrderInfo.objects.filter(**dict_filter)
+    qs = OrderInfo.objects.filter(models.Q(uid_b=user) | models.Q(uid_b__isnull=True), **dict_filter)
     start, end, n_pages = get_page_info(
         qs, count_per_page, page,
         index_error_excepiton=WLException(400, "Page out of range")
