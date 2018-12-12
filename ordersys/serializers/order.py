@@ -32,6 +32,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
     time_remain_b = serializers.SerializerMethodField()
     recycling_staff = RecyclingStaffDisplay(source="uid_b")
     target_time = serializers.SerializerMethodField()
+    distance = serializers.ReadOnlyField()
 
     class Meta:
         model = OrderInfo
@@ -43,6 +44,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
             "amount",
             "target_time",
             'can_cancel_b',
+            "distance",
         )
 
     def get_time_remain(self, obj):

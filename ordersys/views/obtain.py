@@ -2,7 +2,10 @@ from rest_framework.views import APIView
 from base.views import WLAPIView
 from ordersys.serializers import obtain_api, order as order_seri
 from ordersys.funcs import obtain as obtain_funcs
+from ordersys.choices.model_choices import order_state_choice
 from usersys.serializers import usermodel
+from django.conf import settings
+COUNT_PER_PAGE = settings.COUNT_PER_PAGE
 
 
 class ObtainOrderListView(WLAPIView, APIView):
@@ -11,7 +14,7 @@ class ObtainOrderListView(WLAPIView, APIView):
         seri = obtain_api.ObtainOrderListSerializer(data=data)
         self.validate_serializer(seri)
 
-        orders, n_pages, count = obtain_funcs.obtain_order_list(count_per_page=5, **seri.data)
+        orders, n_pages, count = obtain_funcs.obtain_order_list(count_per_page=COUNT_PER_PAGE, **seri.data)
         seri_order = order_seri.OrderDisplaySerializer(orders, many=True)
         return self.generate_response(
             data={
@@ -147,7 +150,11 @@ class RecycleOrderListView(WLAPIView, APIView):
         seri = obtain_api.RecycleOrderListSerilaizer(data=data)
         self.validate_serializer(seri)
 
-        orders, n_pages, count = obtain_funcs.obtain_order_list_by_o_state(count_per_page=5, page=seri.data["page"])
+        orders, n_pages, count = obtain_funcs.obtain_order_list_by_complex_filter(
+            count_per_page=COUNT_PER_PAGE,
+            o_state=order_state_choice.CREATED,
+            **seri.validated_data
+        )
         seri_order = order_seri.OrderDisplaySerializer(orders, many=True)
         return self.generate_response(
             data={
@@ -197,7 +204,9 @@ class ObtainOrderListDateView(WLAPIView, APIView):
         seri = obtain_api.ObtainOrderListDateSerializer(data=data)
         self.validate_serializer(seri)
 
-        orders, n_pages, count = obtain_funcs.obtain_order_list_b(count_per_page=5, **seri.validated_data)
+        orders, n_pages, count = obtain_funcs.obtain_order_list_by_complex_filter(
+            count_per_page=COUNT_PER_PAGE, **seri.validated_data
+        )
         seri_order = order_seri.OrderDisplaySerializer(orders, many=True)
         return self.generate_response(
             data={
@@ -230,7 +239,9 @@ class ObtainOrderListTypeView(WLAPIView, APIView):
         seri = obtain_api.ObtainOrderListTypeSerializer(data=data)
         self.validate_serializer(seri)
 
-        orders, n_pages, count = obtain_funcs.obtain_order_list_by_o_type(count_per_page=5, **seri.validated_data)
+        orders, n_pages, count = obtain_funcs.obtain_order_list_by_complex_filter(
+            count_per_page=COUNT_PER_PAGE, **seri.validated_data
+        )
         seri_order = order_seri.OrderDisplaySerializer(orders, many=True)
         return self.generate_response(
             data={
@@ -248,8 +259,8 @@ class ObtainOrderListStateView(WLAPIView, APIView):
         seri = obtain_api.ObtainOrderListStateSerializer(data=data)
         self.validate_serializer(seri)
 
-        orders, n_pages, count = obtain_funcs.obtain_order_list_by_state(
-            count_per_page=5, **seri.validated_data
+        orders, n_pages, count = obtain_funcs.obtain_order_list_by_complex_filter(
+            count_per_page=COUNT_PER_PAGE, **seri.validated_data
         )
         seri_order = order_seri.OrderDisplaySerializer(orders, many=True)
         return self.generate_response(
