@@ -130,14 +130,17 @@ def obtain_cancel_reason_b():
 
 
 @user_from_sid(Error404)
-def obtain_order_details(user, oid):
-    # type: (UserBase, int) -> OrderProductType
+def obtain_order_details(user, oid, lat=None, lng=None):
+    # type: (UserBase, int, float, float) -> OrderProductType
     try:
         order = OrderInfo.objects.get(id=oid)
     except OrderInfo.DoesNotExist:
         raise WLException(401, u"订单不存在")
     if order.uid_b is not None and order.uid_b != user:
         raise WLException(401, u"无权查看此订单")
+
+    append_distance_for_orders(orders=order, lat=lat, lng=lng)
+
     return order
 
 

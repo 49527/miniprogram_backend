@@ -90,10 +90,11 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
 
     delivery_info = UserDeliveryInfoDisplay(source="c_delivery_info")
     sub_type = OrderDetailsSubTypeSerializer(many=True, source="order_detail_b")
+    distance = serializers.ReadOnlyField()
 
     class Meta:
         model = OrderInfo
-        fields = ("amount", "delivery_info", "sub_type")
+        fields = ("amount", "delivery_info", "sub_type", 'distance')
 
 
 class OrderCustomerSubmittedProductSerializer(serializers.ModelSerializer):

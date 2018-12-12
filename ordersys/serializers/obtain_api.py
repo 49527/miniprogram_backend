@@ -37,6 +37,8 @@ class RecycleOrderListSerilaizer(serializers.Serializer):
 class RecycleOrderDetailsSerilaizer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
     oid = serializers.CharField(max_length=128)
+    lat = serializers.FloatField(allow_null=True, default=None)
+    lng = serializers.FloatField(allow_null=True, default=None)
 
 
 class ObtainOrderListDateSerializer(serializers.Serializer):
