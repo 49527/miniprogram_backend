@@ -30,6 +30,8 @@ class ObtainOrderDetailSerializer(serializers.Serializer):
 class RecycleOrderListSerilaizer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
     page = serializers.IntegerField(default=0)
+    lat = serializers.FloatField(allow_null=True, default=None)
+    lng = serializers.FloatField(allow_null=True, default=None)
 
 
 class RecycleOrderDetailsSerilaizer(serializers.Serializer):
@@ -58,3 +60,14 @@ class ObtainOrderListStateSerializer(serializers.Serializer):
     user_sid = serializers.CharField(max_length=128)
     page = serializers.IntegerField(default=0)
     o_state = serializers.ChoiceField(choices=order_state_choice.choice)
+
+
+class ObtainOrderComplexFilterSerializer(serializers.Serializer):
+    user_sid = serializers.CharField(max_length=128)
+    page = serializers.IntegerField(default=0)
+    o_state = serializers.ChoiceField(choices=order_state_choice.choice, allow_null=True, default=None)
+    o_type = serializers.ChoiceField(choices=recycle_bin_type.choice, allow_null=True, default=None)
+    start_date = TimestampField(allow_null=True, default=None)
+    end_date = TimestampField(allow_null=True, default=None)
+    lat = serializers.FloatField(allow_null=True, default=None)
+    lng = serializers.FloatField(allow_null=True, default=None)

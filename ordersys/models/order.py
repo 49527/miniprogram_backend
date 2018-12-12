@@ -1,6 +1,7 @@
 # coding=UTF-8
 from __future__ import unicode_literals
 from django.db import models
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from base.util.misc_validators import validators
 from usersys.models import UserBase, UserDeliveryInfo
@@ -47,6 +48,44 @@ class OrderInfo(models.Model):
 
     def __unicode__(self):
         return u"{}:{} vs {}".format(self.id, self.uid_c, self.uid_b)
+
+    @property
+    def can_cancel_b(self):
+        if self.budget_amount_avg is None:
+            return False
+
+        return self.budget_amount_avg < settings.BUDGET_MAX_CAN_CANCEL
+
+    # TODO: FILL NEXT 2 PROPERTY
+    @property
+    def can_cancel_c(self):
+        return True
+
+    def budget_amount_op(self, operator):
+        type_binds = self.order_detail_c.all()
+        amount = 0
+        recycling_staff = self.uid_b
+        if recycling_staff is None:
+            return None
+        for type_bind in type_binds:
+            price = recycling_staff.recycling_staff_info.recycle_bin.product_subtype.filter(
+                p_type__toptype_c=type_bind.p_type,
+                p_type__in_use=True).aggregate(budget=operator("price"))["budget"]
+            price = 0 if price is None else price
+            amount += price * type_bind.quantity
+        return amount
+
+    @property
+    def budget_amount_max(self):
+        return self.budget_amount_op(models.Max)
+
+    @property
+    def budget_amount_min(self):
+        return self.budget_amount_op(models.Min)
+
+    @property
+    def budget_amount_avg(self):
+        return self.budget_amount_op(models.Avg)
 
 
 class OrderProductTypeBind(models.Model):

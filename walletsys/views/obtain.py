@@ -3,6 +3,8 @@ from base.views import WLAPIView
 from walletsys.serializers.obtain_api import ObtainBalanceSerializer, ObtainHistorySerializer
 from walletsys.funcs.obtain import obtain_balance, obtain_history
 from walletsys.serializers.wallet import TransactionDetailDisplay
+from django.conf import settings
+COUNT_PER_PAGE = settings.COUNT_PER_PAGE
 
 
 class ObtainBalanceView(WLAPIView, APIView):
@@ -26,7 +28,7 @@ class ObtainHistoryView(WLAPIView, APIView):
         seri = ObtainHistorySerializer(data=data)
         self.validate_serializer(seri)
 
-        history, n_pages = obtain_history(count_per_page=5, **seri.data)
+        history, n_pages = obtain_history(count_per_page=COUNT_PER_PAGE, **seri.data)
 
         seri_history = TransactionDetailDisplay(history, many=True)
 
