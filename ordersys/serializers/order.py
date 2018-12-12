@@ -65,7 +65,7 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
 
     def get_distance(self, obj):
         # type: (OrderInfo) -> int
-        user_b_gps=self.context["user_b_gps"]
+        user_b_gps=self.context.get("user_b_gps")
         lat_c = obj.c_delivery_info.lat
         lng_c = obj.c_delivery_info.lng
         if obj.c_delivery_info.can_resolve_gps:
