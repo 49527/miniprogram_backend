@@ -135,10 +135,9 @@ def obtain_order_details(user, oid):
     try:
         order = OrderInfo.objects.get(id=oid)
     except OrderInfo.DoesNotExist:
-        raise WLException(404, u"订单不存在")
-    if order.uid_b != user:
-        raise WLException(404, u"订单不存在")
-
+        raise WLException(401, u"订单不存在")
+    if order.uid_b is not None and order.uid_b != user:
+        raise WLException(401, u"无权查看此订单")
     return order
 
 
