@@ -26,8 +26,8 @@ class CreateTruckOrderInfoView(WLAPIView, APIView):
         seri = CreateTruckOrderInfoSerializer(data=data)
         self.validate_serializer(seri)
 
-        create_truck_info(**seri.data)
+        cred = create_truck_info(**seri.data)
         return self.generate_response(
-            data={},
+            data={"credential_id": cred.id},
             context=context
         )

@@ -61,7 +61,7 @@ def get_truck_info(user):
 
 @user_from_sid(Error404)
 def create_truck_info(user, number_plate):
-    # type: (UserBase, unicode) -> None
+    # type: (UserBase, unicode) -> LoadingCredential
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权访问")
 
