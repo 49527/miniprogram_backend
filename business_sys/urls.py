@@ -23,7 +23,7 @@ b_urls = [
     url(r'^user_center/$', user_center.ObtainRecyclingStaffInfoView.as_view()),
     url(r'^rb_product_detail/$', obtain.ObtainRecycleBinPriceListView.as_view()),
     url(r'^upload_gps/$', user_center.UploadGps.as_view()),
-    url(r'^truck/$', include(truck_urls)),
+    url(r'^truck/', include(truck_urls)),
 ]
 
 
