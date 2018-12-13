@@ -11,6 +11,7 @@ class RegistrationSessionKeys(object):
     VCODE_LAST_TIME = "vcode_last_time"
     SID = "sid"
     PN_2_SID = "reg_pn_%s"
+    USER_ID = "user_id"
 
 
 class ValidateStatus(object):

@@ -1,4 +1,5 @@
 # coding=utf-8
+from __future__ import unicode_literals
 import datetime
 from pytz import timezone
 from dateutil import relativedelta
@@ -9,14 +10,16 @@ from usersys.models import UserBase, UserDeliveryInfo
 from base.util.pages import get_page_info
 from django.db import models
 from ordersys.choices.model_choices import order_state_choice
-from ordersys.models import OrderCancelReason, OrderInfo, OrderProductType, OrderReasonBind
+from ordersys.models import OrderCancelReason, OrderInfo, OrderProductType, OrderCancelReasonBind
 from business_sys.models import RecycleBin
 from category_sys.models import ProductTopType
 from category_sys.choices.model_choices import top_type_choice
-from ordersys.funcs.utils import get_uncompleted_order
+from ordersys.funcs.utils import get_uncompleted_order, append_distance_for_orders
 from django.utils.timezone import now
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from business_sys.funcs.utils.positon import get_one_to_one_distance
+from django.core.cache import caches
 
 
 def get_user_order_queryset(user):
@@ -33,13 +36,13 @@ def get_user_order_queryset(user):
 @user_from_sid(Error404)
 def obtain_order_list(user, page, count_per_page):
     # type: (UserBase, int, int) -> (QuerySet, int)
-    qs = get_user_order_queryset(user)
+    qs = get_user_order_queryset(user).filter(o_state=order_state_choice.COMPLETED)
     start, end, n_pages = get_page_info(
         qs, count_per_page, page,
         index_error_excepiton=WLException(400, "Page out of range")
     )
 
-    return qs.order_by("-id")[start:end], n_pages
+    return qs.order_by("-id")[start:end], n_pages, qs.count()
 
 
 @user_from_sid(Error404)
@@ -78,7 +81,7 @@ def obtain_uncompleted(user):
                 and order.o_state == order_state_choice.CREATED:
             order.o_state = order_state_choice.CANCELED
             order.save()
-            OrderReasonBind.objects.create(desc=u'订单超时', order=order)
+            OrderCancelReasonBind.objects.create(desc=u'订单超时', order=order)
 
     return order, exist
 
@@ -118,46 +121,70 @@ def obtain_c_toptype_list():
     return type_list, modified_time
 
 
-def obtain_cancel_reason():
-    return OrderCancelReason.objects.filter(in_use=True)
+def obtain_cancel_reason_c():
+    return OrderCancelReason.objects.filter(in_use=True, reason_type=user_role_choice.CLIENT)
 
 
-# @user_from_sid(Error404)
-def obtain_order_list_by_o_state(page, count_per_page):
-    # type: (int, int) -> (QuerySet, int)
-    qs = OrderInfo.objects.filter(o_state=order_state_choice.CREATED)
-    start, end, n_pages = get_page_info(
-        qs, count_per_page, page,
-        index_error_excepiton=WLException(400, "Page out of range")
-    )
-    count = qs.count()
-    return qs.order_by("-id")[start:end], n_pages, count
+def obtain_cancel_reason_b():
+    return OrderCancelReason.objects.filter(in_use=True, reason_type=user_role_choice.RECYCLING_STAFF)
 
 
 @user_from_sid(Error404)
-def obtain_order_details(user, oid):
-    # type: (UserBase, int) -> OrderProductType
+def obtain_order_details(user, oid, lat=None, lng=None):
+    # type: (UserBase, int, float, float) -> OrderProductType
     try:
         order = OrderInfo.objects.get(id=oid)
     except OrderInfo.DoesNotExist:
-        raise WLException(404, u"订单不存在")
-    if order.uid_b != user:
-        raise WLException(404, u"订单不存在")
+        raise WLException(401, u"订单不存在")
+    if order.uid_b is not None and order.uid_b != user:
+        raise WLException(401, u"无权查看此订单")
+
+    append_distance_for_orders(orders=order, lat=lat, lng=lng)
+
     return order
 
 
 @user_from_sid(Error404)
-def obtain_order_list_b(user, start_date, end_date, page, count_per_page):
-    # type: (UserBase, datetime, datetime, int, int) -> (QuerySet, int)
+def obtain_order_details_with_budget(user, oid):
+    # type: (UserBase, int) -> OrderProductType
+    try:
+        order = OrderInfo.objects.get(id=oid)
+    except OrderInfo.DoesNotExist:
+        raise WLException(401, u"订单不存在")
+    if order.uid_b is not None and order.uid_b != user:
+        raise WLException(401, u"无权查看此订单")
+
+    return order
+
+
+@user_from_sid(Error404)
+def obtain_order_list_by_complex_filter(
+        user, page, count_per_page,
+        lat=None, lng=None,
+        o_state=None, o_type=None,
+        start_date=None, end_date=None,
+):
+    # type: (UserBase, int, int, int,  int, float, float, datetime, datetime) -> (QuerySet, int, int)
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权操作")
-    qs = OrderInfo.objects.filter(create_time__gte=start_date, create_time__lte=end_date)
+    dict_filter = {
+        k: v for k, v in {
+            "o_state": o_state,
+            "recycle_bin__r_b_type": o_type,
+            "create_time__gte": start_date,
+            "create_time__lte": end_date,
+        }.iteritems() if v is not None
+    }
+    qs = OrderInfo.objects.filter(models.Q(uid_b=user) | models.Q(uid_b__isnull=True), **dict_filter)
     start, end, n_pages = get_page_info(
         qs, count_per_page, page,
         index_error_excepiton=WLException(400, "Page out of range")
     )
+    qs = qs.order_by("-id")[start:end]
+    if lat is not None and lng is not None:
+        append_distance_for_orders(orders=qs, lat=lat, lng=lng, many=True)
 
-    return qs.order_by("-id")[start:end], n_pages
+    return qs, n_pages, qs.count()
 
 
 def get_datetime(t):
@@ -173,9 +200,12 @@ def get_datetime(t):
 
 @user_from_sid(Error404)
 def obtain_order_count(user):
+    def none_to_zero(obj):
+        return obj if obj is not None else 0
+
     if user.role != user_role_choice.RECYCLING_STAFF:
         raise WLException(401, u"无权操作")
-    t_now = datetime.datetime.now().replace(tzinfo=timezone(settings.TIME_ZONE))
+    t_now = now().astimezone(timezone(settings.TIME_ZONE))
     week_s, week_e, month_s, month_e, day_s, day_e = get_datetime(t_now)
     qs = OrderProductType.objects.filter(oid__o_state=order_state_choice.COMPLETED, oid__uid_b=user)
 
@@ -202,4 +232,10 @@ def obtain_order_count(user):
         "day": {"quantity": day_["quantity__sum"], "price": day_["price__sum"]},
         "all": {"quantity": all_["quantity__sum"], "price": all_["price__sum"]},
     }
+
+    # make all null values to 0
+    data = {
+        k: {
+            k_inner: none_to_zero(v_inner) for k_inner, v_inner in v.iteritems()
+        } for k, v in data.iteritems()}
     return data

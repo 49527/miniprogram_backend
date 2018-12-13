@@ -1,2 +1,2 @@
-from ordersys.models.order import OrderInfo, OrderProductTypeBind, OrderReasonBind,\
-    OrderCancelReason, OrderCancel, OrderProductType
+from ordersys.models.order import OrderInfo, OrderProductTypeBind, OrderCancelReasonBind,\
+    OrderCancelReason, OrderProductType

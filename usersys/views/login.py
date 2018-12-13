@@ -17,11 +17,12 @@ class ClientLoginView(WLAPIView, APIView):
         seri = LoginSerializer(data=data)
         self.validate_serializer(seri)
 
-        sid, state = wechat_login(ipaddr=get_client_ip(request), **seri.data)
+        user_sid, state, sid = wechat_login(ipaddr=get_client_ip(request), **seri.data)
         return self.generate_response(
             data={
-                "user_sid": sid,
-                "state": state
+                "user_sid": user_sid,
+                "state": state,
+                "sid": sid
             },
             context=context
         )
@@ -55,7 +56,6 @@ class PNvalidateView(WLAPIView, APIView):
         return self.generate_response(
             data={
                 "pn": seri.data['pn'],
-                "user_sid": seri.data['user_sid']
             },
             context=context
         )

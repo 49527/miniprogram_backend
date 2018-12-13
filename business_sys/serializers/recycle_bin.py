@@ -1,5 +1,6 @@
 from django.db.models import Min, Max, Prefetch
 from rest_framework import serializers
+from base.util.timestamp import datetime_to_timestamp
 from business_sys.models import RecycleBin, BusinessProductTypeBind
 from category_sys.models import ProductTopType, ProductSubType
 from category_sys.choices.model_choices import top_type_choice
@@ -52,7 +53,9 @@ class RecycleBinBusinessPriceDisplaySerializer(serializers.ModelSerializer):
 
     def get_last_update(self, obj):
         # type: (RecycleBin) -> int
-        return obj.product_subtype.aggregate(Max("modified_time"))["modified_time__max"]
+        return datetime_to_timestamp(
+            obj.product_subtype.aggregate(Max("modified_time"))["modified_time__max"]
+        )
 
     def get_categories(self, obj):
         queryset = ProductTopType.objects.filter(operator=top_type_choice.BUSINESS).prefetch_related(

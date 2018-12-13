@@ -1,16 +1,20 @@
 # coding=UTF-8
 from __future__ import unicode_literals
 from django.db import models
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-from ordersys.choices.model_choices import order_state_choice
-from usersys.models import UserBase
-from category_sys.models import ProductTopType, ProductSubType
 from base.util.misc_validators import validators
-from usersys.models import UserDeliveryInfo
+from usersys.models import UserBase, UserDeliveryInfo
+from usersys.choices.model_choice import user_role_choice
+from ordersys.choices.model_choices import order_state_choice
+from category_sys.models import ProductTopType, ProductSubType
+from business_sys.models import RecycleBin
 
 
 class OrderInfo(models.Model):
     create_time = models.DateTimeField(_('订单创建时间'), auto_now_add=True)
+    grab_time = models.DateTimeField(_("接单时间"), null=True, blank=True)
+    complete_time = models.DateTimeField(_("完成时间"), null=True, blank=True)
     amount = models.FloatField(_("订单金额"), default=0.0)
     o_state = models.IntegerField(_("订单状态"), choices=order_state_choice.choice)
     uid_c = models.ForeignKey(
@@ -37,8 +41,53 @@ class OrderInfo(models.Model):
         validators.get_validator("phone number")
     ])
 
+    recycle_bin = models.ForeignKey(
+        RecycleBin,
+        verbose_name=_("回收站"),
+        null=True,
+        blank=True,
+    )
+
     def __unicode__(self):
         return u"{}:{} vs {}".format(self.id, self.uid_c, self.uid_b)
+
+    @property
+    def can_cancel_b(self):
+        if self.budget_amount_avg is None:
+            return False
+
+        return self.budget_amount_avg < settings.BUDGET_MAX_CAN_CANCEL
+
+    # TODO: FILL NEXT 2 PROPERTY
+    @property
+    def can_cancel_c(self):
+        return True
+
+    def budget_amount_op(self, operator):
+        type_binds = self.order_detail_c.all()
+        amount = 0
+        recycling_staff = self.uid_b
+        if recycling_staff is None:
+            return None
+        for type_bind in type_binds:
+            price = recycling_staff.recycling_staff_info.recycle_bin.product_subtype.filter(
+                p_type__toptype_c=type_bind.p_type,
+                p_type__in_use=True).aggregate(budget=operator("price"))["budget"]
+            price = 0 if price is None else price
+            amount += price * type_bind.quantity
+        return amount
+
+    @property
+    def budget_amount_max(self):
+        return self.budget_amount_op(models.Max)
+
+    @property
+    def budget_amount_min(self):
+        return self.budget_amount_op(models.Min)
+
+    @property
+    def budget_amount_avg(self):
+        return self.budget_amount_op(models.Avg)
 
 
 class OrderProductTypeBind(models.Model):
@@ -79,38 +128,26 @@ class OrderProductType(models.Model):
 class OrderCancelReason(models.Model):
     in_use = models.BooleanField(default=True)
     reason = models.CharField(max_length=256)
+    reason_type = models.IntegerField(choices=user_role_choice.choice)
 
     def __unicode__(self):
         return self.reason
 
 
-class OrderReasonBind(models.Model):
+class OrderCancelReasonBind(models.Model):
     reason = models.ForeignKey(
         OrderCancelReason,
         related_name="order",
-        verbose_name="对应订单",
+        verbose_name=_("对应订单"),
         null=True,
         blank=True
     )
-    order = models.ForeignKey(
+    order = models.OneToOneField(
         OrderInfo,
         related_name="cancel_reason",
-        verbose_name="取消原因"
+        verbose_name=_("取消原因")
     )
     desc = models.TextField(_("具体描述"), null=True, blank=True)
 
     def __unicode__(self):
         return u"[{}] - {}, desc: {}".format(self.order, self.reason, self.desc)
-
-
-class OrderCancel(models.Model):
-    in_use = models.BooleanField(default=True)
-    reason = models.CharField(max_length=256)
-    order = models.ForeignKey(
-        OrderInfo,
-        related_name="order_b",
-        verbose_name="对应订单"
-    )
-
-    def __unicode__(self):
-        return self.reason

@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'business_sys',
     'category_sys',
     'appearancesys',
+    'positionsys',
 ]
 
 MIDDLEWARE = [
@@ -327,9 +328,19 @@ MINIPROGRAM = {
 }
 
 TIME_FOR_SET_ORDER = 600
+COUNTDOWN_FOR_ORDER = 3600
 
 BOUND = 0.05 # about 5.6 kilometer
 
+GPS_GETTER = {
+    "class": "positionsys.gps_api.tencent.TencentMap",
+    "kwargs": {
+        "key": "5MEBZ-IR536-DYYS6-EPZHQ-FUSWE-KRFRF"
+    }
+}
 MAP_KEY = "5MEBZ-IR536-DYYS6-EPZHQ-FUSWE-KRFRF"
 NUM_OF_NEAR_BIN = 3
+
 CREATE_TRUCK_TIME = "2018-12-10 00:00:00"
+BUDGET_MAX_CAN_CANCEL = 20.0
+COUNT_PER_PAGE = 10
