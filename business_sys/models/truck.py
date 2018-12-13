@@ -48,7 +48,12 @@ class LoadingCredential(models.Model):
         verbose_name_plural = _("装车单")
 
     def __unicode__(self):
-        return u"{}-{}".format(self.truck, self.uid_b)
+        return u"id:{} {} {} {}".format(
+            self.id,
+            self.truck,
+            self.uid_b,
+            self.created_date
+        )
 
 
 class LoadingCredentialDetail(models.Model):
@@ -77,3 +82,12 @@ class LoadingCredentialDetail(models.Model):
     class Meta:
         verbose_name = _("装车单详情")
         verbose_name_plural = _("装车单详情")
+
+    def __unicode__(self):
+        return u"id:{} cre_id:{} category:{} count:{}, price:{}".format(
+            self.id,
+            self.credential.id,
+            self.category,
+            self.quantity,
+            self.price
+        )
