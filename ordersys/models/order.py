@@ -8,7 +8,7 @@ from usersys.models import UserBase, UserDeliveryInfo
 from usersys.choices.model_choice import user_role_choice
 from ordersys.choices.model_choices import order_state_choice
 from category_sys.models import ProductTopType, ProductSubType
-from business_sys.models import RecycleBin
+from business_sys.models import RecycleBin, LoadingCredential
 
 
 class OrderInfo(models.Model):
@@ -36,6 +36,21 @@ class OrderInfo(models.Model):
         verbose_name=_("客户收货信息"),
         null=True,
         blank=True
+    )
+    loading_cred = models.ForeignKey(
+        LoadingCredential,
+        verbose_name=_("装车单"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    loaded = models.BooleanField(
+        verbose_name=_("已装车"),
+        default=False,
+    )
+    dispatched_by_service = models.BooleanField(
+        verbose_name=_("已调度"),
+        default=False,
     )
     pn = models.CharField(_('电话号码'), max_length=25, null=True, blank=True, validators=[
         validators.get_validator("phone number")
@@ -118,8 +133,12 @@ class OrderProductType(models.Model):
         verbose_name=_("订单id"),
         related_name="order_detail_b"
     )
-    quantity = models.FloatField()
-    price = models.FloatField()
+    quantity = models.FloatField(
+        verbose_name=_("数量"),
+    )
+    price = models.FloatField(
+        verbose_name=_("总价"),
+    )
 
     def __unicode__(self):
         return u"[{}] - {}, count:{}".format(self.oid, self.p_type, self.quantity)

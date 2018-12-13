@@ -14,7 +14,7 @@ from ordersys.models import OrderCancelReason, OrderInfo, OrderProductType, Orde
 from business_sys.models import RecycleBin
 from category_sys.models import ProductTopType
 from category_sys.choices.model_choices import top_type_choice
-from ordersys.funcs.utils import get_uncompleted_order, append_distance_for_orders
+from ordersys.funcs.utils import get_uncompleted_order_c, append_distance_for_orders
 from django.utils.timezone import now
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -70,7 +70,7 @@ def obtain_delivery_info(user):
 @user_from_sid(Error404)
 def obtain_uncompleted(user):
     # type: (UserBase) -> (UserDeliveryInfo, int)
-    uncompleted = get_uncompleted_order(user)
+    uncompleted = get_uncompleted_order_c(user)
     if uncompleted.count() == 0:
         order = None
         exist = False

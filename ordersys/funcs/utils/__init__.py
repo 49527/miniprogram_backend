@@ -1,2 +1,2 @@
-from .order import get_uncompleted_order
+from .order import get_uncompleted_order_c, get_uncompleted_order, get_completed_order
 from distance import append_distance_for_orders

@@ -11,7 +11,7 @@ from base.exceptions import Error404, WLException
 from usersys.models import UserDeliveryInfo, UserBase
 from ordersys.models import OrderCancelReasonBind, OrderProductTypeBind, OrderInfo, OrderProductType
 from ordersys.choices.model_choices import order_state_choice
-from ordersys.funcs.utils import get_uncompleted_order
+from ordersys.funcs.utils import get_uncompleted_order_c
 from category_sys.models import ProductSubType
 from business_sys.models import BusinessProductTypeBind, RecyclingStaffInfo, RecycleBin
 from usersys.choices.model_choice import user_role_choice
@@ -66,7 +66,7 @@ def cancel_order(user, order, reason=None, desc=None, **kwargs):
 
 @user_from_sid(Error404)
 def one_click_order(user, **data):
-    if not get_uncompleted_order(user).count() == 0:
+    if not get_uncompleted_order_c(user).count() == 0:
         raise WLException(403, _("已经存在一个未完成订单"))
     delivery_info = data["deli_id"]
     if not delivery_info.uid == user:

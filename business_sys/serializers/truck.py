@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from base.util.timestamp_filed import TimestampField
 
 
 class ObtainTruckOrderSerializer(serializers.Serializer):
@@ -6,8 +7,8 @@ class ObtainTruckOrderSerializer(serializers.Serializer):
 
 
 class TruckOrderInfoSerializer(serializers.Serializer):
-    end_time = serializers.DateTimeField()
-    time_diff = serializers.CharField()
+    end_time = TimestampField()
+    time_diff = serializers.IntegerField()
     price = serializers.FloatField()
     quantity = serializers.FloatField()
 
