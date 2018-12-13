@@ -22,20 +22,23 @@ class OrderInfo(models.Model):
         related_name="order_c",
         verbose_name=_("客户id"),
         null=True,
-        blank=True
+        blank=True,
+        on_delete=models.SET_NULL,
     )
     uid_b = models.ForeignKey(
         UserBase,
         related_name="order_b",
         verbose_name=_("回收员id"),
         null=True,
-        blank=True
+        blank=True,
+        on_delete=models.SET_NULL,
     )
     c_delivery_info = models.ForeignKey(
         UserDeliveryInfo,
         verbose_name=_("客户收货信息"),
         null=True,
-        blank=True
+        blank=True,
+        on_delete=models.SET_NULL
     )
     pn = models.CharField(_('电话号码'), max_length=25, null=True, blank=True, validators=[
         validators.get_validator("phone number")
@@ -46,6 +49,7 @@ class OrderInfo(models.Model):
         verbose_name=_("回收站"),
         null=True,
         blank=True,
+        on_delete=models.SET_NULL,
     )
 
     def __unicode__(self):
