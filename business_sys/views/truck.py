@@ -1,9 +1,10 @@
 from rest_framework.views import APIView
 from base.views import WLAPIView
 from business_sys.serializers.truck import (
-                                            TruckOrderInfoSerializer,
-                                            ObtainTruckOrderSerializer,
-                                            CreateTruckOrderInfoSerializer)
+    TruckOrderInfoSerializer,
+    ObtainTruckOrderSerializer,
+    CreateTruckOrderInfoSerializer
+)
 from business_sys.funcs.truck import get_truck_info, create_truck_info
 
 
