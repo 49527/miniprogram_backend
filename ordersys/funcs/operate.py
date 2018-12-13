@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 import requests
 from django.conf import settings
+from django.utils.timezone import now
 from django.core.cache import caches
 from django.utils.translation import ugettext_lazy as _
 from usersys.funcs.utils.usersid import user_from_sid
@@ -103,6 +104,7 @@ def compete_order(user, oid):
     if order.o_state == order_state_choice.CREATED:
         order.uid_b = user
         order.o_state = order_state_choice.ACCEPTED
+        order.grab_time = now()
         order.save()
     return order
 
@@ -163,6 +165,10 @@ def check_type_quantity(type_quantity, recycle_bin):
 
     for sub_type_price in type_quantity:
         p_id = sub_type_price["p_type"]
+
+        if sub_type_price.get("quantity", 0) == 0:
+            continue
+
         price = bpt_queryset_dict[p_id].price * sub_type_price.get("quantity")
         list_product_types.append({
             "p_type": p_type_queryset_dict[p_id],
@@ -170,6 +176,10 @@ def check_type_quantity(type_quantity, recycle_bin):
             "price": price
         })
         amount += price
+
+    if amount == 0:
+        raise WLException(403, u"记账总额为不能为0.")
+
     return list_product_types, amount
 
 
@@ -192,6 +202,7 @@ def bookkeeping_order(user, oid, type_quantity):
 
     order.amount = amount
     order.o_state = order_state_choice.COMPLETED
+    order.complete_time = now()
     order.recycle_bin = recycle_bin
     order.save()
 
@@ -216,6 +227,8 @@ def bookkeeping_order_pn(user, pn, type_quantity):
     order = OrderInfo.objects.create(
         uid_b=user,
         o_state=order_state_choice.COMPLETED,
+        complete_time=now(),
+        grab_time=now(),
         recycle_bin=recycle_bin,
         pn=pn,
         amount=amount
@@ -250,6 +263,8 @@ def bookkeeping_order_scan(user, qr_info, type_quantity):
         uid_b=user,
         uid_c=user_c,
         o_state=order_state_choice.COMPLETED,
+        grab_time=now(),
+        complete_time=now(),
         recycle_bin=recycle_bin,
         amount=amount
     )

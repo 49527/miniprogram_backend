@@ -13,6 +13,8 @@ from business_sys.models import RecycleBin
 
 class OrderInfo(models.Model):
     create_time = models.DateTimeField(_('订单创建时间'), auto_now_add=True)
+    grab_time = models.DateTimeField(_("接单时间"), null=True, blank=True)
+    complete_time = models.DateTimeField(_("完成时间"), null=True, blank=True)
     amount = models.FloatField(_("订单金额"), default=0.0)
     o_state = models.IntegerField(_("订单状态"), choices=order_state_choice.choice)
     uid_c = models.ForeignKey(
