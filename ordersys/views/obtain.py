@@ -278,7 +278,7 @@ class ObtainOrderListComplexFilterView(WLAPIView, APIView):
         self.validate_serializer(seri)
 
         orders, n_pages, count = obtain_funcs.obtain_order_list_by_complex_filter(
-            count_per_page=5, **seri.validated_data
+            count_per_page=COUNT_PER_PAGE, **seri.validated_data
         )
         seri_order = order_seri.OrderDisplaySerializer(orders, many=True)
         return self.generate_response(
