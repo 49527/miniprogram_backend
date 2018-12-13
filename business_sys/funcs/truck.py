@@ -21,7 +21,9 @@ def get_quantity_price(user):
         uid_b=user, loaded=False
     )
 
-    summary = qs.values("order_detail_b__p_type__unit").annotate(
+    summary = qs.values("order_detail_b__p_type__unit",
+                        "order_detail_b__p_type__t_sub_name",
+                        "order_detail_b__p_type__toptype_b__t_top_name").annotate(
         price=models.Sum("order_detail_b__price"),
         quantity=models.Sum("order_detail_b__quantity"),
         create_time=models.Min("create_time"),
@@ -34,7 +36,9 @@ def get_quantity_price(user):
         quantity_by_unit.append({
             "unit": s["order_detail_b__p_type__unit"],
             "quantity": none_to_0(s["quantity"]),
-            "price": none_to_0(s["price"])
+            "price": none_to_0(s["price"]),
+            "t_sub_name": s["order_detail_b__p_type__t_sub_name"],
+            "t_top_name": s["order_detail_b__p_type__toptype_b__t_top_name"]
         })
 
         total_price += none_to_0(s["price"])
