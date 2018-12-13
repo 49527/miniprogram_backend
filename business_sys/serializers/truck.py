@@ -1,17 +1,14 @@
 from rest_framework import serializers
+from base.util.timestamp_filed import TimestampField
 
 
-class ObtainTruckOrderSerializer(serializers.Serializer):
-    user_sid = serializers.CharField(max_length=128)
-
-
-class TruckOrderInfoSerializer(serializers.Serializer):
-    end_time = serializers.DateTimeField()
-    time_diff = serializers.CharField()
+class UnitQuantitySerializer(serializers.Serializer):
+    unit = serializers.IntegerField()
     price = serializers.FloatField()
-    quantity = serializers.FloatField()
 
 
-class CreateTruckOrderInfoSerializer(serializers.Serializer):
-    user_sid = serializers.CharField(max_length=128)
-    number_plate = serializers.CharField(max_length=128)
+class LoadingCredentialSummarySerializer(serializers.Serializer):
+    end_time = TimestampField()
+    last_until_now = serializers.IntegerField()
+    price = serializers.FloatField()
+    quantity = UnitQuantitySerializer(many=True)

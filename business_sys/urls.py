@@ -13,13 +13,17 @@ operate_urls = [
     url(r'^product_price_update/$', operate.CategoryPriceUpdateView.as_view()),
 ]
 
+truck_urls = [
+    url(r'^obtain_truck_info/$', truck.ObtainTruckOrderInfoView.as_view()),
+    url(r'^generate_loading_credential/$', truck.CreateTruckOrderInfoView.as_view()),
+]
+
 
 b_urls = [
     url(r'^user_center/$', user_center.ObtainRecyclingStaffInfoView.as_view()),
     url(r'^rb_product_detail/$', obtain.ObtainRecycleBinPriceListView.as_view()),
-    url(r'^create_truck/$', truck.CreateTruckOrderInfoView.as_view()),
-    url(r'^get_truck/$', truck.ObtainTruckOrderInfoView.as_view()),
     url(r'^upload_gps/$', user_center.UploadGps.as_view()),
+    url(r'^truck/', include(truck_urls)),
 ]
 
 

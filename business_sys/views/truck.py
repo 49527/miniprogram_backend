@@ -1,19 +1,19 @@
 from rest_framework.views import APIView
 from base.views import WLAPIView
 from business_sys.serializers.truck import (
-                                            TruckOrderInfoSerializer,
-                                            ObtainTruckOrderSerializer,
-                                            CreateTruckOrderInfoSerializer)
+    LoadingCredentialSummarySerializer
+)
+from business_sys.serializers.truck_api import GenerateLoadingCredentialSerializer, ObtainLoadingCredentialSummarySerializer
 from business_sys.funcs.truck import get_truck_info, create_truck_info
 
 
 class ObtainTruckOrderInfoView(WLAPIView, APIView):
     def get(self, request):
         data, context = self.get_request_obj(request)
-        seri = ObtainTruckOrderSerializer(data=data)
+        seri = ObtainLoadingCredentialSummarySerializer(data=data)
         self.validate_serializer(seri)
 
-        truck = TruckOrderInfoSerializer(get_truck_info(**seri.data))
+        truck = LoadingCredentialSummarySerializer(get_truck_info(**seri.data))
         return self.generate_response(
             data=truck.data,
             context=context
@@ -23,11 +23,11 @@ class ObtainTruckOrderInfoView(WLAPIView, APIView):
 class CreateTruckOrderInfoView(WLAPIView, APIView):
     def post(self, request):
         data, context = self.get_request_obj(request)
-        seri = CreateTruckOrderInfoSerializer(data=data)
+        seri = GenerateLoadingCredentialSerializer(data=data)
         self.validate_serializer(seri)
 
-        create_truck_info(**seri.data)
+        cred = create_truck_info(**seri.data)
         return self.generate_response(
-            data={},
+            data={"credential_id": cred.id},
             context=context
         )
