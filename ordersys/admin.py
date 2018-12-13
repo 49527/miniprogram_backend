@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from ordersys.models import OrderInfo, OrderCancelReason, OrderProductTypeBind, OrderReasonBind, OrderProductType
+from ordersys.models import OrderInfo, OrderCancelReason, OrderProductTypeBind, OrderCancelReasonBind, OrderProductType
 
 # Register your models here.
 
@@ -20,6 +20,7 @@ class BTypeBind(admin.TabularInline):
 
 
 class OrderInfoAdmin(admin.ModelAdmin):
+    readonly_fields = ('create_time', )
     list_display = ('id', 'uid_c', 'uid_b', 'o_state', 'amount', 'c_delivery_info', 'create_time')
     list_editable = ('o_state', 'uid_c', 'uid_b', 'amount')
     list_display_links = ('id', )
@@ -28,4 +29,4 @@ class OrderInfoAdmin(admin.ModelAdmin):
 
 
 admin.site.register(OrderInfo, OrderInfoAdmin)
-admin.site.register([OrderCancelReason, OrderProductTypeBind, OrderReasonBind, OrderProductType])
+admin.site.register([OrderCancelReason, OrderProductTypeBind, OrderCancelReasonBind, OrderProductType])
