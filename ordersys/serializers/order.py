@@ -6,7 +6,7 @@ from base.util.timestamp import datetime_to_timestamp
 from ordersys.models import OrderInfo, OrderCancelReason, OrderProductType, OrderProductTypeBind
 from usersys.serializers.usermodel import UserDeliveryInfoDisplay
 from base.util.timestamp_filed import TimestampField
-from category_sys.serializers.category import ProductSubTypeSerializer, ProductTopTypeSerializer
+from category_sys.serializers.category import NestedProductSubTypeSerializer, ProductTopTypeSerializer
 from usersys.models import UserBase
 
 
@@ -75,7 +75,7 @@ class CancelReasonDisplaySerializer(serializers.ModelSerializer):
 
 class OrderDetailsSubTypeSerializer(serializers.ModelSerializer):
 
-    sub_type = ProductSubTypeSerializer(source="p_type")
+    sub_type = NestedProductSubTypeSerializer(source="p_type")
 
     class Meta:
         model = OrderProductType
@@ -90,10 +90,11 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
 
     delivery_info = UserDeliveryInfoDisplay(source="c_delivery_info")
     sub_type = OrderDetailsSubTypeSerializer(many=True, source="order_detail_b")
+    distance = serializers.ReadOnlyField()
 
     class Meta:
         model = OrderInfo
-        fields = ("amount", "delivery_info", "sub_type")
+        fields = ("amount", "delivery_info", "sub_type", 'distance')
 
 
 class OrderCustomerSubmittedProductSerializer(serializers.ModelSerializer):
