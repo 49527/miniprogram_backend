@@ -175,16 +175,16 @@ def obtain_order_list_by_complex_filter(
             "create_time__lte": end_date,
         }.iteritems() if v is not None
     }
-    qs = OrderInfo.objects.filter(models.Q(uid_b=user) | models.Q(uid_b__isnull=True), **dict_filter)
+    qs_all = OrderInfo.objects.filter(models.Q(uid_b=user) | models.Q(uid_b__isnull=True), **dict_filter)
     start, end, n_pages = get_page_info(
-        qs, count_per_page, page,
+        qs_all, count_per_page, page,
         index_error_excepiton=WLException(400, "Page out of range")
     )
-    qs = qs.order_by("-id")[start:end]
+    qs = qs_all.order_by("-id")[start:end]
     if lat is not None and lng is not None:
         append_distance_for_orders(orders=qs, lat=lat, lng=lng, many=True)
 
-    return qs, n_pages, qs.count()
+    return qs, n_pages, qs_all.count()
 
 
 def get_datetime(t):
