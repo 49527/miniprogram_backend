@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 import requests
 from django.conf import settings
+from django.utils.timezone import now
 from django.core.cache import caches
 from django.utils.translation import ugettext_lazy as _
 from usersys.funcs.utils.usersid import user_from_sid
@@ -103,6 +104,7 @@ def compete_order(user, oid):
     if order.o_state == order_state_choice.CREATED:
         order.uid_b = user
         order.o_state = order_state_choice.ACCEPTED
+        order.grab_time = now()
         order.save()
     return order
 
@@ -200,6 +202,7 @@ def bookkeeping_order(user, oid, type_quantity):
 
     order.amount = amount
     order.o_state = order_state_choice.COMPLETED
+    order.complete_time = now()
     order.recycle_bin = recycle_bin
     order.save()
 
@@ -224,6 +227,8 @@ def bookkeeping_order_pn(user, pn, type_quantity):
     order = OrderInfo.objects.create(
         uid_b=user,
         o_state=order_state_choice.COMPLETED,
+        complete_time=now(),
+        grab_time=now(),
         recycle_bin=recycle_bin,
         pn=pn,
         amount=amount
@@ -258,6 +263,8 @@ def bookkeeping_order_scan(user, qr_info, type_quantity):
         uid_b=user,
         uid_c=user_c,
         o_state=order_state_choice.COMPLETED,
+        grab_time=now(),
+        complete_time=now(),
         recycle_bin=recycle_bin,
         amount=amount
     )
