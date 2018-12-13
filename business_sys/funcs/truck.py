@@ -53,7 +53,7 @@ def get_truck_info(user):
 
     return {
         "end_time": unloaded_start_time,
-        "time_diff": (now() - unloaded_start_time).total_seconds(),
+        "last_until_now": (now() - unloaded_start_time).total_seconds(),
         "price": price,
         "quantity": quantity
     }
