@@ -29,6 +29,8 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
     c_delivery_info = UserDeliveryInfoDisplay()
     location = serializers.ReadOnlyField(source="c_delivery_info.address")
     create_time = TimestampField()
+    complete_time = TimestampField()
+    grab_time = TimestampField()
     time_remain = serializers.SerializerMethodField()
     time_remain_b = serializers.SerializerMethodField()
     recycling_staff = RecyclingStaffDisplay(source="uid_b")
@@ -39,7 +41,12 @@ class OrderDisplaySerializer(serializers.ModelSerializer):
         model = OrderInfo
         fields = (
             "location", "recycling_staff",
-            "id", "create_time", "o_state", "c_delivery_info",
+            "id",
+            "create_time",
+            "grab_time",
+            "complete_time",
+            "o_state",
+            "c_delivery_info",
             "time_remain",
             "time_remain_b",
             "amount",

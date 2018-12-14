@@ -36,6 +36,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'suit',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -343,3 +344,5 @@ NUM_OF_NEAR_BIN = 3
 
 BUDGET_MAX_CAN_CANCEL = 20.0
 COUNT_PER_PAGE = 10
+
+from .settings_suit import *
